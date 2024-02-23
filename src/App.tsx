@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import AppBar from "./components/AppBar";
 import Loading from "./components/Loading";
 import PlayConfirmModal from "./components/PlayConfirmModal";
@@ -8,11 +8,9 @@ import { useAuth } from "./auth";
 import { getUserProfile, getAllUserSavedAlbums } from "./api";
 import { userState, userSavedAlbums } from "./data";
 import { Album } from "./types";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 
 function App() {
-  const [user, setUser] = useRecoilState(userState);
+  const setUser = useSetRecoilState(userState);
   const [albums, setAlbums] = useRecoilState(userSavedAlbums);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,34 +63,15 @@ function App() {
         {isLoading ? (
           <Loading />
         ) : (
-          <main className="flex flex-col gap-2 p-4 max-w-full">
+          <main className="flex flex-col gap-2 p-4 max-w-full items-center justify-center">
             <div className="flex gap-2">
-              <button
-                className="bg-white text-black-700 p-2 rounded"
-                onClick={() => useAuth()}
-              >
-                auth
-              </button>
-              <button
-                className="bg-white text-black-700 p-2 rounded"
-                onClick={() => handleClickGetProfile()}
-              >
-                getUserProfile
-              </button>
               <button
                 className="bg-white text-black-700 p-2 rounded"
                 onClick={() => handleAllUserSavedAlbums()}
               >
-                get Albums
+                Play Rundam Albums
               </button>
             </div>
-            <a href="https://vitejs.dev" target="_blank">
-              <img src={viteLogo} className="logo" alt="Vite logo" />
-            </a>
-            <a href="https://react.dev" target="_blank">
-              <img src={reactLogo} className="logo react" alt="React logo" />
-            </a>
-            <div className="text-white">{JSON.stringify(albums)}</div>
           </main>
         )}
         {isModalOpen && (

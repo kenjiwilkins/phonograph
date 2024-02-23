@@ -5,7 +5,7 @@ const Loading = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDotCount((dotCount + 1) % 3);
+      setDotCount((dotCount + 1) % 4);
     }, 500);
 
     return () => clearInterval(interval);
