@@ -13,10 +13,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("response_type", "code");
-  params.append(
-    "redirect_uri",
-    isDev ? "http://localhost:5173/" : "https://spotify-clone-5173.vercel.app/"
-  );
+  params.append("redirect_uri", isDev ? "http://localhost:5173/" : deployURL);
   params.append(
     "scope",
     "user-read-private user-read-email user-library-read user-read-playback-state user-modify-playback-state"
