@@ -2,6 +2,7 @@ import { isDev } from "../utils";
 import { getLocalStorage, setLocalStorage, resetAccessToken } from "../utils";
 
 const clientId = import.meta.env.VITE_APP_SPOTIFY_CLIENT_ID;
+const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || "";
 // let code = "";
 export async function redirectToAuthCodeFlow(clientId: string) {
   const verifier = generateCodeVerifier(128);
@@ -36,10 +37,7 @@ export async function getAccessToken(
   params.append("client_id", clientId);
   params.append("grant_type", "authorization_code");
   params.append("code", code);
-  params.append(
-    "redirect_uri",
-    isDev ? "http://localhost:5173/" : "https://spotify-clone-5173.vercel.app/"
-  );
+  params.append("redirect_uri", isDev ? "http://localhost:5173/" : deployURL);
   params.append("code_verifier", verifier!);
 
   const result = await fetch("https://accounts.spotify.com/api/token", {
