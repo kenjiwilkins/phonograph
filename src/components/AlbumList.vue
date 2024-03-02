@@ -1,5 +1,5 @@
 <template>
-  <ul class="flex flex-col gap-2 py-2">
+  <ul v-if="savedAlbums.length" class="flex flex-col gap-2 py-2">
     <li
       v-for="album in savedAlbums"
       :key="album.id"
@@ -19,7 +19,7 @@
       </div>
     </li>
   </ul>
-  <div v-if="!isLoading" class="flex justify-center py-2">
+  <div v-if="isLoading" class="flex justify-center py-2">
     <p class="text-gray-500">Loading...</p>
   </div>
 </template>

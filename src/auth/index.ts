@@ -132,7 +132,10 @@ export async function useAuth() {
     if (code) {
       return getAccessToken(clientId, code);
     }
-    if (expires_in && Date.now() - tenMinutes > Date.parse(expires_in)) {
+    if (
+      expires_in &&
+      Date.now() - tenMinutes > new Date(parseInt(expires_in))
+    ) {
       if (refreshToken) {
         return getAccessTokenWithRefresh();
       }
@@ -141,5 +144,13 @@ export async function useAuth() {
       removeLocalStorage("expiresIn");
     }
     return redirectToAuthCodeFlow(clientId);
+  }
+  if (expires_in && Date.now() - tenMinutes > new Date(parseInt(expires_in))) {
+    if (refreshToken) {
+      return getAccessTokenWithRefresh();
+    }
+    removeLocalStorage("accessToken");
+    removeLocalStorage("refreshToken");
+    removeLocalStorage("expiresIn");
   }
 }

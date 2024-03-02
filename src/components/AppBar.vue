@@ -1,7 +1,8 @@
 <template>
-  <div
+  <header
     id="app-bar"
-    class="flex justify-between items-center h-16 bg-black py-4 px-6 w-full"
+    class="flex sticky top-0 justify-between items-center h-16 bg-black py-4 px-6 w-full"
+    ref="appBar"
   >
     <h1 class="font-bold text-xl text-white">PHONOGRAPH</h1>
     <button
@@ -21,7 +22,7 @@
     >
       Login
     </button>
-  </div>
+  </header>
 </template>
 <script setup lang="ts">
 import { computed } from "vue";

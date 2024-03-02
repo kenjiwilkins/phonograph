@@ -1,6 +1,6 @@
 import axios from "axios";
-import { getLocalStorage } from "../utils";
-import { removeLocalStorage } from "../utils";
+import { getLocalStorage, removeLocalStorage } from "../utils";
+import { getAccessTokenWithRefresh } from "../auth";
 
 const baseURL = "https://api.spotify.com/v1";
 
@@ -16,6 +16,10 @@ request.interceptors.request.use((config) => {
 request.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      removeLocalStorage("accessToken");
+      getAccessTokenWithRefresh();
+    }
     return Promise.reject(error);
   }
 );

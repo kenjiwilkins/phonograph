@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-around p-2">
+  <div v-if="albumsCount" class="flex flex-col justify-around p-2">
     <div class="flex justify-start">
       <p class="text-xs text-gray-500">{{ albumsCount }} albums</p>
     </div>
