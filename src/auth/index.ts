@@ -1,8 +1,10 @@
 import { isDev } from "../utils";
-import { getLocalStorage, setLocalStorage, resetAccessToken } from "../utils";
+import { getLocalStorage, setLocalStorage, removeLocalStorage } from "../utils";
 
 const clientId = import.meta.env.VITE_APP_SPOTIFY_CLIENT_ID;
 const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || "";
+const tenMinutes = 10 * 60 * 1000;
+
 // let code = "";
 export async function redirectToAuthCodeFlow(clientId: string) {
   const verifier = generateCodeVerifier(128);
@@ -45,8 +47,35 @@ export async function getAccessToken(
   if (result.status !== 200) {
     console.log("error");
   }
-  const { access_token } = await result.json();
+  const json = await result.json();
+  const { access_token, refresh_token, expires_in } = json;
+  const expireTime = Date.now() + expires_in * 1000;
   window.history.pushState(null, "", "/");
+  setLocalStorage("accessToken", access_token);
+  setLocalStorage("refreshToken", refresh_token);
+  setLocalStorage("expiresIn", expireTime.toString());
+  return access_token;
+}
+
+export async function getAccessTokenWithRefresh() {
+  const refreshToken = getLocalStorage("refreshToken");
+  const params = new URLSearchParams();
+  params.append("grant_type", "refresh_token");
+  params.append("refresh_token", refreshToken);
+  const result = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params,
+  });
+  if (result.status !== 200) {
+    console.log("error");
+  }
+  const json = await result.json();
+  const { access_token, expires_in, refresh_token } = json;
+  const expireTime = Date.now() + expires_in * 1000;
+  setLocalStorage("accessToken", access_token);
+  setLocalStorage("refreshToken", refresh_token);
+  setLocalStorage("expiresIn", expireTime.toString());
   return access_token;
 }
 
@@ -77,22 +106,40 @@ export function getCode() {
 
 export function getAccessTokenFromLocalStorage() {
   const accessToken = getLocalStorage("accessToken");
-  if (!accessToken) {
-    return "";
-  }
+  const expires_in = getLocalStorage("expiresIn");
+  const refreshToken = getLocalStorage("refreshToken");
   if (accessToken === "undefined") {
-    resetAccessToken();
-    return "";
+    removeLocalStorage("accessToken");
+    removeLocalStorage("expiresIn");
+    removeLocalStorage("refreshToken");
   }
-  return localStorage.getItem("accessToken");
+  if (expires_in && Date.now() > Date.parse(expires_in)) {
+    removeLocalStorage("accessToken");
+    removeLocalStorage("expiresIn");
+  }
+  return {
+    accessToken,
+    refreshToken,
+    expires_in,
+  };
 }
 
 export async function useAuth() {
   const code = getCode();
-  if (!getAccessTokenFromLocalStorage() && !code) {
+  const { accessToken, expires_in, refreshToken } =
+    getAccessTokenFromLocalStorage();
+  if (!accessToken) {
+    if (code) {
+      return getAccessToken(clientId, code);
+    }
+    if (expires_in && Date.now() - tenMinutes > Date.parse(expires_in)) {
+      if (refreshToken) {
+        return getAccessTokenWithRefresh();
+      }
+      removeLocalStorage("accessToken");
+      removeLocalStorage("refreshToken");
+      removeLocalStorage("expiresIn");
+    }
     return redirectToAuthCodeFlow(clientId);
-  } else {
-    const accessToken = await getAccessToken(clientId, code!);
-    return setLocalStorage("accessToken", accessToken);
   }
 }

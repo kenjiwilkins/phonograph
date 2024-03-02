@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getAccessToken } from "../utils";
+import { getLocalStorage } from "../utils";
+import { removeLocalStorage } from "../utils";
 
 const baseURL = "https://api.spotify.com/v1";
 
@@ -8,16 +9,13 @@ const request = axios.create({
 });
 
 request.interceptors.request.use((config) => {
-  config.headers["Authorization"] = `Bearer ${getAccessToken()}`;
+  const accessToken = getLocalStorage("accessToken");
+  config.headers["Authorization"] = `Bearer ${accessToken}`;
   return config;
 });
 request.interceptors.response.use(
   (response) => response,
   (error) => {
-    // if (error.response.status === 401) {
-    //   resetAccessToken();
-    //   return useAuth();
-    // }
     return Promise.reject(error);
   }
 );
@@ -27,24 +25,12 @@ export async function getUserProfile() {
   return data;
 }
 
-export async function getUserSavedAlbums(offset: number) {
-  const { data } = await request.get(`/me/albums?offset=${offset}`);
+export async function getUserSavedAlbums() {
+  const { data } = await request.get(`/me/albums`);
   return data;
 }
 
-export async function getAllUserSavedAlbums(limit?: number) {
-  let albums = [];
-  let nextUrl = "/me/albums";
-  let count = 0;
-  while (nextUrl) {
-    if (limit && count >= limit) {
-      break;
-    }
-    const { data } = await request.get(nextUrl);
-    const items = data.items.map((item: any) => item.album);
-    albums.push(...items);
-    nextUrl = data.next;
-    count++;
-  }
-  return albums;
+export async function getNextUserSavedAlbums(url: string) {
+  const { data } = await request.get(url);
+  return data;
 }

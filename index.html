@@ -2,12 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Phonograph</title>
+    <meta
+      name="og:title"
+      content="Phonograph - A Spotify Random Album Player"
+    />
+    <meta
+      name="og:description"
+      content="Phonograph is a simple web app that allows you to play a random album from Spotify."
+    />
+    <meta name="og:image" content="/kenji.png" />
+    <meta name="og:url" content="<%VITE_APP_DEPLOY_URL %>" />
+    <title>Phonograph - A Spotify Random Album Player</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
