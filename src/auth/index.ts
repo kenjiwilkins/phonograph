@@ -134,7 +134,7 @@ export async function useAuth() {
     }
     if (
       expires_in &&
-      Date.now() - tenMinutes > new Date(parseInt(expires_in))
+      new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))
     ) {
       if (refreshToken) {
         return getAccessTokenWithRefresh();
@@ -145,7 +145,10 @@ export async function useAuth() {
     }
     return redirectToAuthCodeFlow(clientId);
   }
-  if (expires_in && Date.now() - tenMinutes > new Date(parseInt(expires_in))) {
+  if (
+    expires_in &&
+    new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))
+  ) {
     if (refreshToken) {
       return getAccessTokenWithRefresh();
     }
