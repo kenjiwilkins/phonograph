@@ -156,4 +156,5 @@ export async function useAuth() {
     removeLocalStorage("refreshToken");
     removeLocalStorage("expiresIn");
   }
+  return redirectToAuthCodeFlow(clientId);
 }
