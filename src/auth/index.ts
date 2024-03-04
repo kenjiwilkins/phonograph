@@ -1,11 +1,17 @@
 import { isDev } from "../utils";
-import { getLocalStorage, setLocalStorage, removeLocalStorage } from "../utils";
+import {
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  verifyAccessToken,
+  verifyExpiresIn,
+  verifyRefreshToken,
+} from "../utils";
 
 const clientId = import.meta.env.VITE_APP_SPOTIFY_CLIENT_ID;
 const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || "";
 const tenMinutes = 10 * 60 * 1000;
 
-// let code = "";
 export async function redirectToAuthCodeFlow(clientId: string) {
   const verifier = generateCodeVerifier(128);
   const challenge = await generateCodeChallenge(verifier);
@@ -99,7 +105,7 @@ async function generateCodeChallenge(codeVerifier: string) {
     .replace(/=+$/, "");
 }
 
-export function getCode() {
+export async function getCode() {
   const searchParams = new URLSearchParams(window.location.search);
   return searchParams.get("code");
 }
@@ -125,25 +131,24 @@ export function getAccessTokenFromLocalStorage() {
 }
 
 export async function useAuth() {
-  const code = getCode();
-  const { accessToken, expires_in, refreshToken } =
-    getAccessTokenFromLocalStorage();
-  if (!accessToken) {
-    if (code) {
-      return getAccessToken(clientId, code);
-    }
-    if (
-      expires_in &&
-      new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))
-    ) {
-      if (refreshToken) {
-        return getAccessTokenWithRefresh();
-      }
-      removeLocalStorage("accessToken");
-      removeLocalStorage("refreshToken");
-      removeLocalStorage("expiresIn");
-    }
+  const code = await getCode();
+  const { expires_in, refreshToken } = getAccessTokenFromLocalStorage();
+  if (code) {
+    return getAccessToken(clientId, code);
+  }
+  if (!verifyAccessToken() || !verifyExpiresIn() || !verifyRefreshToken()) {
     return redirectToAuthCodeFlow(clientId);
+  }
+  if (
+    expires_in &&
+    new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))
+  ) {
+    if (refreshToken) {
+      return getAccessTokenWithRefresh();
+    }
+    removeLocalStorage("accessToken");
+    removeLocalStorage("refreshToken");
+    removeLocalStorage("expiresIn");
   }
   if (
     expires_in &&
