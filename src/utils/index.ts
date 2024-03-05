@@ -1,4 +1,4 @@
-export const isDev = import.meta.env.MODE === "development";
+export const isDev = import.meta.env.MODE === 'development';
 
 export function getLocalStorage(key: string): string {
   return localStorage.getItem(key)!;
@@ -13,31 +13,31 @@ export function removeLocalStorage(key: string): void {
 }
 
 export function verifyAccessToken(): boolean {
-  const accessToken = getLocalStorage("accessToken");
+  const accessToken = getLocalStorage('accessToken');
   if (!accessToken) return false;
-  if (accessToken === "undefined") return false;
+  if (accessToken === 'undefined') return false;
   return true;
 }
 
 export function verifyRefreshToken(): boolean {
-  const refreshToken = getLocalStorage("refreshToken");
+  const refreshToken = getLocalStorage('refreshToken');
   if (!refreshToken) return false;
-  if (refreshToken === "undefined") return false;
+  if (refreshToken === 'undefined') return false;
   return true;
 }
 
 export function verifyExpiresIn(): boolean {
-  const expiresIn = getLocalStorage("expiresIn");
+  const expiresIn = getLocalStorage('expiresIn');
   if (!expiresIn) return false;
-  if (expiresIn === "undefined") return false;
-  if (expiresIn === "NaN") return false;
+  if (expiresIn === 'undefined') return false;
+  if (expiresIn === 'NaN') return false;
   return true;
 }
 
 export function getAccessToken(): string {
-  return getLocalStorage("accessToken");
+  return getLocalStorage('accessToken');
 }
 
 export function resetAccessToken(): void {
-  removeLocalStorage("accessToken");
+  removeLocalStorage('accessToken');
 }

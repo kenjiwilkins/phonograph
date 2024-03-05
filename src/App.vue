@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-950 text-white w-full h-full">
+  <div class="h-full w-full overflow-x-hidden bg-gray-950 text-white">
     <app-bar ref="appBar" />
     <main ref="main" class="min-h-screen">
       <play-control-area />
@@ -10,13 +10,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
-import AppBar from "./components/AppBar.vue";
-import PlayControlArea from "./components/PlayControlArea.vue";
-import AlbumList from "./components/AlbumList.vue";
-import PlayConfirmModal from "./components/PlayConfirmModal.vue";
-import { useAuth } from "./auth";
-import { useUserStore, useUserSavedAlbumsStore } from "./data";
+import { onMounted } from 'vue';
+import AppBar from './components/AppBar.vue';
+import PlayControlArea from './components/PlayControlArea.vue';
+import AlbumList from './components/AlbumList.vue';
+import PlayConfirmModal from './components/PlayConfirmModal.vue';
+import { useAuth } from './auth';
+import { useUserStore, useUserSavedAlbumsStore } from './data';
 // stores
 const userStore = useUserStore();
 const userSavedAlbums = useUserSavedAlbumsStore();
