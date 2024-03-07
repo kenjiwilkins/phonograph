@@ -1,19 +1,17 @@
 <template>
-  <ul v-if="savedAlbums.length" class="flex flex-col gap-2 py-2">
+  <ul v-if="savedAlbums.length" class="flex w-full flex-col gap-2 py-2">
     <li
       v-for="album in savedAlbums"
       :key="album.id"
-      class="flex gap-2 px-2"
+      class="flex w-full gap-2 px-2"
       @click="selectAlbum(album)"
     >
       <img :src="album.images[0].url" :alt="album.name" class="h-16 w-16" />
-      <div class="flex flex-col justify-center max-w-full">
-        <p
-          class="text-white text-ellipsis whitespace-nowrap w-full overflow-x-hidden"
-        >
+      <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
+        <p class="overflow-x-hidden text-ellipsis whitespace-nowrap">
           {{ album.name }}
         </p>
-        <p class="text-md font-thin text-white">
+        <p class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin">
           {{ album.artists[0].name }}
         </p>
       </div>
@@ -24,11 +22,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onBeforeMount } from "vue";
-import { useUserSavedAlbumsStore } from "../data";
-import { Album } from "../types";
+import { computed, onMounted, onBeforeMount, ref } from 'vue';
+import { useUserSavedAlbumsStore } from '../data';
+import { Album } from '../types';
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();
+
+// data
+const fetching = ref(false);
+
 // computed
 const savedAlbums = computed(() => userSavedAlbums.albums);
 const isLoading = computed(() => userSavedAlbums.isLoading);
@@ -36,21 +38,27 @@ const isLoading = computed(() => userSavedAlbums.isLoading);
 function selectAlbum(album: Album) {
   userSavedAlbums.setSelectedAlbum(album);
 }
-function getMoreAlbums() {
+async function getMoreAlbums() {
+  if (isLoading.value) return;
+  if (fetching.value) return;
   if (
     window.innerHeight + window.scrollY >= document.body.offsetHeight &&
     savedAlbums.value.length
   ) {
-    userSavedAlbums.fetchNextUserSavedAlbums();
+    fetching.value = true;
+    await userSavedAlbums.fetchNextUserSavedAlbums();
+    fetching.value = false;
   }
 }
 
 // Add event listener to fetch more albums when the user scrolls to the bottom
 onMounted(() => {
-  window.addEventListener("scroll", getMoreAlbums);
+  window.addEventListener('scroll', getMoreAlbums);
+  window.addEventListener('touchmove', getMoreAlbums);
 });
 // Remove event listener when the component is unmounted
 onBeforeMount(() => {
-  window.removeEventListener("scroll", getMoreAlbums);
+  window.removeEventListener('scroll', getMoreAlbums);
+  window.removeEventListener('touchmove', getMoreAlbums);
 });
 </script>

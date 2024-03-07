@@ -7,13 +7,13 @@
       class="flex w-full flex-col items-center justify-center gap-2 rounded-t-3xl bg-gray-800 p-4"
     >
       <div className="pb-2">. . .</div>
-      <div class="flex items-center justify-center gap-4">
+      <div class="flex w-full items-center justify-start gap-4">
         <img
           :src="selectedAlbum.images[0].url"
           :alt="selectedAlbum.name"
           class="h-20 w-20 shadow-md"
         />
-        <div class="flex flex-col gap-2 font-bold">
+        <div class="flex flex-col gap-1 font-bold">
           <p>
             <span class="">{{ selectedAlbum.name }}</span>
           </p>

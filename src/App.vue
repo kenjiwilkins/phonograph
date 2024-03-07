@@ -1,11 +1,12 @@
 <template>
-  <div class="h-full w-full overflow-x-hidden bg-gray-950 text-white">
-    <app-bar ref="appBar" />
-    <main ref="main" class="min-h-screen">
+  <div class="h-full w-full bg-gray-950 text-white">
+    <app-bar />
+    <main class="min-h-screen w-full overflow-x-hidden">
       <play-control-area />
       <album-list />
     </main>
     <play-confirm-modal />
+    <app-footer />
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import AppBar from './components/AppBar.vue';
 import PlayControlArea from './components/PlayControlArea.vue';
 import AlbumList from './components/AlbumList.vue';
 import PlayConfirmModal from './components/PlayConfirmModal.vue';
+import AppFooter from './components/AppFooter.vue';
 import { useAuth } from './auth';
 import { useUserStore, useUserSavedAlbumsStore } from './data';
 // stores

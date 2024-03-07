@@ -1,32 +1,27 @@
 <template>
   <header
     id="app-bar"
-    class="flex sticky top-0 justify-between items-center h-16 bg-black py-4 px-6 w-full"
-    ref="appBar"
+    class="sticky top-0 flex h-16 w-full items-center justify-between bg-black px-6 py-4"
   >
-    <h1 class="font-bold text-xl text-white">PHONOGRAPH</h1>
+    <h1 class="text-xl font-bold text-white">PHONOGRAPH</h1>
     <button
       v-if="loggedIn"
-      class="flex py-2 px-2 bg-black-900 gap-2 text-white hover:brightness-125"
+      class="bg-black-900 flex gap-2 px-2 py-2 text-white hover:brightness-125"
     >
-      <img
-        :src="user?.images[0]?.url"
-        :alt="user?.display_name"
-        class="rounded-full h-6 w-6"
-      />
+      <img :src="user?.images[0]?.url" :alt="user?.display_name" class="h-6 w-6 rounded-full" />
       <span>{{ user?.display_name }}</span>
     </button>
     <button
       v-else
-      class="flex py-1 px-2 bg-gray-800 rounded-md gap-2 text-white hover:brightness-110"
+      class="flex gap-2 rounded-md bg-gray-800 px-2 py-1 text-white hover:brightness-110"
     >
       Login
     </button>
   </header>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
-import { useUserStore } from "../data";
+import { computed } from 'vue';
+import { useUserStore } from '../data';
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 const loggedIn = computed(() => userStore.loggedInState);

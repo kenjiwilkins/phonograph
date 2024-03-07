@@ -1,14 +1,14 @@
-import { defineStore } from "pinia";
-import { Album } from "../types";
-import { getUserSavedAlbums, getNextUserSavedAlbums } from "../api";
+import { defineStore } from 'pinia';
+import { Album } from '../types';
+import { getUserSavedAlbums, getNextUserSavedAlbums } from '../api';
 
-export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
+export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
   state: () => ({
     albums: [] as Album[],
     selectedAlbum: null as Album | null,
     hasNext: false,
     isLoading: false,
-    naxtUrl: "",
+    nextUrl: ''
   }),
   actions: {
     clearAlbums() {
@@ -40,12 +40,15 @@ export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
       this.isLoading = isLoading;
     },
     setNextUrl(nextUrl: string) {
-      this.naxtUrl = nextUrl;
+      this.nextUrl = nextUrl;
     },
     resetNextUrl() {
-      this.naxtUrl = "";
+      this.nextUrl = '';
     },
     async fetchUserSavedAlbums() {
+      if (this.isLoading) {
+        return;
+      }
       try {
         this.setIsLoading(true);
         const data = await getUserSavedAlbums();
@@ -56,7 +59,7 @@ export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
       } catch (error) {
         this.setIsLoading(false);
         console.log(error);
-        this.setNextUrl("");
+        this.setNextUrl('');
         this.setHasNext(false);
         return Promise.reject(error);
       }
@@ -67,7 +70,7 @@ export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
       }
       try {
         this.setIsLoading(true);
-        const data = await getNextUserSavedAlbums(this.naxtUrl);
+        const data = await getNextUserSavedAlbums(this.nextUrl);
         this.addAlbums(data.items.map((item: any) => item.album));
         this.setHasNext(!!data.next);
         this.setNextUrl(data.next);
@@ -75,7 +78,7 @@ export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
       } catch (error) {
         this.setIsLoading(false);
         console.log(error);
-        this.setNextUrl("");
+        this.setNextUrl('');
         this.setHasNext(false);
       }
     },
@@ -86,11 +89,11 @@ export const useUserSavedAlbumsStore = defineStore("userSavedAlbums", {
           await this.fetchNextUserSavedAlbums();
         }
         this.setHasNext(false);
-        this.setNextUrl("");
+        this.setNextUrl('');
       } catch (error) {
         console.log(error);
         return Promise.reject(error);
       }
-    },
-  },
+    }
+  }
 });
