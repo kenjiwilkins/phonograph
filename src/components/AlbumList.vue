@@ -29,6 +29,7 @@ import { Album } from '../types';
 const userSavedAlbums = useUserSavedAlbumsStore();
 
 // data
+const footerHeight = 64;
 const fetching = ref(false);
 
 // computed
@@ -42,7 +43,7 @@ async function getMoreAlbums() {
   if (isLoading.value) return;
   if (fetching.value) return;
   if (
-    window.innerHeight + window.scrollY >= document.body.offsetHeight &&
+    window.innerHeight + window.scrollY >= document.body.offsetHeight - footerHeight &&
     savedAlbums.value.length
   ) {
     fetching.value = true;
