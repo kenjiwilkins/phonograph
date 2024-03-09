@@ -32,6 +32,17 @@ export interface UserSavedAlbums {
   }[];
 }
 
+export interface UserSavedPlaylists {
+  href: string;
+  total: number;
+  limit: number;
+  offset: number;
+  items: {
+    added_at: string;
+    playlist: Playlist;
+  }[];
+}
+
 export interface Device {
   id: string;
   is_active: boolean;
@@ -72,7 +83,7 @@ export interface Album {
   };
   release_date: string;
   release_date_precision: string;
-  type: "album" | "single";
+  type: 'album' | 'single';
   uri: string;
   copyrights: CopyRight[];
   genres: string[];
@@ -92,6 +103,9 @@ export interface Track {
   explicit: boolean;
   album: Album;
   artists: Artist[];
+  external_urls: {
+    spotify: string;
+  };
 }
 
 export interface PlaybackState {
@@ -115,4 +129,30 @@ export interface PlaybackState {
     toggling_repeat_track: boolean;
     transferring_playback: boolean;
   };
+}
+
+export interface Playlist {
+  id: string;
+  description: string;
+  external_urls: {
+    spotify: string;
+  };
+  images: Image[];
+  name: string;
+  owner: {
+    display_name: string;
+    external_urls: {
+      spotify: string;
+    };
+    href: string;
+    id: string;
+    type: string;
+    uri: string;
+  };
+  public: boolean;
+  tracks: {
+    href: string;
+    total: number;
+  };
+  uri: string;
 }

@@ -12,8 +12,13 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     totalAlbums: 0
   }),
   actions: {
-    clearAlbums() {
+    clearAllStates() {
       this.albums = [];
+      this.selectedAlbum = null;
+      this.hasNext = false;
+      this.isLoading = false;
+      this.nextUrl = '';
+      this.totalAlbums = 0;
     },
     addAlbums(albums: Album[]) {
       this.albums = [...this.albums, ...albums];
@@ -91,7 +96,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       try {
         await this.fetchUserSavedAlbums();
         while (this.hasNext) {
-          if (this.selectedAlbum) {
+          if (this.selectedAlbum || this.albums.length === 0) {
             return Promise.reject('User cancelled');
           }
           await this.fetchNextUserSavedAlbums();

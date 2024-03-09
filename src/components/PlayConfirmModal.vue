@@ -1,9 +1,9 @@
 <template>
   <Transition>
     <div
-      v-if="selectedAlbum"
+      v-if="showModal"
       class="overlay fixed left-0 top-0 z-20 flex h-full w-full flex-col items-center justify-end bg-gray-950 bg-opacity-80 text-white"
-      @click="close"
+      @click.self="close"
     >
       <div
         :class="`popup ${selectedAlbum ? 'popup-enter-active' : 'popup-leave-active'}`"
@@ -11,31 +11,27 @@
       >
         <div className="pb-2">. . .</div>
         <div class="flex w-full items-center justify-start gap-4">
-          <img
-            :src="selectedAlbum.images[0].url"
-            :alt="selectedAlbum.name"
-            class="h-20 w-20 shadow-md"
-          />
+          <img :src="imageUrl" :alt="albumName" class="h-20 w-20 shadow-md" />
           <div class="flex flex-col gap-1 font-bold">
             <p>
-              <span class="">{{ selectedAlbum.name }}</span>
+              <span class="">{{ albumName }}</span>
             </p>
             <p>
-              <span class="font-normal text-gray-300">{{ selectedAlbum.artists[0].name }}</span>
+              <span class="font-normal text-gray-300">{{ artistName }}</span>
             </p>
           </div>
         </div>
         <div class="w-full border border-gray-700"></div>
         <div class="flex w-full flex-col items-start gap-0">
-          <button class="flex items-center gap-2 py-2" @click="play">
+          <button class="flex w-full items-center gap-2 py-2" @click.prevent="play">
             <img :src="playIcon" class="h-8 w-8" />
             <span>Play Album</span>
           </button>
-          <button class="flex items-center gap-2 py-2" @click="next">
+          <button class="flex w-full items-center gap-2 py-2" @click.prevent="next">
             <img :src="shuffleIcon" class="h-8 w-8" />
             <span>Shuffle to Next Album</span>
           </button>
-          <button class="flex items-center gap-2 py-2" @click="close">
+          <button class="flex w-full items-center gap-2 py-2" @click.prevent="close">
             <img :src="closeIcon" class="h-8 w-8" />
             <span>Close</span>
           </button>
@@ -46,23 +42,71 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useUserSavedAlbumsStore } from '@/data';
+import { useUserSavedAlbumsStore, useTracksStore } from '@/data';
 import playIcon from '@assets/play.svg';
 import shuffleIcon from '@assets/shuffle.svg';
 import closeIcon from '@assets/close.svg';
+
+// stores
 const userSavedAlbums = useUserSavedAlbumsStore();
+const tracksStore = useTracksStore();
+
+// computed
 const selectedAlbum = computed(() => userSavedAlbums.selectedAlbum);
+const selectedTrack = computed(() => tracksStore.selectedTrack);
+const showModal = computed(() => {
+  return selectedAlbum.value || selectedTrack.value;
+});
+const imageUrl = computed(() => {
+  if (selectedAlbum.value) {
+    return selectedAlbum.value.images[0].url;
+  } else if (selectedTrack.value) {
+    return selectedTrack.value.album.images[0].url;
+  } else {
+    return 'Ooops something went wrong';
+  }
+});
+const albumName = computed(() => {
+  if (selectedAlbum.value) {
+    return selectedAlbum.value.name;
+  } else if (selectedTrack.value) {
+    return selectedTrack.value.album.name;
+  } else {
+    return 'Ooops something went wrong';
+  }
+});
+const artistName = computed(() => {
+  if (selectedAlbum.value) {
+    return selectedAlbum.value.artists[0].name;
+  } else if (selectedTrack.value) {
+    return selectedTrack.value.artists[0].name;
+  } else {
+    return 'Ooops something went wrong';
+  }
+});
+
+// methods
 function play() {
-  const url = selectedAlbum.value?.external_urls.spotify || '';
+  let url = '';
+  if (selectedTrack.value) {
+    url = selectedTrack.value.external_urls.spotify;
+  } else if (selectedAlbum.value) {
+    url = selectedAlbum.value.external_urls.spotify;
+  }
   if (url) {
     location.href = url;
   }
 }
 function next() {
-  userSavedAlbums.setSelectedAlbumRandomly();
+  if (selectedAlbum.value) {
+    userSavedAlbums.setSelectedAlbumRandomly();
+  } else if (selectedTrack.value) {
+    tracksStore.setSelectedTrackRandomly();
+  }
 }
 function close() {
   userSavedAlbums.clearSelectedAlbum();
+  tracksStore.clearSelectedTrack();
 }
 </script>
 <style scoped>
