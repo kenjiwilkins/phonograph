@@ -26,14 +26,19 @@
           </div>
         </div>
         <div class="w-full border border-gray-700"></div>
-        <div class="flex flex-col gap-2">
-          <button class="rounded border border-green-600 bg-green-600 px-20 py-1" @click="play">
-            Play
+        <div class="flex w-full flex-col items-start gap-0">
+          <button class="flex items-center gap-2 py-2" @click="play">
+            <img :src="playIcon" class="h-8 w-8" />
+            <span>Play Album</span>
           </button>
-          <button class="rounded border border-gray-950 bg-gray-950 px-20 py-1" @click="next">
-            Next
+          <button class="flex items-center gap-2 py-2" @click="next">
+            <img :src="shuffleIcon" class="h-8 w-8" />
+            <span>Shuffle to Next Album</span>
           </button>
-          <button class="rounded border px-20 py-1" @click="close">Close</button>
+          <button class="flex items-center gap-2 py-2" @click="close">
+            <img :src="closeIcon" class="h-8 w-8" />
+            <span>Close</span>
+          </button>
         </div>
       </div>
     </div>
@@ -41,7 +46,10 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useUserSavedAlbumsStore } from '../data';
+import { useUserSavedAlbumsStore } from '@/data';
+import playIcon from '@assets/play.svg';
+import shuffleIcon from '@assets/shuffle.svg';
+import closeIcon from '@assets/close.svg';
 const userSavedAlbums = useUserSavedAlbumsStore();
 const selectedAlbum = computed(() => userSavedAlbums.selectedAlbum);
 function play() {
