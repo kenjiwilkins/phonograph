@@ -30,7 +30,7 @@ export async function getUserProfile() {
 }
 
 export async function getUserSavedAlbums() {
-  const { data } = await request.get(`/me/albums?offset=0&limit=20`);
+  const { data } = await request.get(`/me/albums?offset=0&limit=50`);
   return data;
 }
 

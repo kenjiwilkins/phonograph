@@ -8,7 +8,8 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     selectedAlbum: null as Album | null,
     hasNext: false,
     isLoading: false,
-    nextUrl: ''
+    nextUrl: '',
+    totalAlbums: 0
   }),
   actions: {
     clearAlbums() {
@@ -33,6 +34,9 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     clearSelectedAlbum() {
       this.selectedAlbum = null;
     },
+    setTotalAlbums(totalAlbums: number) {
+      this.totalAlbums = totalAlbums;
+    },
     setHasNext(hasNext: boolean) {
       this.hasNext = hasNext;
     },
@@ -53,6 +57,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
         this.setIsLoading(true);
         const data = await getUserSavedAlbums();
         this.addAlbums(data.items.map((item: any) => item.album));
+        this.setTotalAlbums(data.total);
         this.setHasNext(!!data.next);
         this.setNextUrl(data.next);
         this.setIsLoading(false);
@@ -86,6 +91,9 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       try {
         await this.fetchUserSavedAlbums();
         while (this.hasNext) {
+          if (this.selectedAlbum) {
+            return Promise.reject('User cancelled');
+          }
           await this.fetchNextUserSavedAlbums();
         }
         this.setHasNext(false);
