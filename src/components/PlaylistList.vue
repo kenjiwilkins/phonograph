@@ -6,13 +6,11 @@
       class="flex w-full gap-2 px-2"
       @click="selectPlaylist(playlist)"
     >
-      <img
+      <content-image
         :src="playlist.images.length ? playlist.images[0].url : playlistIcon"
         :alt="playlist.name"
-        class="h-16 w-16"
-        loading="lazy"
-        width="64px"
-        height="64px"
+        :height="64"
+        :width="64"
       />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
         <p class="overflow-x-hidden text-ellipsis whitespace-nowrap">{{ playlist.name }}</p>
@@ -25,6 +23,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';
 import playlistIcon from '@assets/playlists.svg';

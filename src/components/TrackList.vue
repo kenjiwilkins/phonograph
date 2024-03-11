@@ -6,14 +6,7 @@
       class="flex w-full gap-2 px-2"
       @click="selectTrack(track)"
     >
-      <img
-        :src="track.album.images[0].url"
-        :alt="`${track.name} / ${track.album.name}`"
-        class="h-16 w-16"
-        loading="lazy"
-        width="64px"
-        height="64px"
-      />
+      <content-image :src="track.album.images[0].url" :alt="track.name" :height="64" :width="64" />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
         <p class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm">{{ track.name }}</p>
         <p class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm font-thin">
@@ -28,6 +21,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Track } from '@/types';
 
