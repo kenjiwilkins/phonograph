@@ -21,7 +21,7 @@ import PlaylistList from './components/PlaylistList.vue';
 import TrackList from './components/TrackList.vue';
 import PlayConfirmModal from './components/PlayConfirmModal.vue';
 import AppFooter from './components/AppFooter.vue';
-import { useAuth } from './auth';
+import { useAuth, getAccessTokenFromLocalStorage } from './auth';
 import {
   useUserStore,
   useUserSavedAlbumsStore,
@@ -45,17 +45,27 @@ const isShowTrackList = computed(() => userSavedPlaylists.selectedPlaylist);
 async function init() {
   try {
     await useAuth();
+  } catch (error) {
+    console.error(error);
+  }
+}
+async function getData() {
+  try {
     await userStore.getUser();
     await userSavedAlbums.fetchUserSavedAlbums();
   } catch (error) {
-    console.error(error);
+    if (error) {
+      console.error(error);
+    }
   }
 }
 
 // life cycle
 onMounted(async () => {
   try {
-    await init();
+    init().then(() => {
+      getData();
+    });
   } catch (error) {
     console.error(error);
   }
