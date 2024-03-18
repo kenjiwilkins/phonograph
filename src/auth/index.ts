@@ -130,14 +130,14 @@ export async function useAuth() {
   const code = await getCode();
   const { expires_in, refreshToken } = getAccessTokenFromLocalStorage();
   if (code) {
-    return getAccessToken(clientId, code);
+    return await getAccessToken(clientId, code);
   }
   if (!verifyAccessToken() || !verifyExpiresIn() || !verifyRefreshToken()) {
     return redirectToAuthCodeFlow(clientId);
   }
   if (expires_in && new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))) {
     if (refreshToken) {
-      return getAccessTokenWithRefresh();
+      return await getAccessTokenWithRefresh();
     }
     removeLocalStorage('accessToken');
     removeLocalStorage('refreshToken');
@@ -145,7 +145,7 @@ export async function useAuth() {
   }
   if (expires_in && new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))) {
     if (refreshToken) {
-      return getAccessTokenWithRefresh();
+      return await getAccessTokenWithRefresh();
     }
     removeLocalStorage('accessToken');
     removeLocalStorage('refreshToken');
