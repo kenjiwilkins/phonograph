@@ -63,9 +63,8 @@ async function getData() {
 // life cycle
 onMounted(async () => {
   try {
-    init().then(() => {
-      getData();
-    });
+    await init();
+    await getData();
   } catch (error) {
     console.error(error);
   }
