@@ -28,10 +28,13 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: prettier
-      - name: eslint check
+      - name: unit test
         uses: borales/actions-yarn@v4
         with:
-          cmd: lint
+          cmd: 'test:coverage'
+      - name: report coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
       - name: Build code
         uses: borales/actions-yarn@v4
         with:

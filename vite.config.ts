@@ -15,7 +15,14 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.spec.ts'],
-    globals: true
+    globals: true,
+    environment: 'jsdom',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'json'],
+      reportOnFailure: true,
+      include: ['src/**/*.ts', 'src/**/*.vue']
+    }
   },
   plugins: [
     vue(),
