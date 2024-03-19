@@ -6,7 +6,7 @@
       class="flex w-full gap-2 px-2"
       @click="selectAlbum(album)"
     >
-      <content-image :src="album.images[0].url" :alt="album.name" :height="64" :width="64" />
+      <img :src="album.images[0].url" :alt="album.name" :height="64" :width="64" loading="lazy" />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
         <p class="overflow-x-hidden text-ellipsis whitespace-nowrap">
           {{ album.name }}

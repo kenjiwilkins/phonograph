@@ -130,7 +130,8 @@ export async function useAuth() {
   const code = await getCode();
   const { expires_in, refreshToken } = getAccessTokenFromLocalStorage();
   if (code) {
-    return await getAccessToken(clientId, code);
+    await getAccessToken(clientId, code);
+    return;
   }
   if (!verifyAccessToken() || !verifyExpiresIn() || !verifyRefreshToken()) {
     return redirectToAuthCodeFlow(clientId);

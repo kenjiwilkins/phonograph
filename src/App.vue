@@ -1,11 +1,17 @@
 <template>
   <div class="h-full w-full bg-gray-950 text-white">
     <app-bar />
-    <main class="min-h-screen w-full overflow-x-hidden">
+    <main class="min-h-screen w-full overflow-x-hidden" v-if="isLoggedIn">
       <play-control-area />
       <album-list v-if="isAlbumTab" />
       <playlist-list v-if="isPlaylistTab && !isShowTrackList" />
       <track-list v-if="isShowTrackList" />
+    </main>
+    <main v-else class="flex h-screen w-full flex-col items-center justify-center pb-16">
+      <p class="sr-only">Loading...</p>
+      <div
+        class="box-border inline-block h-8 w-8 animate-spin rounded-full border border-solid border-white border-b-green-500"
+      />
     </main>
     <play-confirm-modal />
     <app-footer />
@@ -21,7 +27,7 @@ import PlaylistList from './components/PlaylistList.vue';
 import TrackList from './components/TrackList.vue';
 import PlayConfirmModal from './components/PlayConfirmModal.vue';
 import AppFooter from './components/AppFooter.vue';
-import { useAuth, getAccessTokenFromLocalStorage } from './auth';
+import { useAuth } from './auth';
 import {
   useUserStore,
   useUserSavedAlbumsStore,
@@ -40,13 +46,16 @@ const currentTab = computed(() => tabStore.currentTab);
 const isAlbumTab = computed(() => currentTab.value === TabType.ALBUM);
 const isPlaylistTab = computed(() => currentTab.value === TabType.PLAYLIST);
 const isShowTrackList = computed(() => userSavedPlaylists.selectedPlaylist);
+const isLoggedIn = computed(() => userStore.isLoggedIn);
 
 // methods
 async function init() {
   try {
     await useAuth();
+    return;
   } catch (error) {
     console.error(error);
+    return;
   }
 }
 async function getData() {

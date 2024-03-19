@@ -25,6 +25,7 @@
     :height="height"
     :width="width"
     @load="loaded"
+    @error="console.error"
   />
 </template>
 <script setup lang="ts">

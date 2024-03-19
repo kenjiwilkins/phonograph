@@ -1,15 +1,18 @@
-import { defineStore } from "pinia";
-import { User } from "../types";
-import { getUserProfile } from "../api";
+import { defineStore } from 'pinia';
+import { User } from '../types';
+import { getUserProfile } from '../api';
 
-export const useUserStore = defineStore("user", {
+export const useUserStore = defineStore('user', {
   state: () => ({
-    token: "",
-    authCode: "",
-    accessToken: "",
+    token: '',
+    authCode: '',
+    accessToken: '',
     loggedInState: false,
-    user: null as User | null,
+    user: null as User | null
   }),
+  getters: {
+    isLoggedIn: (state) => state.user !== null
+  },
   actions: {
     setToken(token: string) {
       this.token = token;
@@ -38,7 +41,7 @@ export const useUserStore = defineStore("user", {
           return Promise.reject(error);
         }
       }
-    },
+    }
   },
-  persist: true,
+  persist: true
 });
