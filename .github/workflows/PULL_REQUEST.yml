@@ -24,8 +24,11 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install
-
-      - name: Lint code
+      - name: prettier check
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: prettier
+      - name: eslint check
         uses: borales/actions-yarn@v4
         with:
           cmd: lint
