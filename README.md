@@ -1,27 +1,39 @@
-# React + TypeScript + Vite
+# Phonograph
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Phonograph is a PWA to play album in your library in Spotify.
+Since music streaming service got popular, people tends to listen songs in shuffled playlist rather than a whole album from begin to end.
+This app aims to help user to pick an album from their liked albums and playlist etc.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* build - vite
+* frontend framework - vue
+* state management - pinia
+* styling - tailwind
+* code formatter - prettier
+* unit test - testing-library + vitest
+* CI - GitHub Actions
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+If you want to run this app in your development environment, please ~~star~~ clone this repository first.
+Secondary, you need to create your own spotify developer account and API Client ID and Secret from: [Spotify Developer](https://developer.spotify.com/).
+Then please create a `.env` file in the root of the repo and add
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
+```
+VITE_APP_SPOTIFY_CLIENT_ID={your client ID}
+VITE_APP_SPOTIFY_CLIENT_SECRET={your client secret}
+VITE_APP_DEPLOY_URL=localhost:5137
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+### install
+
+```
+yarn
+```
+
+### run
+
+```
+yarn dev
+```
