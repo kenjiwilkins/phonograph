@@ -23,7 +23,6 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, onBeforeMount, ref } from 'vue';
-import ContentImage from './ContentImage.vue';
 import { useUserSavedAlbumsStore } from '../data';
 import { Album } from '../types';
 // store
