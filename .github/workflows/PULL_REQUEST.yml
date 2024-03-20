@@ -1,0 +1,44 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install --frozen-lockfile
+      - name: prettier check
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: prettier
+      - name: unit test
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: 'test:coverage'
+      - name: report coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Build code
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
