@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'LINESeedSans';
+  font-weight: 400;
+  font-style: normal;
+  font-display: auto;
+  src: url('/src/assets/fonts/LINESeedSans_W_Rg.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'LINESeedSans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: auto;
+  src: url('/src/assets/fonts/LINESeedSans_W_Bd.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'LINESeedSand';
+  font-weight: 300;
+  font-style: normal;
+  font-display: auto;
+  src: url('/src/assets/fonts/LINESeedSans_W_Th.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'LINESeedSans';
+  font-weight: 900;
+  font-style: normal;
+  font-display: auto;
+  src: url('/src/assets/fonts/LINESeedSans_W_XBd.woff2') format('woff2');
+}
+
+body {
+  font-family: 'LINESeedSans', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
