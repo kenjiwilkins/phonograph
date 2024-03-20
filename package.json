@@ -2,7 +2,7 @@
   "name": "phonograph",
   "description": "A spotify album player",
   "private": true,
-  "version": "1.2.2",
+  "version": "1.2.3",
   "license": "MIT",
   "author": {
     "name": "Michael Kenji Wilkins"
