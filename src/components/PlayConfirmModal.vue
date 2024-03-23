@@ -89,7 +89,7 @@ const artistName = computed(() => {
 function play() {
   let url = '';
   if (selectedTrack.value) {
-    url = selectedTrack.value.external_urls.spotify;
+    url = selectedTrack.value.album.external_urls.spotify;
   } else if (selectedAlbum.value) {
     url = selectedAlbum.value.external_urls.spotify;
   }
