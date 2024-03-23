@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
@@ -12,6 +13,9 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
       '@components': path.resolve(__dirname, './src/components')
     }
+  },
+  build: {
+    sourcemap: true
   },
   test: {
     include: ['src/**/*.spec.ts'],
@@ -26,6 +30,15 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    sentryVitePlugin({
+      org: 'kenji-wilkins',
+      project: 'phonograph',
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      debug: true,
+      sourcemaps: {
+        filesToDeleteAfterUpload: ['dist:/**/*.map']
+      }
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
