@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:CI": "tsc && vite build --mode test",
     "prettier": "prettier --write .",
     "lint": "eslint . --ext .ts,.vue",
     "preview": "vite preview",
