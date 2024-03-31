@@ -1,5 +1,5 @@
 <template>
-  <ul v-if="savedPlaylists.length" class="flex w-full flex-col gap-2 py-2">
+  <ul v-if="hasSavedPlaylists" class="flex w-full flex-col gap-2 py-2">
     <li
       v-for="playlist in savedPlaylists"
       :key="playlist.id"
@@ -7,7 +7,7 @@
       @click="selectPlaylist(playlist)"
     >
       <content-image
-        :src="playlist.images.length ? playlist.images[0].url : playlistIcon"
+        :src="playlist.images ? playlist.images[0].url : playlistIcon"
         :alt="playlist.name"
         :height="64"
         :width="64"
@@ -20,6 +20,7 @@
       </div>
     </li>
   </ul>
+  <div v-else></div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
@@ -34,6 +35,7 @@ const tracksStore = useTracksStore();
 
 // computed
 const savedPlaylists = computed(() => userSavedPlaylists.playlists);
+const hasSavedPlaylists = computed(() => savedPlaylists.value.length > 0);
 
 // methods
 function selectPlaylist(playlist: Playlist) {
