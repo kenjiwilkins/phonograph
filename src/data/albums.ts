@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Album } from '../types';
+import { Album, UserSavedAlbumsItem } from '../types';
 import { getUserSavedAlbums, getNextUserSavedAlbums } from '../api';
 
 export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
@@ -61,7 +61,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       try {
         this.setIsLoading(true);
         const data = await getUserSavedAlbums();
-        this.addAlbums(data.items.map((item: any) => item.album));
+        this.addAlbums(data.items.map((item: UserSavedAlbumsItem) => item.album));
         this.setTotalAlbums(data.total);
         this.setHasNext(!!data.next);
         this.setNextUrl(data.next);
@@ -81,7 +81,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       try {
         this.setIsLoading(true);
         const data = await getNextUserSavedAlbums(this.nextUrl);
-        this.addAlbums(data.items.map((item: any) => item.album));
+        this.addAlbums(data.items.map((item: UserSavedAlbumsItem) => item.album));
         this.setHasNext(!!data.next);
         this.setNextUrl(data.next);
         this.setIsLoading(false);
