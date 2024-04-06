@@ -6,7 +6,6 @@ module.exports = {
   extends: ['eslint:recommended'],
   plugins: ['@shopify', 'import'],
   env: {
-    node: true,
     browser: true
   },
   parserOptions: {

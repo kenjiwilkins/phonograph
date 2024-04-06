@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Track } from '@/types';
+import { Track, TrackResponseItem } from '@/types';
 import { getTracks } from '@/api';
 
 export const useTracksStore = defineStore('tracks', {
@@ -60,7 +60,7 @@ export const useTracksStore = defineStore('tracks', {
       try {
         this.setIsLoading(true);
         const data = await getTracks(this.nextUrl);
-        this.addTracks(data.items.map((item: any) => item.track));
+        this.addTracks(data.items.map((item: TrackResponseItem) => item.track));
         this.setNextUrl(data.next);
       } catch (error) {
         console.error(error);
@@ -75,7 +75,7 @@ export const useTracksStore = defineStore('tracks', {
       try {
         this.setIsLoading(true);
         const data = await getTracks(this.nextUrl);
-        this.addTracks(data.items.map((item: any) => item.track));
+        this.addTracks(data.items.map((item: TrackResponseItem) => item.track));
         this.setNextUrl(data.next);
       } catch (error) {
         console.error(error);
