@@ -26,10 +26,12 @@ export interface UserSavedAlbums {
   total: number;
   limit: number;
   offset: number;
-  items: {
-    added_at: string;
-    album: Album;
-  }[];
+  items: UserSavedAlbumItem[];
+}
+
+export interface UserSavedAlbumsItem {
+  added_at: string;
+  album: Album;
 }
 
 export interface UserSavedPlaylists {
@@ -37,10 +39,12 @@ export interface UserSavedPlaylists {
   total: number;
   limit: number;
   offset: number;
-  items: {
-    added_at: string;
-    playlist: Playlist;
-  }[];
+  items: UserSavedPlaylistsItem[];
+}
+
+export interface UserSavedPlaylistsItem {
+  added_at: string;
+  playlist: Playlist;
 }
 
 export interface Device {
@@ -106,6 +110,10 @@ export interface Track {
   external_urls: {
     spotify: string;
   };
+}
+
+export interface TrackResponseItem {
+  track: Track;
 }
 
 export interface PlaybackState {

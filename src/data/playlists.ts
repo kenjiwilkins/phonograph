@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Playlist } from '@/types';
+import { Playlist, UserSavedPlaylistsItem } from '@/types';
 import { getUserSavedPlaylists } from '@/api';
 
 export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
@@ -54,7 +54,7 @@ export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
       try {
         this.setIsLoading(true);
         const data = await getUserSavedPlaylists();
-        this.addPlaylists(data.items.map((item: any) => item));
+        this.addPlaylists(data.items.map((item: UserSavedPlaylistsItem) => item));
         this.setTotalPlaylists(data.total);
         this.setNextUrl(data.next);
       } catch (error) {

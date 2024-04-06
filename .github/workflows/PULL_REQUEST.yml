@@ -27,6 +27,11 @@ jobs:
         uses: borales/actions-yarn@v4
         with:
           cmd: install --frozen-lockfile
+      - name: eslint check
+        if: always()
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: lint
       - name: prettier check
         uses: borales/actions-yarn@v4
         with:
