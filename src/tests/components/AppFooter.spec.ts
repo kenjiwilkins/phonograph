@@ -1,5 +1,4 @@
-import { render } from '@testing-library/vue';
-import { fireEvent } from '@testing-library/vue';
+import { render, fireEvent } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
 import { describe, test, expect, vi } from 'vitest';
 import AppFooter from '@/components/AppFooter.vue';

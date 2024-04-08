@@ -36,6 +36,10 @@ export function generateAlbum(): Album {
   };
 }
 
+export function generateAlbums(length: number): Album[] {
+  return Array.from({ length }, () => generateAlbum());
+}
+
 function generateEmptyAlbum(): Album {
   return {
     total_tracks: 0,

@@ -1,10 +1,11 @@
 <template>
-  <ul v-if="savedAlbums.length" class="flex w-full flex-col gap-2 py-2">
+  <ul v-if="savedAlbums.length" class="flex w-full flex-col gap-2 py-2" data-testid="album-list">
     <li
-      v-for="album in savedAlbums"
+      v-for="(album, index) in savedAlbums"
       :key="album.id"
       class="flex w-full gap-2 px-2"
       @click="selectAlbum(album)"
+      :data-testid="'album-list-item-' + index"
     >
       <img :src="album.images[0].url" :alt="album.name" :height="64" :width="64" loading="lazy" />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
@@ -17,7 +18,7 @@
       </div>
     </li>
   </ul>
-  <div v-if="isLoading" class="flex justify-center py-2">
+  <div v-if="isLoading" class="flex justify-center py-2" data-testid="loading">
     <p class="text-gray-500">Loading...</p>
   </div>
 </template>
