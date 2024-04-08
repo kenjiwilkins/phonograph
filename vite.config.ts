@@ -23,7 +23,7 @@ export default defineConfig({
     environment: 'jsdom',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json-summary', 'json'],
+      reporter: ['text', 'json-summary', 'json', 'html'],
       reportOnFailure: true,
       include: ['src/**/*.ts', 'src/**/*.vue']
     }
