@@ -29,11 +29,14 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     setSelectedAlbum(album: Album) {
       this.selectedAlbum = album;
     },
-    setSelectedAlbumRandomly() {
+    setSelectedAlbumRandomly(): void {
       if (this.albums.length === 0) {
         return;
       }
       const randomIndex = Math.floor(Math.random() * this.albums.length);
+      if (this.selectedAlbum === this.albums[randomIndex]) {
+        return this.setSelectedAlbumRandomly();
+      }
       this.selectedAlbum = this.albums[randomIndex];
     },
     clearSelectedAlbum() {

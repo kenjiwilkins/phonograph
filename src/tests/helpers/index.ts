@@ -69,7 +69,7 @@ function generateEmptyAlbum(): Album {
   };
 }
 
-function generateTrack(): Track {
+export function generateTrack(): Track {
   return {
     id: faker.string.uuid(),
     name: faker.music.songName(),
