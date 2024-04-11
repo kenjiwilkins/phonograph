@@ -1,6 +1,10 @@
 <template>
   <template v-if="isAlbumSelected">
-    <div v-if="albumsCount" class="flex flex-col justify-around p-2">
+    <div
+      v-if="albumsCount"
+      class="flex flex-col justify-around p-2"
+      data-testid="play-control-album"
+    >
       <div class="flex justify-start">
         <p class="text-xs text-gray-500">
           <span>{{ albumsCount }}/{{ totalAlbums }} albums</span>
@@ -12,6 +16,7 @@
           class="flex gap-1 rounded border p-2"
           @click="playRandomAlbum"
           :disabled="fetching"
+          data-testid="play-control-album-button"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +36,11 @@
     </div>
   </template>
   <template v-if="isPlaylistSelected && !tracksCount">
-    <div v-if="playlistsCount" class="flex flex-col justify-around p-2">
+    <div
+      v-if="playlistsCount"
+      class="flex flex-col justify-around p-2"
+      data-testid="play-control-playlist"
+    >
       <div class="flex justify-start">
         <p class="text-xs text-gray-500">
           <span>{{ playlistsCount }}/{{ totalPlaylists }} playlists</span>
@@ -40,7 +49,11 @@
     </div>
   </template>
   <template v-if="tracksCount">
-    <div v-if="tracksCount" class="flex flex-col justify-around p-2">
+    <div
+      v-if="tracksCount"
+      class="flex flex-col justify-around p-2"
+      data-testid="play-control-track"
+    >
       <div class="flex justify-start">
         <p class="text-xs text-gray-500">
           <span>{{ tracksCount }}/{{ totalTracks }} tracks</span>
@@ -52,6 +65,7 @@
           class="flex gap-1 rounded border p-2"
           @click="playRandomTrackAlbum"
           :disabled="fetching"
+          data-testid="play-control-track-button"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
