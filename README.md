@@ -6,13 +6,13 @@ This app aims to help user to pick an album from their liked albums and playlist
 
 ## Tech stack
 
-* build - vite
-* frontend framework - vue
-* state management - pinia
-* styling - tailwind
-* code formatter - prettier
-* unit test - testing-library + vitest
-* CI - GitHub Actions
+- build - vite
+- frontend framework - vue
+- state management - pinia
+- styling - tailwind
+- code formatter - prettier
+- unit test - testing-library + vitest
+- CI - GitHub Actions
 
 ## Development
 
@@ -36,4 +36,15 @@ yarn
 
 ```
 yarn dev
+```
+
+### test
+
+```
+// for all unit test
+yarn test
+// for specific test
+yarn test TestFileName.spec.ts (case sensitive, you can include path as well)
+// for coverage
+yarn test:coverage
 ```
