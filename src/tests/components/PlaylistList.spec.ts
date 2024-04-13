@@ -1,6 +1,6 @@
 import { render, fireEvent } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import PlaylistList from '@/components/PlaylistList.vue';
 import { generatePlaylists } from '../helpers';
 import { useUserSavedPlaylistsStore } from '@/data';

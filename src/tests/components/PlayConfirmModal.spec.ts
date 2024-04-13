@@ -194,6 +194,9 @@ describe('PlayConfirmModal', () => {
         plugins: [
           createTestingPinia({
             initialState: {
+              userSavedAlbums: {
+                selectedAlbum: null
+              },
               tracks: {
                 selectedTrack: selectedTrack
               }

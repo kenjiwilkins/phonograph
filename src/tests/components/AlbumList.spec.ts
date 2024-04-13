@@ -25,7 +25,7 @@ describe('AlbumList', () => {
   test('renders correctly - has albums', () => {
     const ALBUMS_LENGTH = 10;
     const albums = generateAlbums(ALBUMS_LENGTH);
-    const { getByTestId, getByAltText, getByText } = render(AlbumList, {
+    const { getByTestId } = render(AlbumList, {
       global: {
         plugins: [
           createTestingPinia({
@@ -43,9 +43,8 @@ describe('AlbumList', () => {
     for (let i = 0; i < ALBUMS_LENGTH; i++) {
       const album = getByTestId(`album-list-item-${i}`);
       expect(album).toBeTruthy();
-      expect(getByAltText(albums[i].name)).toBeTruthy();
-      expect(getByText(albums[i].name)).toBeTruthy();
-      expect(getByText(albums[i].artists[0].name)).toBeTruthy();
+      expect(getByTestId(`album-li-name-${i}`).textContent).toContain(albums[i].name);
+      expect(getByTestId(`album-li-artist-${i}`).textContent).toContain(albums[i].artists[0].name);
     }
   });
   test('functionality - click', async () => {

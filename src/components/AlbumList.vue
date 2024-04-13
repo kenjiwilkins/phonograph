@@ -6,13 +6,27 @@
       class="flex w-full gap-2 px-2"
       @click="selectAlbum(album)"
       :data-testid="'album-list-item-' + index"
+      role="button"
     >
-      <img :src="album.images[0].url" :alt="album.name" :height="64" :width="64" loading="lazy" />
+      <img
+        :src="album.images[0].url"
+        :alt="album.name"
+        :height="64"
+        :width="64"
+        loading="lazy"
+        :data-testid="`album-li-img-${index}`"
+      />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
-        <p class="overflow-x-hidden text-ellipsis whitespace-nowrap">
+        <p
+          class="overflow-x-hidden text-ellipsis whitespace-nowrap"
+          :data-testid="`album-li-name-${index}`"
+        >
           {{ album.name }}
         </p>
-        <p class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin">
+        <p
+          class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin"
+          :data-testid="`album-li-artist-${index}`"
+        >
           {{ album.artists[0].name }}
         </p>
       </div>
