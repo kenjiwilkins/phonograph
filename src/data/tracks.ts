@@ -32,11 +32,14 @@ export const useTracksStore = defineStore('tracks', {
     setSelectedTrack(track: Track) {
       this.selectedTrack = track;
     },
-    setSelectedTrackRandomly() {
+    setSelectedTrackRandomly(): void {
       if (this.tracks.length === 0) {
         return;
       }
       const randomIndex = Math.floor(Math.random() * this.tracks.length);
+      if (this.selectedTrack === this.tracks[randomIndex]) {
+        return this.setSelectedTrackRandomly();
+      }
       this.setSelectedTrack(this.tracks[randomIndex]);
     },
     clearSelectedTrack() {
