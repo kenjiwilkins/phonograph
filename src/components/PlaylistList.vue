@@ -30,10 +30,11 @@
       </div>
     </li>
   </ul>
-  <div v-else></div>
+  <ContentPlaceholder v-else />
 </template>
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import ContentPlaceholder from './ContentPlaceholder.vue';
 import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';

@@ -1,5 +1,5 @@
 <template>
-  <template v-if="isAlbumSelected">
+  <template v-if="isAlbumSelected && albumsCount">
     <div
       v-if="albumsCount"
       class="flex flex-col justify-around p-2"
@@ -35,7 +35,7 @@
       </div>
     </div>
   </template>
-  <template v-if="isPlaylistSelected && !tracksCount">
+  <template v-else-if="isPlaylistSelected && !tracksCount">
     <div
       v-if="playlistsCount"
       class="flex flex-col justify-around p-2"
@@ -48,7 +48,7 @@
       </div>
     </div>
   </template>
-  <template v-if="tracksCount">
+  <template v-else-if="tracksCount">
     <div
       v-if="tracksCount"
       class="flex flex-col justify-around p-2"
@@ -80,6 +80,32 @@
           </svg>
           <span v-if="fetching">lodaing</span>
           <span v-else>Play Random</span>
+        </button>
+      </div>
+    </div>
+  </template>
+  <template v-else>
+    <div class="flex flex-col justify-around p-2" data-testid="play-control-track">
+      <div class="flex justify-start">
+        <p class="h-4 w-20 animate-pulse bg-gray-500 text-xs"></p>
+      </div>
+      <div v-if="!isPlaylistSelected" class="flex justify-end">
+        <button
+          class="flex gap-1 rounded border border-gray-500 bg-gray-500 p-2"
+          data-testid="play-control-track-button"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24"
+            viewBox="0 -960 960 960"
+            width="24"
+            class="fill-gray-500"
+          >
+            <path
+              d="M560-160v-80h104L537-367l57-57 126 126v-102h80v240H560Zm-344 0-56-56 504-504H560v-80h240v240h-80v-104L216-160Zm151-377L160-744l56-56 207 207-56 56Z"
+            />
+          </svg>
+          <span class="text-gray-500">lodaing</span>
         </button>
       </div>
     </div>

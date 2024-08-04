@@ -1,7 +1,7 @@
 <template>
   <div class="h-full w-full bg-gray-950 text-white">
     <app-bar />
-    <main class="min-h-screen w-full overflow-x-hidden" v-if="isLoggedIn">
+    <main class="min-h-full w-full overflow-x-hidden" v-if="isLoggedIn">
       <play-control-area />
       <album-list v-if="isAlbumTab" />
       <playlist-list v-if="isPlaylistTab && !isShowTrackList" />
