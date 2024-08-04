@@ -33,6 +33,9 @@
     </li>
   </ul>
   <ContentPlaceholder v-else />
+  <div v-if="isLoading" class="flex justify-center py-2" data-testid="loading">
+    <p class="text-gray-500">Loading...</p>
+  </div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, onBeforeMount, ref } from 'vue';

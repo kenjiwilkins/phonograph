@@ -20,6 +20,7 @@ describe('AlbumList', () => {
         ]
       }
     });
+    expect(getByTestId('content-placeholder')).toBeTruthy();
     expect(getByTestId('loading')).toBeTruthy();
   });
   test('renders correctly - has albums', () => {
