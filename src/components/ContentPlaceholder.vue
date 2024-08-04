@@ -35,14 +35,13 @@ const placeholder = ref<HTMLUListElement>();
 
 // lifecycle
 onMounted(() => {
-  if (placeholder.value) {
-    const rect = placeholder.value.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const placeholderOffset = Math.abs(rect.top - windowHeight);
-    placeholderCount.value = Math.ceil(
-      (placeholderOffset - footerHeight + headerHeight - playerControllerHeight) /
-        contentPlaceholderHeight
-    );
-  }
+  if (!placeholder.value) return;
+  const rect = placeholder.value.getBoundingClientRect();
+  const windowHeight = window.innerHeight;
+  const placeholderOffset = Math.abs(rect.top - windowHeight);
+  placeholderCount.value = Math.ceil(
+    (placeholderOffset - footerHeight + headerHeight - playerControllerHeight) /
+      contentPlaceholderHeight
+  );
 });
 </script>
