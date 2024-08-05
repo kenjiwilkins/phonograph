@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: #030712;
+}
+
 @font-face {
   font-family: 'LINESeedSans';
   font-weight: 400;

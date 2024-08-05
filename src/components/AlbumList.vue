@@ -32,19 +32,21 @@
       </div>
     </li>
   </ul>
+  <ContentPlaceholder v-else />
   <div v-if="isLoading" class="flex justify-center py-2" data-testid="loading">
     <p class="text-gray-500">Loading...</p>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, onBeforeMount, ref } from 'vue';
+import ContentPlaceholder from './ContentPlaceholder.vue';
+import { footerHeight } from '@/constants';
 import { useUserSavedAlbumsStore } from '../data';
 import { Album } from '../types';
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();
 
 // data
-const footerHeight = 64;
 const fetching = ref(false);
 
 // computed
