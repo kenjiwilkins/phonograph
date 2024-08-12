@@ -1,8 +1,19 @@
 <template>
+  <img
+    v-if="!hasError"
+    loading="lazy"
+    :src="src"
+    :alt="alt"
+    :height="height"
+    :width="width"
+    @error="handleError"
+    :data-testid="`content-image-${alt}`"
+  />
   <div
-    v-if="loading"
+    v-else
     :style="{ height: `${height}px`, width: `${width}px` }"
     class="flex w-full animate-pulse items-center justify-center bg-gray-300"
+    :data-testid="`content-image-placeholder-${alt}`"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -17,19 +28,11 @@
       />
     </svg>
   </div>
-  <img
-    v-show="!loading"
-    loading="lazy"
-    :src="src"
-    :alt="alt"
-    :height="height"
-    :width="width"
-    @load="loaded"
-    @error="console.error"
-  />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
+
+// props
 
 interface Props {
   src: string;
@@ -41,10 +44,13 @@ interface Props {
 defineProps<Props>();
 
 // data
-const loading = ref(true);
+
+const hasError = ref(false);
 
 // methods
-function loaded() {
-  loading.value = false;
+
+function handleError(error: Event) {
+  hasError.value = true;
+  console.error(error);
 }
 </script>

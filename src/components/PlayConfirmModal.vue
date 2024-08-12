@@ -4,34 +4,52 @@
       v-if="showModal"
       class="overlay fixed left-0 top-0 z-20 flex h-full w-full flex-col items-center justify-end bg-gray-950 bg-opacity-80 text-white"
       @click.self="close"
+      data-testid="play-confirm-modal-overlay"
     >
       <div
         :class="`popup ${selectedAlbum ? 'popup-enter-active' : 'popup-leave-active'}`"
         class="flex w-full flex-col items-center justify-center gap-2 rounded-t-3xl bg-gray-800 p-4"
+        data-testid="play-confirm-modal"
       >
         <div className="pb-2">. . .</div>
         <div class="flex w-full items-center justify-start gap-4">
           <img :src="imageUrl" :alt="albumName" class="h-20 w-20 shadow-md" />
           <div class="flex flex-col gap-1 font-bold">
             <p>
-              <span class="">{{ albumName }}</span>
+              <span class="" data-testid="play-confirm-modal-album-name">{{ albumName }}</span>
             </p>
             <p>
-              <span class="font-normal text-gray-300">{{ artistName }}</span>
+              <span
+                class="font-normal text-gray-300"
+                data-testid="play-confirm-modal-artist-name"
+                >{{ artistName }}</span
+              >
             </p>
           </div>
         </div>
         <div class="w-full border border-gray-700"></div>
         <div class="flex w-full flex-col items-start gap-0">
-          <button class="flex w-full items-center gap-2 py-2" @click.prevent="play">
+          <button
+            class="flex w-full items-center gap-2 py-2"
+            @click.prevent="play"
+            data-testid="play-confirm-modal-play-button"
+          >
             <img :src="playIcon" class="h-8 w-8" />
             <span>Play Album</span>
           </button>
-          <button class="flex w-full items-center gap-2 py-2" @click.prevent="next">
+          <button
+            class="flex w-full items-center gap-2 py-2"
+            @click.prevent="next"
+            data-testid="play-confirm-modal-next-button"
+          >
             <img :src="shuffleIcon" class="h-8 w-8" />
             <span>Shuffle to Next Album</span>
           </button>
-          <button class="flex w-full items-center gap-2 py-2" @click.prevent="close">
+          <button
+            class="flex w-full items-center gap-2 py-2"
+            @click.prevent="close"
+            data-testid="play-confirm-modal-close-button"
+          >
             <img :src="closeIcon" class="h-8 w-8" />
             <span>Close</span>
           </button>
