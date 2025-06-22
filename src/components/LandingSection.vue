@@ -16,7 +16,7 @@
     </div>
   </section>
   <footer class="fixed bottom-0 w-full bg-gray-800 py-4 text-center text-gray-400">
-    <p>&copy; 2023 Michael Kenji Wilkins. All rights reserved.</p>
+    <p>&copy; {{ new Date().getFullYear() }} Michael Kenji Wilkins. All rights reserved.</p>
   </footer>
 </template>
 
