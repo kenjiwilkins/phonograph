@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@sentry/vue": "^7.108.0",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "pinia": "^2.1.7",
     "vue": "^3.4.19"
   },
