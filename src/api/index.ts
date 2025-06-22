@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getLocalStorage, removeLocalStorage } from '../utils';
+import { getCookie, removeCookie } from '../utils';
 import { getAccessTokenWithRefresh } from '../auth';
 
 const baseURL = 'https://api.spotify.com/v1';
@@ -9,7 +9,7 @@ const request = axios.create({
 });
 
 request.interceptors.request.use((config) => {
-  const accessToken = getLocalStorage('accessToken');
+  const accessToken = getCookie('accessToken');
   config.headers['Authorization'] = `Bearer ${accessToken}`;
   return config;
 });
@@ -17,7 +17,7 @@ request.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      removeLocalStorage('accessToken');
+      removeCookie('accessToken');
       getAccessTokenWithRefresh();
     }
     return Promise.reject(error);
