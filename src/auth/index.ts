@@ -1,8 +1,8 @@
 import { isDev } from '../utils';
 import {
-  getLocalStorage,
-  setLocalStorage,
-  removeLocalStorage,
+  getCookie,
+  setCookie,
+  removeCookie,
   verifyAccessToken,
   verifyExpiresIn,
   verifyRefreshToken
@@ -16,7 +16,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
   const verifier = generateCodeVerifier(128);
   const challenge = await generateCodeChallenge(verifier);
 
-  localStorage.setItem('verifier', verifier);
+  setCookie('verifier', verifier, 1); // 1 day expiry for verifier
 
   const params = new URLSearchParams();
   params.append('client_id', clientId);
@@ -33,7 +33,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
 }
 
 export async function getAccessToken(clientId: string, code: string): Promise<string> {
-  const verifier = localStorage.getItem('verifier');
+  const verifier = getCookie('verifier');
 
   const params = new URLSearchParams();
   params.append('client_id', clientId);
@@ -54,14 +54,16 @@ export async function getAccessToken(clientId: string, code: string): Promise<st
   const { access_token, refresh_token, expires_in } = json;
   const expireTime = Date.now() + expires_in * 1000;
   window.history.pushState(null, '', '/');
-  setLocalStorage('accessToken', access_token);
-  setLocalStorage('refreshToken', refresh_token);
-  setLocalStorage('expiresIn', expireTime.toString());
+  setCookie('accessToken', access_token);
+  setCookie('refreshToken', refresh_token);
+  setCookie('expiresIn', expireTime.toString());
+  // Clean up the verifier cookie after successful authentication
+  removeCookie('verifier');
   return access_token;
 }
 
 export async function getAccessTokenWithRefresh() {
-  const refreshToken = getLocalStorage('refreshToken');
+  const refreshToken = getCookie('refreshToken');
   const params = new URLSearchParams();
   params.append('grant_type', 'refresh_token');
   params.append('refresh_token', refreshToken);
@@ -76,9 +78,9 @@ export async function getAccessTokenWithRefresh() {
   const json = await result.json();
   const { access_token, expires_in, refresh_token } = json;
   const expireTime = Date.now() + expires_in * 1000;
-  setLocalStorage('accessToken', access_token);
-  setLocalStorage('refreshToken', refresh_token);
-  setLocalStorage('expiresIn', expireTime.toString());
+  setCookie('accessToken', access_token);
+  setCookie('refreshToken', refresh_token);
+  setCookie('expiresIn', expireTime.toString());
   return access_token;
 }
 
@@ -106,18 +108,19 @@ export async function getCode() {
   return searchParams.get('code');
 }
 
-export function getAccessTokenFromLocalStorage() {
-  const accessToken = getLocalStorage('accessToken');
-  const expires_in = getLocalStorage('expiresIn');
-  const refreshToken = getLocalStorage('refreshToken');
-  if (accessToken === 'undefined') {
-    removeLocalStorage('accessToken');
-    removeLocalStorage('expiresIn');
-    removeLocalStorage('refreshToken');
+export function getAccessTokenFromCookies() {
+  const accessToken = getCookie('accessToken');
+  const expires_in = getCookie('expiresIn');
+  const refreshToken = getCookie('refreshToken');
+  if (accessToken === 'undefined' || accessToken === '') {
+    removeCookie('accessToken');
+    removeCookie('expiresIn');
+    removeCookie('refreshToken');
+    removeCookie('verifier'); // Also clean up verifier
   }
   if (expires_in && new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))) {
-    removeLocalStorage('accessToken');
-    removeLocalStorage('expiresIn');
+    removeCookie('accessToken');
+    removeCookie('expiresIn');
   }
   return {
     accessToken,
@@ -126,31 +129,80 @@ export function getAccessTokenFromLocalStorage() {
   };
 }
 
+export function getAuth() {
+  redirectToAuthCodeFlow(clientId);
+}
+
 export async function useAuth() {
   const code = await getCode();
-  const { expires_in, refreshToken } = getAccessTokenFromLocalStorage();
+
+  // If there's a code, exchange it for tokens
   if (code) {
-    await getAccessToken(clientId, code);
-    return;
+    try {
+      const accessToken = await getAccessToken(clientId, code);
+      return {
+        isAuthenticated: true,
+        accessToken,
+        code
+      };
+    } catch (error) {
+      console.error('Error exchanging code for token:', error);
+      return {
+        isAuthenticated: false,
+        error: 'Failed to exchange authorization code'
+      };
+    }
   }
+
+  // Check if we have valid tokens in cookies
+  const { accessToken, expires_in, refreshToken } = getAccessTokenFromCookies();
+
+  // If no access token exists, user needs to authenticate
   if (!verifyAccessToken() || !verifyExpiresIn() || !verifyRefreshToken()) {
-    return redirectToAuthCodeFlow(clientId);
+    return {
+      isAuthenticated: false,
+      needsAuth: true
+    };
   }
+
+  // Check if token is expired (with 10 minute buffer)
   if (expires_in && new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))) {
+    // Try to refresh the token if we have a refresh token
     if (refreshToken) {
-      return await getAccessTokenWithRefresh();
+      try {
+        const newAccessToken = await getAccessTokenWithRefresh();
+        return {
+          isAuthenticated: true,
+          accessToken: newAccessToken,
+          refreshed: true
+        };
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+        // Clear invalid tokens
+        removeCookie('accessToken');
+        removeCookie('refreshToken');
+        removeCookie('expiresIn');
+        return {
+          isAuthenticated: false,
+          needsAuth: true,
+          error: 'Token refresh failed'
+        };
+      }
+    } else {
+      // No refresh token, clear expired tokens
+      removeCookie('accessToken');
+      removeCookie('expiresIn');
+      return {
+        isAuthenticated: false,
+        needsAuth: true,
+        error: 'Token expired and no refresh token available'
+      };
     }
-    removeLocalStorage('accessToken');
-    removeLocalStorage('refreshToken');
-    removeLocalStorage('expiresIn');
   }
-  if (expires_in && new Date(Date.now() - tenMinutes) > new Date(parseInt(expires_in))) {
-    if (refreshToken) {
-      return await getAccessTokenWithRefresh();
-    }
-    removeLocalStorage('accessToken');
-    removeLocalStorage('refreshToken');
-    removeLocalStorage('expiresIn');
-  }
-  return;
+
+  // Valid token exists
+  return {
+    isAuthenticated: true,
+    accessToken
+  };
 }
