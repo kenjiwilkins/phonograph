@@ -1,7 +1,11 @@
 <template>
   <div class="h-16"></div>
   <footer class="fixed bottom-0 z-10 flex h-16 w-full bg-black bg-opacity-90 text-white">
-    <div class="mx-auto grid h-full max-w-lg grid-cols-2 font-medium">
+    <div class="mx-auto grid h-full max-w-lg grid-cols-3 font-medium">
+      <GitHubButton
+        text="Star Me!"
+        custom-class="group inline-flex flex-col items-center justify-center px-5"
+      />
       <button
         type="button"
         class="group inline-flex flex-col items-center justify-center px-5"
@@ -66,6 +70,7 @@ import {
   useTabStore,
   TabType
 } from '@/data';
+import GitHubButton from './GitHubButton.vue';
 
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();

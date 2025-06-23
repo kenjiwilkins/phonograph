@@ -2,17 +2,18 @@
   <section
     class="flex min-h-screen w-full flex-col items-center justify-center bg-gray-950 text-white"
   >
-    <div class="max-w-4xl px-6 text-center">
+    <div class="flex flex-col items-center justify-center max-w-4xl px-6 text-center">
       <h1 class="mb-8 text-6xl font-bold">PHONOGRAPH</h1>
       <p class="mb-12 whitespace-pre-wrap text-xl text-gray-300">
         {{ description }}
       </p>
       <button
-        class="rounded-lg bg-green-500 px-8 py-4 text-lg font-semibold text-black transition-colors hover:bg-green-400"
+        class="rounded-lg bg-green-500 mb-4 px-8 py-4 text-lg font-semibold text-black transition-colors hover:bg-green-400"
         @click="getAuth"
       >
         Get Started
       </button>
+      <GitHubButton />
     </div>
   </section>
   <footer class="fixed bottom-0 w-full bg-gray-800 py-4 text-center text-gray-400">
@@ -22,6 +23,7 @@
 
 <script setup lang="ts">
 import { getAuth } from '@/auth';
+import GitHubButton from './GitHubButton.vue';
 const description =
   'Your personal music companion.\n Discover, organize, and enjoy your favorite tracks.';
 </script>
