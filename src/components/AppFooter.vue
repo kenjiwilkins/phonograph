@@ -2,17 +2,10 @@
   <div class="h-16"></div>
   <footer class="fixed bottom-0 z-10 flex h-16 w-full bg-black bg-opacity-90 text-white">
     <div class="mx-auto grid h-full max-w-lg grid-cols-3 font-medium">
-      <a
-        type="button"
-        class="group inline-flex flex-col items-center justify-center px-5"
-        href="https://github.com/kenjiwilkins/phonograph"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-testid="github-button"
-      >
-        <img src="../assets/github.svg" alt="GitHub" class="h-5 w-5" />
-        <span>Star Me!</span>
-      </a>
+      <GitHubButton
+        text="Star Me!"
+        custom-class="group inline-flex flex-col items-center justify-center px-5"
+      />
       <button
         type="button"
         class="group inline-flex flex-col items-center justify-center px-5"
@@ -77,6 +70,7 @@ import {
   useTabStore,
   TabType
 } from '@/data';
+import GitHubButton from './GitHubButton.vue';
 
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();
