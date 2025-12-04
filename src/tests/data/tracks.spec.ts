@@ -36,7 +36,7 @@ const generateTrack = (): Track => ({
 describe('TracksStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should have initial state', () => {
@@ -143,8 +143,28 @@ describe('TracksStore', () => {
     expect(store.selectedTrack).toBeNull();
   });
 
+  it('should handle single track already selected (prevent infinite recursion)', () => {
+    const store = useTracksStore();
+    const track = generateTrack();
+    store.addTracks([track]);
+    store.setSelectedTrack(track);
+
+    store.setSelectedTrackRandomly();
+
+    // Should remain the same track without crashing
+    expect(store.selectedTrack).toEqual(track);
+  });
+
   describe('Async Actions', () => {
-    const mockTracksResponse = {
+    const mockTracksResponse: {
+      items: { track: Track }[];
+      next: string | null;
+      total: number;
+      limit: number;
+      offset: number;
+      href: string;
+      previous: string | null;
+    } = {
       items: [
         { track: generateTrack() },
         { track: generateTrack() }
@@ -232,7 +252,7 @@ describe('TracksStore', () => {
 
       const getTracksSpy = vi.spyOn(api, 'getTracks')
         .mockResolvedValueOnce(firstResponse)
-        .mockResolvedValueOnce(secondResponse as unknown as typeof firstResponse);
+        .mockResolvedValueOnce(secondResponse);
 
       await store.fetchAllTracks();
 
@@ -242,7 +262,7 @@ describe('TracksStore', () => {
       expect(store.nextUrl).toBe('');
     });
 
-    it('should stop fetching all tracks if user cancels (selectedTrack set)', async () => {
+    it('should reject when user cancels (selectedTrack set)', async () => {
       const store = useTracksStore();
       store.setNextUrl('http://api.spotify.com/v1/me/tracks');
       store.addTracks([generateTrack()]); // Add initial tracks
@@ -252,11 +272,29 @@ describe('TracksStore', () => {
         return mockTracksResponse;
       });
 
-      try {
-        await store.fetchAllTracks();
-      } catch (e) {
-        expect(e).toBe('User cancelled');
-      }
+      await expect(store.fetchAllTracks()).rejects.toBe('User cancelled');
+    });
+
+    it('should fetch all tracks starting with empty list', async () => {
+      const store = useTracksStore();
+      store.setNextUrl('http://api.spotify.com/v1/me/tracks');
+      // Ensure tracks is empty
+      expect(store.tracks).toHaveLength(0);
+
+      // First call returns data and a next URL
+      const firstResponse = { ...mockTracksResponse, next: 'http://api.spotify.com/v1/me/tracks?offset=2' };
+      // Second call returns data and no next URL
+      const secondResponse = { ...mockTracksResponse, next: null };
+
+      const getTracksSpy = vi.spyOn(api, 'getTracks')
+        .mockResolvedValueOnce(firstResponse)
+        .mockResolvedValueOnce(secondResponse);
+
+      await store.fetchAllTracks();
+
+      expect(getTracksSpy).toHaveBeenCalledTimes(2);
+      expect(store.tracks).toHaveLength(4);
+      expect(store.nextUrl).toBe('');
     });
   });
 });

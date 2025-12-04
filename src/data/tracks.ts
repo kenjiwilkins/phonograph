@@ -37,7 +37,7 @@ export const useTracksStore = defineStore('tracks', {
         return;
       }
       const randomIndex = Math.floor(Math.random() * this.tracks.length);
-      if (this.selectedTrack === this.tracks[randomIndex]) {
+      if (this.tracks.length > 1 && this.selectedTrack === this.tracks[randomIndex]) {
         return this.setSelectedTrackRandomly();
       }
       this.setSelectedTrack(this.tracks[randomIndex]);
@@ -90,7 +90,7 @@ export const useTracksStore = defineStore('tracks', {
     async fetchAllTracks() {
       try {
         while (this.hasNext) {
-          if (this.selectedTrack || this.tracks.length === 0) {
+          if (this.selectedTrack) {
             return Promise.reject('User cancelled');
           }
           await this.fetchNextTracks();
