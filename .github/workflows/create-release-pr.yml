@@ -1,0 +1,23 @@
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh pr list --base main --head develop --state open --json url | grep url; then
+            echo "PR already exists"
+          else
+            gh pr create --base main --head develop --title "chore: release" --body "Release PR from develop to main"
+          fi
