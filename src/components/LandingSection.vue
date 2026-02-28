@@ -2,13 +2,15 @@
   <section
     class="flex min-h-screen w-full flex-col items-center justify-center bg-gray-950 text-white"
   >
-    <div class="flex flex-col items-center justify-center max-w-4xl px-6 text-center">
-      <h1 class="mb-8 text-4xl sm:text-5xl md:text-6xl font-bold glitch" data-text="PHONOGRAPH">PHONOGRAPH</h1>
+    <div class="flex max-w-4xl flex-col items-center justify-center px-6 text-center">
+      <h1 class="glitch mb-8 text-4xl font-bold sm:text-5xl md:text-6xl" data-text="PHONOGRAPH">
+        PHONOGRAPH
+      </h1>
       <p class="mb-12 whitespace-pre-wrap text-xl text-gray-300">
         {{ description }}
       </p>
       <button
-        class="rounded-lg bg-green-500 mb-4 px-8 py-4 text-lg font-semibold text-black transition-colors hover:bg-green-400"
+        class="mb-4 rounded-lg bg-green-500 px-8 py-4 text-lg font-semibold text-black transition-colors hover:bg-green-400"
         @click="getAuth"
       >
         Get Started
@@ -57,7 +59,9 @@ const description =
 }
 
 @keyframes glitch {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
   }
   75% {
@@ -81,7 +85,9 @@ const description =
 }
 
 @keyframes glitch-1 {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
@@ -92,7 +98,9 @@ const description =
 }
 
 @keyframes glitch-2 {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }

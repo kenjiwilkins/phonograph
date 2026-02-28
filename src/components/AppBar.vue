@@ -3,7 +3,9 @@
     id="app-bar"
     class="sticky top-0 flex h-16 w-full items-center justify-between bg-black px-6 py-4"
   >
-    <h1 class="text-xl font-bold text-white glitch" data-testid="logo" data-text="PHONOGRAPH">PHONOGRAPH</h1>
+    <h1 class="glitch text-xl font-bold text-white" data-testid="logo" data-text="PHONOGRAPH">
+      PHONOGRAPH
+    </h1>
     <button
       v-if="loggedIn"
       class="bg-black-900 flex gap-2 px-2 py-2 text-white hover:brightness-125"
@@ -62,7 +64,9 @@ const loggedIn = computed(() => userStore.loggedInState);
 }
 
 @keyframes glitch {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
   }
   75% {
@@ -86,7 +90,9 @@ const loggedIn = computed(() => userStore.loggedInState);
 }
 
 @keyframes glitch-1 {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
@@ -97,7 +103,9 @@ const loggedIn = computed(() => userStore.loggedInState);
 }
 
 @keyframes glitch-2 {
-  0%, 74%, 100% {
+  0%,
+  74%,
+  100% {
     transform: translate(0);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }

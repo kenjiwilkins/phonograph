@@ -31,9 +31,10 @@ npm install -D vitest @vue/test-utils jsdom
 ```
 
 **vite.config.js:**
+
 ```javascript
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   plugins: [vue()],
@@ -45,10 +46,11 @@ export default defineConfig({
     // Optional: Setup files for global configuration
     setupFiles: ['./src/test/setup.js']
   }
-})
+});
 ```
 
 **package.json:**
+
 ```json
 {
   "scripts": {
@@ -60,6 +62,7 @@ export default defineConfig({
 ```
 
 **tsconfig.json (if using TypeScript):**
+
 ```json
 {
   "compilerOptions": {
@@ -72,38 +75,38 @@ export default defineConfig({
 
 ```javascript
 // src/components/Counter.test.js
-import { describe, it, expect, beforeEach } from 'vitest'  // optional with globals: true
-import { mount } from '@vue/test-utils'
-import Counter from './Counter.vue'
+import { describe, it, expect, beforeEach } from 'vitest'; // optional with globals: true
+import { mount } from '@vue/test-utils';
+import Counter from './Counter.vue';
 
 describe('Counter', () => {
-  let wrapper
+  let wrapper;
 
   beforeEach(() => {
-    wrapper = mount(Counter)
-  })
+    wrapper = mount(Counter);
+  });
 
   it('renders initial count', () => {
-    expect(wrapper.find('[data-testid="count"]').text()).toBe('0')
-  })
+    expect(wrapper.find('[data-testid="count"]').text()).toBe('0');
+  });
 
   it('increments when button clicked', async () => {
-    await wrapper.find('[data-testid="increment"]').trigger('click')
-    expect(wrapper.find('[data-testid="count"]').text()).toBe('1')
-  })
-})
+    await wrapper.find('[data-testid="increment"]').trigger('click');
+    expect(wrapper.find('[data-testid="count"]').text()).toBe('1');
+  });
+});
 ```
 
 ## Vitest vs Jest Comparison
 
-| Feature | Vitest | Jest |
-|---------|--------|------|
-| Vite Integration | Native | Requires config |
-| Speed | Very fast (ESM native) | Slower with Vite |
-| Watch Mode | Excellent | Good |
-| Vue SFC Support | Works with Vite | Needs vue-jest |
-| Config Sharing | Same as vite.config | Separate |
-| API | Jest-compatible | Standard |
+| Feature          | Vitest                 | Jest             |
+| ---------------- | ---------------------- | ---------------- |
+| Vite Integration | Native                 | Requires config  |
+| Speed            | Very fast (ESM native) | Slower with Vite |
+| Watch Mode       | Excellent              | Good             |
+| Vue SFC Support  | Works with Vite        | Needs vue-jest   |
+| Config Sharing   | Same as vite.config    | Separate         |
+| API              | Jest-compatible        | Standard         |
 
 ## Using with Testing Library
 
@@ -113,32 +116,32 @@ npm install -D @testing-library/vue @testing-library/jest-dom
 
 ```javascript
 // src/test/setup.js
-import { expect } from 'vitest'
-import * as matchers from '@testing-library/jest-dom/matchers'
+import { expect } from 'vitest';
+import * as matchers from '@testing-library/jest-dom/matchers';
 
-expect.extend(matchers)
+expect.extend(matchers);
 ```
 
 ```javascript
 // Component.test.js
-import { render, screen, fireEvent } from '@testing-library/vue'
-import UserCard from './UserCard.vue'
+import { render, screen, fireEvent } from '@testing-library/vue';
+import UserCard from './UserCard.vue';
 
 test('displays user name', () => {
   render(UserCard, {
     props: { name: 'John Doe' }
-  })
+  });
 
-  expect(screen.getByText('John Doe')).toBeInTheDocument()
-})
+  expect(screen.getByText('John Doe')).toBeInTheDocument();
+});
 ```
 
 ## Advanced Configuration
 
 ```javascript
 // vitest.config.js (separate file if preferred)
-import { defineConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vitest/config';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   plugins: [vue()],
@@ -161,44 +164,47 @@ export default defineConfig({
       }
     }
   }
-})
+});
 ```
 
 ## Common Patterns
 
 ### Mocking Modules
+
 ```javascript
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 vi.mock('@/api/users', () => ({
   fetchUser: vi.fn().mockResolvedValue({ name: 'John' })
-}))
+}));
 ```
 
 ### Testing with Fake Timers
+
 ```javascript
-import { vi, beforeEach, afterEach } from 'vitest'
+import { vi, beforeEach, afterEach } from 'vitest';
 
 beforeEach(() => {
-  vi.useFakeTimers()
-})
+  vi.useFakeTimers();
+});
 
 afterEach(() => {
-  vi.restoreAllMocks()
-})
+  vi.restoreAllMocks();
+});
 
 test('debounced search', async () => {
-  const wrapper = mount(SearchBox)
-  await wrapper.find('input').setValue('vue')
+  const wrapper = mount(SearchBox);
+  await wrapper.find('input').setValue('vue');
 
-  vi.advanceTimersByTime(300)
-  await flushPromises()
+  vi.advanceTimersByTime(300);
+  await flushPromises();
 
-  expect(wrapper.emitted('search')).toBeTruthy()
-})
+  expect(wrapper.emitted('search')).toBeTruthy();
+});
 ```
 
 ## Reference
+
 - [Vitest Documentation](https://vitest.dev/)
 - [Vue.js Testing Guide](https://vuejs.org/guide/scaling-up/testing)
 - [Vue Test Utils](https://test-utils.vuejs.org/)
