@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Mocking axios
 vi.mock('axios', async () => {
-  const actualAxios = await vi.importActual('axios') as any;
+  const actualAxios = (await vi.importActual('axios')) as any;
   const mockInstance = {
     get: vi.fn().mockResolvedValue({ data: {} }),
     interceptors: {

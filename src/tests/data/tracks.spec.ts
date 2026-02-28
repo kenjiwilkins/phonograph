@@ -30,7 +30,7 @@ const generateTrack = (): Track => ({
   uri: faker.internet.url(),
   explicit: false,
   external_urls: { spotify: '' },
-  type: 'track',
+  type: 'track'
 });
 
 describe('TracksStore', () => {
@@ -134,7 +134,7 @@ describe('TracksStore', () => {
 
     store.setSelectedTrackRandomly();
     expect(store.selectedTrack).not.toBeNull();
-    expect(tracks.map(t => t.id)).toContain(store.selectedTrack?.id);
+    expect(tracks.map((t) => t.id)).toContain(store.selectedTrack?.id);
   });
 
   it('should not set selected track randomly if no tracks', () => {
@@ -165,16 +165,13 @@ describe('TracksStore', () => {
       href: string;
       previous: string | null;
     } = {
-      items: [
-        { track: generateTrack() },
-        { track: generateTrack() }
-      ],
+      items: [{ track: generateTrack() }, { track: generateTrack() }],
       next: faker.internet.url(),
       total: 10,
       limit: 2,
       offset: 0,
       href: faker.internet.url(),
-      previous: null,
+      previous: null
     };
 
     it('should fetch tracks', async () => {
@@ -196,7 +193,7 @@ describe('TracksStore', () => {
       store.setNextUrl('http://api.spotify.com/v1/me/tracks');
 
       vi.spyOn(api, 'getTracks').mockRejectedValue(new Error('Network error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await store.fetchTracks();
 
@@ -246,11 +243,15 @@ describe('TracksStore', () => {
       store.addTracks([generateTrack()]);
 
       // First call returns data and a next URL
-      const firstResponse = { ...mockTracksResponse, next: 'http://api.spotify.com/v1/me/tracks?offset=2' };
+      const firstResponse = {
+        ...mockTracksResponse,
+        next: 'http://api.spotify.com/v1/me/tracks?offset=2'
+      };
       // Second call returns data and no next URL
       const secondResponse = { ...mockTracksResponse, next: null };
 
-      const getTracksSpy = vi.spyOn(api, 'getTracks')
+      const getTracksSpy = vi
+        .spyOn(api, 'getTracks')
         .mockResolvedValueOnce(firstResponse)
         .mockResolvedValueOnce(secondResponse);
 
@@ -282,11 +283,15 @@ describe('TracksStore', () => {
       expect(store.tracks).toHaveLength(0);
 
       // First call returns data and a next URL
-      const firstResponse = { ...mockTracksResponse, next: 'http://api.spotify.com/v1/me/tracks?offset=2' };
+      const firstResponse = {
+        ...mockTracksResponse,
+        next: 'http://api.spotify.com/v1/me/tracks?offset=2'
+      };
       // Second call returns data and no next URL
       const secondResponse = { ...mockTracksResponse, next: null };
 
-      const getTracksSpy = vi.spyOn(api, 'getTracks')
+      const getTracksSpy = vi
+        .spyOn(api, 'getTracks')
         .mockResolvedValueOnce(firstResponse)
         .mockResolvedValueOnce(secondResponse);
 

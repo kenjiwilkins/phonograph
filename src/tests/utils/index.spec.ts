@@ -82,9 +82,9 @@ describe('utils', () => {
     utils.setCookie('refreshToken', 'r');
     utils.setCookie('expiresIn', 'e');
     utils.setCookie('verifier', 'v');
-    
+
     utils.resetAccessToken();
-    
+
     expect(utils.getCookie('accessToken')).toBe('');
     expect(utils.getCookie('refreshToken')).toBe('');
     expect(utils.getCookie('expiresIn')).toBe('');

@@ -10,12 +10,24 @@ const locationMock = {
   assign: vi.fn(),
   replace: vi.fn(),
   toString: () => mockLocation.toString(),
-  get href() { return mockLocation.href; },
-  set href(url) { mockLocation.href = url; },
-  get search() { return mockLocation.search; },
-  set search(s) { mockLocation.search = s; },
-  get pathname() { return mockLocation.pathname; },
-  set pathname(p) { mockLocation.pathname = p; },
+  get href() {
+    return mockLocation.href;
+  },
+  set href(url) {
+    mockLocation.href = url;
+  },
+  get search() {
+    return mockLocation.search;
+  },
+  set search(s) {
+    mockLocation.search = s;
+  },
+  get pathname() {
+    return mockLocation.pathname;
+  },
+  set pathname(p) {
+    mockLocation.pathname = p;
+  }
 };
 
 // @ts-ignore
@@ -37,16 +49,29 @@ Object.defineProperty(window, 'crypto', {
 
 // Mocking utils to avoid cookie issues in JSDOM
 vi.mock('@/utils', async () => {
-  const actual = await vi.importActual('@/utils') as any;
+  const actual = (await vi.importActual('@/utils')) as any;
   const cookies: Record<string, string> = {};
   return {
     ...actual,
     getCookie: vi.fn((key) => cookies[key] || ''),
-    setCookie: vi.fn((key, value) => { cookies[key] = value; }),
-    removeCookie: vi.fn((key) => { delete cookies[key]; }),
-    verifyAccessToken: vi.fn(() => !!cookies['accessToken'] && cookies['accessToken'] !== 'undefined'),
-    verifyRefreshToken: vi.fn(() => !!cookies['refreshToken'] && cookies['refreshToken'] !== 'undefined'),
-    verifyExpiresIn: vi.fn(() => !!cookies['expiresIn'] && cookies['expiresIn'] !== 'undefined' && cookies['expiresIn'] !== 'NaN'),
+    setCookie: vi.fn((key, value) => {
+      cookies[key] = value;
+    }),
+    removeCookie: vi.fn((key) => {
+      delete cookies[key];
+    }),
+    verifyAccessToken: vi.fn(
+      () => !!cookies['accessToken'] && cookies['accessToken'] !== 'undefined'
+    ),
+    verifyRefreshToken: vi.fn(
+      () => !!cookies['refreshToken'] && cookies['refreshToken'] !== 'undefined'
+    ),
+    verifyExpiresIn: vi.fn(
+      () =>
+        !!cookies['expiresIn'] &&
+        cookies['expiresIn'] !== 'undefined' &&
+        cookies['expiresIn'] !== 'NaN'
+    )
   };
 });
 
@@ -68,8 +93,12 @@ describe('auth', () => {
     const clientId = 'test-client-id';
     await auth.redirectToAuthCodeFlow(clientId);
     expect(utils.setCookie).toHaveBeenCalledWith('verifier', expect.anything(), 1);
-    expect(locationMock.assign).toHaveBeenCalledWith(expect.stringContaining('https://accounts.spotify.com/authorize'));
-    expect(locationMock.assign).toHaveBeenCalledWith(expect.stringContaining('client_id=test-client-id'));
+    expect(locationMock.assign).toHaveBeenCalledWith(
+      expect.stringContaining('https://accounts.spotify.com/authorize')
+    );
+    expect(locationMock.assign).toHaveBeenCalledWith(
+      expect.stringContaining('client_id=test-client-id')
+    );
   });
 
   test('getAccessToken', async () => {
@@ -82,7 +111,9 @@ describe('auth', () => {
       status: 200,
       json: async () => mockTokenResponse
     });
-    (utils.getCookie as any).mockImplementation((k: string) => k === 'verifier' ? 'mock-verifier' : '');
+    (utils.getCookie as any).mockImplementation((k: string) =>
+      k === 'verifier' ? 'mock-verifier' : ''
+    );
 
     const token = await auth.getAccessToken('client-id', 'code');
     expect(token).toBe('mock-access-token');
@@ -101,7 +132,9 @@ describe('auth', () => {
       status: 200,
       json: async () => mockTokenResponse
     });
-    (utils.getCookie as any).mockImplementation((k: string) => k === 'refreshToken' ? 'old-refresh-token' : '');
+    (utils.getCookie as any).mockImplementation((k: string) =>
+      k === 'refreshToken' ? 'old-refresh-token' : ''
+    );
 
     const token = await auth.getAccessTokenWithRefresh();
     expect(token).toBe('new-access-token');
@@ -122,7 +155,9 @@ describe('auth', () => {
   });
 
   test('getAccessTokenFromCookies - cleans up undefined', () => {
-    (utils.getCookie as any).mockImplementation((k: string) => k === 'accessToken' ? 'undefined' : '');
+    (utils.getCookie as any).mockImplementation((k: string) =>
+      k === 'accessToken' ? 'undefined' : ''
+    );
     auth.getAccessTokenFromCookies();
     expect(utils.removeCookie).toHaveBeenCalledWith('accessToken');
   });
@@ -148,7 +183,7 @@ describe('auth', () => {
       status: 200,
       json: async () => mockTokenResponse
     });
-    (utils.getCookie as any).mockImplementation((k: string) => k === 'verifier' ? 'v' : '');
+    (utils.getCookie as any).mockImplementation((k: string) => (k === 'verifier' ? 'v' : ''));
 
     const result = await auth.useAuth();
     expect(result.isAuthenticated).toBe(true);

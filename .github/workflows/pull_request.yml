@@ -31,7 +31,7 @@ jobs:
         run: yarn lint
 
       - name: prettier check
-        run: yarn prettier
+        run: yarn prettier --check
 
       - name: unit test
         run: yarn test:coverage

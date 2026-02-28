@@ -60,11 +60,11 @@ describe('UserSavedAlbumsStore', () => {
     const store = useUserSavedAlbumsStore();
     const albums = Array.from({ length: 3 }, () => generateAlbum());
     store.addAlbums(albums);
-    
+
     store.setSelectedAlbumRandomly();
     expect(store.selectedAlbum).not.toBeNull();
     // Compare by ID to avoid reference issues if cloned
-    expect(albums.map(a => a.id)).toContain(store.selectedAlbum?.id);
+    expect(albums.map((a) => a.id)).toContain(store.selectedAlbum?.id);
   });
 
   describe('Async actions', () => {
