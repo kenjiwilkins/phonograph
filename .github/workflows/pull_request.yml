@@ -1,0 +1,40 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: eslint check
+        if: always()
+        run: yarn lint
+
+      - name: prettier check
+        run: yarn prettier
+
+      - name: unit test
+        run: yarn test:coverage
+
+      - name: Build code
+        run: yarn build:CI
