@@ -20,7 +20,7 @@ describe('App', () => {
       needsAuth: true
     });
 
-    const { getByText, findByText } = render(App, {
+    const { findByText } = render(App, {
       global: {
         plugins: [createTestingPinia()]
       }
@@ -35,7 +35,7 @@ describe('App', () => {
       accessToken: 'mock-token'
     });
 
-    const { getByTestId, findByTestId } = render(App, {
+    const { findByTestId } = render(App, {
       global: {
         plugins: [
           createTestingPinia({
@@ -67,7 +67,7 @@ describe('App', () => {
       accessToken: 'mock-token'
     });
 
-    const { getByText, findByText } = render(App, {
+    const { findByText } = render(App, {
       global: {
         plugins: [
           createTestingPinia({
