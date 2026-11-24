@@ -86,4 +86,13 @@ describe('AppBar', () => {
     expect(queryByRole('img')).toBeNull();
     expect(getByTestId('user-button').querySelector('.app-bar__avatar')).not.toBeNull();
   });
+
+  test('shows SYNC instead of LOGIN while the user profile loads (#162)', () => {
+    const { getByTestId, queryByTestId } = render(AppBar, {
+      props: { syncing: true },
+      global: { plugins: [createTestingPinia()] }
+    });
+    expect(getByTestId('link-status').textContent?.trim()).toBe('Sync');
+    expect(queryByTestId('login-button')).toBeNull();
+  });
 });

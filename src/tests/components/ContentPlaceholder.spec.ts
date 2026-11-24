@@ -31,4 +31,12 @@ describe('ContentPlaceholder', () => {
       await findByTestId(`placeholder-${i}`);
     }
   });
+  test('renders a fixed number of skeleton rows with dashed indexes (#162)', () => {
+    const { getAllByTestId, getByTestId } = render(ContentPlaceholder, { props: { count: 1 } });
+    expect(getAllByTestId(/^placeholder-/)).toHaveLength(1);
+    const row = getByTestId('placeholder-1');
+    expect(row.textContent).toContain('----');
+    expect(row.querySelectorAll('.pg-skel')).toHaveLength(3);
+    expect(getByTestId('content-placeholder').getAttribute('aria-hidden')).toBe('true');
+  });
 });

@@ -17,8 +17,10 @@
   </ul>
   <ContentPlaceholder v-else />
   <div v-if="savedAlbums.length" ref="sentinel" aria-hidden="true" data-testid="album-list-end" />
-  <div v-if="isLoading" class="flex justify-center py-2" data-testid="loading">
-    <p class="text-gray-500">Loading...</p>
+  <!-- The next page is loading: one skeleton row at the end of the list -->
+  <div v-if="isLoading" data-testid="loading">
+    <p class="sr-only" role="status">Loading...</p>
+    <ContentPlaceholder :count="1" data-testid="loading-row" />
   </div>
 </template>
 <script setup lang="ts">
