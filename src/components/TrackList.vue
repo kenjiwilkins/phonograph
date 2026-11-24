@@ -8,7 +8,12 @@
       @click="selectTrack(track)"
       :data-testid="`track-li-${index}`"
     >
-      <content-image :src="track.album.images[0].url" :alt="track.name" :height="64" :width="64" />
+      <content-image
+        :src="getImageUrl(track.album.images, 64) ?? ''"
+        :alt="track.name"
+        :height="64"
+        :width="64"
+      />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
         <p
           class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm"
@@ -39,6 +44,7 @@ import ContentPlaceholder from './ContentPlaceholder.vue';
 import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Track } from '@/types';
+import { getImageUrl } from '@/utils';
 
 // stores
 const userSavedPlaylists = useUserSavedPlaylistsStore();

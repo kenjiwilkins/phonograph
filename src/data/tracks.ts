@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { markRaw } from 'vue';
 import { Track, TrackResponseItem } from '@/types';
 import { getTracks, getPlaylistTrackAt } from '@/api';
 import { randomOffset } from '@/utils';
@@ -36,7 +37,8 @@ export const useTracksStore = defineStore('tracks', {
       this.tracksUrl = tracksUrl;
     },
     addTracks(tracks: Track[]) {
-      this.tracks = [...this.tracks, ...tracks];
+      // Tracks carry a full album object; don't wrap every nested object in a reactive proxy
+      this.tracks.push(...tracks.map((track) => markRaw(track)));
     },
     overwriteTracks(tracks: Track[]) {
       this.tracks = tracks;

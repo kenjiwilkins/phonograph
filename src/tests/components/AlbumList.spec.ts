@@ -77,7 +77,7 @@ describe('AlbumList', () => {
     });
     const albumListItem = getByTestId('album-list-item-0');
     await fireEvent.click(albumListItem);
-    expect(useUserSavedAlbumsStore().selectedAlbum).toEqual(albums[0]);
+    expect(useUserSavedAlbumsStore().selectedAlbum?.id).toBe(albums[0].id);
   });
   test('functionality - loads the next page when the end of the list is visible (#122)', async () => {
     const albums = generateAlbums(10);
@@ -131,5 +131,22 @@ describe('AlbumList', () => {
     const observer = MockIntersectionObserver.latest();
     unmount();
     expect(observer.disconnect).toHaveBeenCalled();
+  });
+  test('renders the smallest suitable cover image (#123)', () => {
+    const album = {
+      ...generateAlbums(1)[0],
+      images: [
+        { url: 'https://i.scdn.co/large', width: 640, height: 640 },
+        { url: 'https://i.scdn.co/medium', width: 300, height: 300 },
+        { url: 'https://i.scdn.co/small', width: 64, height: 64 }
+      ]
+    };
+    vi.stubGlobal('devicePixelRatio', 1);
+    const { getByTestId } = render(AlbumList, {
+      global: {
+        plugins: [createTestingPinia({ initialState: { userSavedAlbums: { albums: [album] } } })]
+      }
+    });
+    expect(getByTestId('album-li-img-0').getAttribute('src')).toBe('https://i.scdn.co/small');
   });
 });

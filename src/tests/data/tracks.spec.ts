@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { isReactive } from 'vue';
 import { useTracksStore } from '@/data/tracks';
 import { Track } from '@/types';
 import * as api from '@/api';
@@ -294,5 +295,11 @@ describe('TracksStore', () => {
       store.clearAllStates();
       expect(store.tracksUrl).toBe('');
     });
+  });
+
+  it('does not make stored tracks deeply reactive (#121)', () => {
+    const store = useTracksStore();
+    store.addTracks([generateTrack()]);
+    expect(isReactive(store.tracks[0])).toBe(false);
   });
 });

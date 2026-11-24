@@ -11,7 +11,11 @@
       class="bg-black-900 flex gap-2 px-2 py-2 text-white hover:brightness-125"
       data-testid="user-button"
     >
-      <img :src="user?.images[0]?.url" :alt="user?.display_name" class="h-6 w-6 rounded-full" />
+      <img
+        :src="getImageUrl(user?.images, 24)"
+        :alt="user?.display_name"
+        class="h-6 w-6 rounded-full"
+      />
       <span class="max-w-32 truncate">{{ user?.display_name }}</span>
     </button>
     <button
@@ -26,6 +30,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useUserStore } from '../data';
+import { getImageUrl } from '@/utils';
 
 // store
 const userStore = useUserStore();

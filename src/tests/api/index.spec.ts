@@ -45,7 +45,7 @@ describe('api', () => {
 
     const result = await api.getUserSavedAlbums();
     expect(result).toEqual(mockData);
-    expect(mockInstance.get).toHaveBeenCalledWith('/me/albums?offset=0&limit=50');
+    expect(mockInstance.get).toHaveBeenCalledWith('/me/albums?offset=0&limit=50&market=from_token');
   });
 
   test('getNextUserSavedAlbums', async () => {
@@ -99,7 +99,7 @@ describe('api', () => {
     const result = await api.getUserSavedAlbumAt(7);
     expect(result).toEqual(mockData);
     expect(mockInstance.get).toHaveBeenCalledWith('/me/albums', {
-      params: { offset: 7, limit: 1 }
+      params: { offset: 7, limit: 1, market: 'from_token' }
     });
   });
 

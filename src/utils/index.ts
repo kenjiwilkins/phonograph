@@ -1,3 +1,5 @@
+import type { Image } from '@/types';
+
 export const isDev = import.meta.env.MODE === 'development';
 
 export function getCookie(key: string): string {
@@ -76,4 +78,23 @@ export function randomOffset(total: number, exclude: number | null = null): numb
   }
   const offset = Math.floor(Math.random() * (total - 1));
   return offset >= exclude ? offset + 1 : offset;
+}
+
+/**
+ * Returns the smallest image that still covers `displaySize` CSS pixels on this screen.
+ * Spotify returns covers at 640, 300 and 64px; lists show them at 64px, so loading the
+ * largest one wastes ~10x the bandwidth.
+ */
+export function getImageUrl(
+  images: Image[] | null | undefined,
+  displaySize: number,
+  pixelRatio: number = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
+): string | undefined {
+  if (!images?.length) return undefined;
+  const sized = images.filter((image) => typeof image.width === 'number');
+  if (sized.length === 0) return images[0].url;
+  const bySize = [...sized].sort((a, b) => (a.width as number) - (b.width as number));
+  const target = displaySize * pixelRatio;
+  return (bySize.find((image) => (image.width as number) >= target) ?? bySize[bySize.length - 1])
+    .url;
 }
