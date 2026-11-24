@@ -3,7 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { describe, test, expect } from 'vitest';
 import PlaylistList from '@/components/PlaylistList.vue';
 import { generatePlaylists } from '../helpers';
-import { useUserSavedPlaylistsStore } from '@/data';
+import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 
 describe('PlaylistList', () => {
   test('renders correctly - is loading', () => {
@@ -50,5 +50,22 @@ describe('PlaylistList', () => {
     const playlistItem = getByTestId('playlist-li-0');
     await fireEvent.click(playlistItem);
     expect(playlistStore.selectedPlaylist).toEqual(playlists[0]);
+  });
+  test('functionality - click sets the tracks url for random picks (#120)', async () => {
+    const playlists = generatePlaylists(3);
+    const { getByTestId } = render(PlaylistList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedPlaylists: { playlists } },
+            stubActions: false
+          })
+        ]
+      }
+    });
+    const tracksStore = useTracksStore();
+    await fireEvent.click(getByTestId('playlist-li-1'));
+    expect(tracksStore.tracksUrl).toBe(playlists[1].tracks.href);
+    expect(tracksStore.totalTracks).toBe(playlists[1].tracks.total);
   });
 });

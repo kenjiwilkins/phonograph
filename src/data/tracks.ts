@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia';
 import { Track, TrackResponseItem } from '@/types';
-import { getTracks } from '@/api';
+import { getTracks, getPlaylistTrackAt } from '@/api';
+import { randomOffset } from '@/utils';
+
+// Removed tracks come back as `track: null`; give up after this many empty picks
+const maxRandomPickAttempts = 3;
 
 export const useTracksStore = defineStore('tracks', {
   state: () => ({
@@ -8,7 +12,10 @@ export const useTracksStore = defineStore('tracks', {
     selectedTrack: null as Track | null,
     isLoading: false,
     nextUrl: '',
-    totalTracks: 0
+    totalTracks: 0,
+    // The selected playlist's tracks endpoint, used to fetch single tracks at random offsets
+    tracksUrl: '',
+    lastRandomOffset: null as number | null
   }),
   getters: {
     hasNext(state) {
@@ -22,6 +29,11 @@ export const useTracksStore = defineStore('tracks', {
       this.isLoading = false;
       this.nextUrl = '';
       this.totalTracks = 0;
+      this.tracksUrl = '';
+      this.lastRandomOffset = null;
+    },
+    setTracksUrl(tracksUrl: string) {
+      this.tracksUrl = tracksUrl;
     },
     addTracks(tracks: Track[]) {
       this.tracks = [...this.tracks, ...tracks];
@@ -87,19 +99,27 @@ export const useTracksStore = defineStore('tracks', {
         this.setIsLoading(false);
       }
     },
-    async fetchAllTracks() {
-      try {
-        while (this.hasNext) {
-          if (this.selectedTrack) {
-            return Promise.reject('User cancelled');
-          }
-          await this.fetchNextTracks();
+    /**
+     * Selects a random track of the selected playlist. When not every track is loaded yet, only
+     * the track at a random offset is fetched (one request) instead of loading the whole playlist.
+     */
+    async pickRandomTrack() {
+      if (this.tracks.length >= this.totalTracks || !this.tracksUrl) {
+        this.setSelectedTrackRandomly();
+        return;
+      }
+      let exclude = this.lastRandomOffset;
+      for (let attempt = 0; attempt < maxRandomPickAttempts; attempt++) {
+        const offset = randomOffset(this.totalTracks, exclude);
+        const data = await getPlaylistTrackAt(this.tracksUrl, offset);
+        this.setTotalTracks(data.total);
+        const track: Track | null | undefined = data.items[0]?.track;
+        if (track && track.id !== this.selectedTrack?.id) {
+          this.lastRandomOffset = offset;
+          this.setSelectedTrack(track);
+          return;
         }
-        this.setNextUrl('');
-        return Promise.resolve();
-      } catch (error) {
-        console.error(error);
-        return Promise.reject(error);
+        exclude = offset;
       }
     }
   }

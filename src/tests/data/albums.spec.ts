@@ -6,7 +6,8 @@ import * as api from '@/api';
 
 vi.mock('@/api', () => ({
   getUserSavedAlbums: vi.fn(),
-  getNextUserSavedAlbums: vi.fn()
+  getNextUserSavedAlbums: vi.fn(),
+  getUserSavedAlbumAt: vi.fn()
 }));
 
 describe('UserSavedAlbumsStore', () => {
@@ -102,27 +103,6 @@ describe('UserSavedAlbumsStore', () => {
       expect(store.hasNext).toBe(false);
       expect(store.nextUrl).toBeNull();
     });
-
-    it('fetchAllUserSavedAlbums', async () => {
-      const mockFirstResponse = {
-        items: [{ album: generateAlbum() }],
-        total: 2,
-        next: 'https://next-url'
-      };
-      const mockSecondResponse = {
-        items: [{ album: generateAlbum() }],
-        total: 2,
-        next: null
-      };
-      (api.getUserSavedAlbums as any).mockResolvedValue(mockFirstResponse);
-      (api.getNextUserSavedAlbums as any).mockResolvedValue(mockSecondResponse);
-
-      const store = useUserSavedAlbumsStore();
-      await store.fetchAllUserSavedAlbums();
-
-      expect(store.albums).toHaveLength(2);
-      expect(store.hasNext).toBe(false);
-    });
   });
 
   describe('setSelectedAlbumRandomly (#125)', () => {
@@ -202,35 +182,81 @@ describe('UserSavedAlbumsStore', () => {
       expect(store.isLoading).toBe(false);
       expect(store.hasNext).toBe(false);
     });
+  });
 
-    it('fetchAllUserSavedAlbums waits for a next page that is already loading', async () => {
+  describe('pickRandomAlbum (#120)', () => {
+    it('fetches a single album at a random offset when not all albums are loaded', async () => {
       const store = useUserSavedAlbumsStore();
-      (api.getUserSavedAlbums as any).mockResolvedValue({
+      store.addAlbums([generateAlbum()]);
+      store.setTotalAlbums(1000);
+      const album = generateAlbum();
+      (api.getUserSavedAlbumAt as any).mockResolvedValue({ items: [{ album }], total: 1000 });
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+
+      await store.pickRandomAlbum();
+
+      expect(api.getUserSavedAlbumAt).toHaveBeenCalledTimes(1);
+      expect(api.getUserSavedAlbumAt).toHaveBeenCalledWith(500);
+      expect(store.selectedAlbum?.id).toBe(album.id);
+    });
+
+    it('picks from the loaded albums without a request when all albums are loaded', async () => {
+      const store = useUserSavedAlbumsStore();
+      const albums = [generateAlbum(), generateAlbum()];
+      store.addAlbums(albums);
+      store.setTotalAlbums(2);
+
+      await store.pickRandomAlbum();
+
+      expect(api.getUserSavedAlbumAt).not.toHaveBeenCalled();
+      expect(albums.map((album) => album.id)).toContain(store.selectedAlbum?.id);
+    });
+
+    it('does not pick the same offset twice in a row', async () => {
+      const store = useUserSavedAlbumsStore();
+      store.setTotalAlbums(10);
+      (api.getUserSavedAlbumAt as any).mockImplementation(async () => ({
         items: [{ album: generateAlbum() }],
-        total: 3,
-        next: 'https://page-2'
+        total: 10
+      }));
+      vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      await store.pickRandomAlbum();
+      await store.pickRandomAlbum();
+
+      const offsets = (api.getUserSavedAlbumAt as any).mock.calls.map(
+        ([offset]: [number]) => offset
+      );
+      expect(offsets[0]).not.toBe(offsets[1]);
+    });
+
+    it('fetches the next offset when the random album is the current one', async () => {
+      const store = useUserSavedAlbumsStore();
+      const current = generateAlbum();
+      const other = generateAlbum();
+      store.setSelectedAlbum(current);
+      store.setTotalAlbums(10);
+      (api.getUserSavedAlbumAt as any)
+        .mockResolvedValueOnce({ items: [{ album: current }], total: 10 })
+        .mockResolvedValueOnce({ items: [{ album: other }], total: 10 });
+      vi.spyOn(Math, 'random').mockReturnValue(0.3);
+
+      await store.pickRandomAlbum();
+
+      expect((api.getUserSavedAlbumAt as any).mock.calls).toEqual([[3], [4]]);
+      expect(store.selectedAlbum?.id).toBe(other.id);
+    });
+
+    it('keeps the total in sync with the response', async () => {
+      const store = useUserSavedAlbumsStore();
+      store.setTotalAlbums(10);
+      (api.getUserSavedAlbumAt as any).mockResolvedValue({
+        items: [{ album: generateAlbum() }],
+        total: 12
       });
-      await store.fetchUserSavedAlbums();
 
-      let resolvePage2!: (value: unknown) => void;
-      (api.getNextUserSavedAlbums as any)
-        .mockImplementationOnce(() => new Promise((resolve) => (resolvePage2 = resolve)))
-        .mockResolvedValueOnce({ items: [{ album: generateAlbum() }], next: null });
-      (api.getUserSavedAlbums as any).mockResolvedValue({
-        items: store.albums.map((album) => ({ album })),
-        total: 3,
-        next: 'https://page-2'
-      });
-
-      // A scroll-triggered request is in flight when "Play Random" starts fetching everything
-      const scrollFetch = store.fetchNextUserSavedAlbums();
-      const fetchAll = store.fetchAllUserSavedAlbums();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      resolvePage2({ items: [{ album: generateAlbum() }], next: 'https://page-3' });
-
-      await Promise.all([scrollFetch, fetchAll]);
-      expect(store.albums).toHaveLength(3);
-      expect(store.hasNext).toBe(false);
-    }, 1000);
+      await store.pickRandomAlbum();
+      expect(store.totalAlbums).toBe(12);
+    });
   });
 });

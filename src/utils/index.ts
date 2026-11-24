@@ -65,3 +65,15 @@ export function resetAccessToken(): void {
   removeCookie('expiresIn');
   removeCookie('verifier');
 }
+
+/**
+ * Returns a random index in [0, total). When `exclude` is given and there is more than one
+ * choice, that index is never returned, so the same item isn't picked twice in a row.
+ */
+export function randomOffset(total: number, exclude: number | null = null): number {
+  if (exclude === null || exclude < 0 || exclude >= total || total <= 1) {
+    return Math.floor(Math.random() * total);
+  }
+  const offset = Math.floor(Math.random() * (total - 1));
+  return offset >= exclude ? offset + 1 : offset;
+}

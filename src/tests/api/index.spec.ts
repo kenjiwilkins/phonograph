@@ -90,4 +90,34 @@ describe('api', () => {
     expect(result).toEqual(mockData);
     expect(mockInstance.get).toHaveBeenCalledWith(mockUrl);
   });
+
+  test('getUserSavedAlbumAt (#120)', async () => {
+    const mockData = { items: [], total: 10 };
+    const mockInstance = (axios.create as any)();
+    mockInstance.get.mockResolvedValue({ data: mockData });
+
+    const result = await api.getUserSavedAlbumAt(7);
+    expect(result).toEqual(mockData);
+    expect(mockInstance.get).toHaveBeenCalledWith('/me/albums', {
+      params: { offset: 7, limit: 1 }
+    });
+  });
+
+  test('getPlaylistTrackAt (#120)', async () => {
+    const mockData = { items: [], total: 10 };
+    const mockInstance = (axios.create as any)();
+    mockInstance.get.mockResolvedValue({ data: mockData });
+
+    const result = await api.getPlaylistTrackAt(
+      'https://api.spotify.com/v1/playlists/abc/tracks',
+      3
+    );
+    expect(result).toEqual(mockData);
+    expect(mockInstance.get).toHaveBeenCalledWith(
+      'https://api.spotify.com/v1/playlists/abc/tracks',
+      {
+        params: { offset: 3, limit: 1 }
+      }
+    );
+  });
 });

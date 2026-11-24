@@ -47,6 +47,12 @@ export async function getUserSavedAlbums() {
   return data;
 }
 
+/** Fetches the single saved album at `offset`. Used to pick a random album without loading all of them. */
+export async function getUserSavedAlbumAt(offset: number) {
+  const { data } = await request.get('/me/albums', { params: { offset, limit: 1 } });
+  return data;
+}
+
 export async function getNextUserSavedAlbums(url: string) {
   const { data } = await request.get(url);
   return data;
@@ -64,5 +70,11 @@ export async function getNextUserSavedPlaylists(url: string) {
 
 export async function getTracks(url: string) {
   const { data } = await request.get(url);
+  return data;
+}
+
+/** Fetches the single playlist item at `offset` from a playlist's tracks endpoint. */
+export async function getPlaylistTrackAt(tracksUrl: string, offset: number) {
+  const { data } = await request.get(tracksUrl, { params: { offset, limit: 1 } });
   return data;
 }

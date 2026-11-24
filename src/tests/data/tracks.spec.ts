@@ -235,71 +235,64 @@ describe('TracksStore', () => {
       expect(store.nextUrl).toBe(mockTracksResponse.next);
       expect(getTracksSpy).toHaveBeenCalledWith('http://api.spotify.com/v1/me/tracks?offset=2');
     });
+  });
 
-    it('should fetch all tracks', async () => {
+  describe('pickRandomTrack (#120)', () => {
+    const playlistTracksUrl = 'https://api.spotify.com/v1/playlists/abc/tracks';
+
+    it('fetches a single track at a random offset when not all tracks are loaded', async () => {
       const store = useTracksStore();
-      store.setNextUrl('http://api.spotify.com/v1/me/tracks');
-      // fetchAllTracks requires existing tracks to proceed
-      store.addTracks([generateTrack()]);
+      store.setTracksUrl(playlistTracksUrl);
+      store.setTotalTracks(200);
+      const track = generateTrack();
+      const spy = vi
+        .spyOn(api, 'getPlaylistTrackAt')
+        .mockResolvedValue({ items: [{ track }], total: 200 });
+      vi.spyOn(Math, 'random').mockReturnValue(0.25);
 
-      // First call returns data and a next URL
-      const firstResponse = {
-        ...mockTracksResponse,
-        next: 'http://api.spotify.com/v1/me/tracks?offset=2'
-      };
-      // Second call returns data and no next URL
-      const secondResponse = { ...mockTracksResponse, next: null };
+      await store.pickRandomTrack();
 
-      const getTracksSpy = vi
-        .spyOn(api, 'getTracks')
-        .mockResolvedValueOnce(firstResponse)
-        .mockResolvedValueOnce(secondResponse);
-
-      await store.fetchAllTracks();
-
-      expect(getTracksSpy).toHaveBeenCalledTimes(2);
-      // 1 initial + 2 from first response + 2 from second response = 5
-      expect(store.tracks).toHaveLength(5);
-      expect(store.nextUrl).toBe('');
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(playlistTracksUrl, 50);
+      expect(store.selectedTrack?.id).toBe(track.id);
     });
 
-    it('should reject when user cancels (selectedTrack set)', async () => {
+    it('picks from the loaded tracks without a request when all tracks are loaded', async () => {
       const store = useTracksStore();
-      store.setNextUrl('http://api.spotify.com/v1/me/tracks');
-      store.addTracks([generateTrack()]); // Add initial tracks
+      const tracks = [generateTrack(), generateTrack()];
+      store.setTracksUrl(playlistTracksUrl);
+      store.addTracks(tracks);
+      store.setTotalTracks(2);
+      const spy = vi.spyOn(api, 'getPlaylistTrackAt');
 
-      vi.spyOn(api, 'getTracks').mockImplementation(async () => {
-        store.setSelectedTrack(generateTrack()); // Simulate user selection during fetch
-        return mockTracksResponse;
-      });
+      await store.pickRandomTrack();
 
-      await expect(store.fetchAllTracks()).rejects.toBe('User cancelled');
+      expect(spy).not.toHaveBeenCalled();
+      expect(tracks.map((track) => track.id)).toContain(store.selectedTrack?.id);
     });
 
-    it('should fetch all tracks starting with empty list', async () => {
+    it('tries another offset when the item has no track (removed track)', async () => {
       const store = useTracksStore();
-      store.setNextUrl('http://api.spotify.com/v1/me/tracks');
-      // Ensure tracks is empty
-      expect(store.tracks).toHaveLength(0);
+      store.setTracksUrl(playlistTracksUrl);
+      store.setTotalTracks(10);
+      const track = generateTrack();
+      const spy = vi
+        .spyOn(api, 'getPlaylistTrackAt')
+        .mockResolvedValueOnce({ items: [{ track: null }], total: 10 })
+        .mockResolvedValueOnce({ items: [{ track }], total: 10 });
+      vi.spyOn(Math, 'random').mockReturnValue(0);
 
-      // First call returns data and a next URL
-      const firstResponse = {
-        ...mockTracksResponse,
-        next: 'http://api.spotify.com/v1/me/tracks?offset=2'
-      };
-      // Second call returns data and no next URL
-      const secondResponse = { ...mockTracksResponse, next: null };
+      await store.pickRandomTrack();
 
-      const getTracksSpy = vi
-        .spyOn(api, 'getTracks')
-        .mockResolvedValueOnce(firstResponse)
-        .mockResolvedValueOnce(secondResponse);
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(store.selectedTrack?.id).toBe(track.id);
+    });
 
-      await store.fetchAllTracks();
-
-      expect(getTracksSpy).toHaveBeenCalledTimes(2);
-      expect(store.tracks).toHaveLength(4);
-      expect(store.nextUrl).toBe('');
+    it('resets the tracks url with clearAllStates', () => {
+      const store = useTracksStore();
+      store.setTracksUrl(playlistTracksUrl);
+      store.clearAllStates();
+      expect(store.tracksUrl).toBe('');
     });
   });
 });

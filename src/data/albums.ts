@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
 import { Album, UserSavedAlbumsItem } from '../types';
-import { getUserSavedAlbums, getNextUserSavedAlbums } from '../api';
+import { getUserSavedAlbums, getNextUserSavedAlbums, getUserSavedAlbumAt } from '../api';
+import { randomOffset } from '../utils';
 
 // The request currently loading a page. Callers that arrive while it is loading wait for it
-// instead of returning early, so loops such as fetchAllUserSavedAlbums never spin.
+// instead of returning early.
 let inFlightRequest: Promise<void> | null = null;
 
 export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
@@ -13,7 +14,8 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     hasNext: false,
     isLoading: false,
     nextUrl: '',
-    totalAlbums: 0
+    totalAlbums: 0,
+    lastRandomOffset: null as number | null
   }),
   actions: {
     clearAllStates() {
@@ -24,6 +26,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       this.isLoading = false;
       this.nextUrl = '';
       this.totalAlbums = 0;
+      this.lastRandomOffset = null;
     },
     addAlbums(albums: Album[]) {
       const knownIds = new Set(this.albums.map((album) => album.id));
@@ -111,21 +114,28 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       })();
       return inFlightRequest;
     },
-    async fetchAllUserSavedAlbums() {
-      try {
-        await this.fetchUserSavedAlbums();
-        while (this.hasNext) {
-          if (this.selectedAlbum || this.albums.length === 0) {
-            return Promise.reject('User cancelled');
-          }
-          await this.fetchNextUserSavedAlbums();
-        }
-        this.setHasNext(false);
-        this.setNextUrl('');
-      } catch (error) {
-        console.log(error);
-        return Promise.reject(error);
+    /**
+     * Selects a random saved album. When not every album is loaded yet, only the album at a
+     * random offset is fetched (one request) instead of loading the whole library.
+     */
+    async pickRandomAlbum() {
+      if (this.albums.length >= this.totalAlbums) {
+        this.setSelectedAlbumRandomly();
+        return;
       }
+      let offset = randomOffset(this.totalAlbums, this.lastRandomOffset);
+      let data = await getUserSavedAlbumAt(offset);
+      let album: Album | undefined = data.items[0]?.album;
+      // The album may have been selected from the list, so its offset isn't known up front
+      if (album && album.id === this.selectedAlbum?.id && data.total > 1) {
+        offset = (offset + 1) % data.total;
+        data = await getUserSavedAlbumAt(offset);
+        album = data.items[0]?.album;
+      }
+      this.setTotalAlbums(data.total);
+      if (!album) return;
+      this.lastRandomOffset = offset;
+      this.setSelectedAlbum(album);
     }
   }
 });

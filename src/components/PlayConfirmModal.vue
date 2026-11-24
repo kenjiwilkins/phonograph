@@ -115,11 +115,15 @@ function play() {
     location.href = url;
   }
 }
-function next() {
-  if (selectedAlbum.value) {
-    userSavedAlbums.setSelectedAlbumRandomly();
-  } else if (selectedTrack.value) {
-    tracksStore.setSelectedTrackRandomly();
+async function next() {
+  try {
+    if (selectedAlbum.value) {
+      await userSavedAlbums.pickRandomAlbum();
+    } else if (selectedTrack.value) {
+      await tracksStore.pickRandomTrack();
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 function close() {
