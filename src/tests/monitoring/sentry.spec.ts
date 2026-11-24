@@ -21,8 +21,18 @@ describe('Sentry options (#129)', () => {
     });
   });
 
-  test('does not send personal data by default', () => {
-    expect(getSentryOptions({ production: true }).sendDefaultPii).toBe(false);
+  test('does not send personal data (Sentry 11 collects it unless told otherwise)', () => {
+    const { dataCollection } = getSentryOptions({ production: true });
+    expect(dataCollection.userInfo).toBe(false);
+    expect(dataCollection.cookies).toBe(false);
+    expect(dataCollection.httpBodies).toEqual([]);
+    expect(dataCollection.httpHeaders).toEqual({
+      request: { deny: expect.arrayContaining(['-ip', '-user']) },
+      response: { deny: expect.arrayContaining(['-ip', '-user']) }
+    });
+    expect(dataCollection.urlQueryParams).toEqual({
+      deny: expect.arrayContaining(['-ip', '-user'])
+    });
   });
 
   test('is disabled outside production builds', () => {
