@@ -53,9 +53,13 @@ describe('AppBar', () => {
     expect(getByTestId('login-button').textContent).toContain('Login');
   });
   test('renders correctly with logged in', async () => {
-    const { getByTestId, getByAltText } = renderLoggedIn();
-    expect(getByTestId('user-button').textContent).toContain('test');
-    getByAltText('test');
+    const { getByTestId, queryByRole } = renderLoggedIn();
+    const user = getByTestId('user-button');
+    expect(user.textContent).toContain('test');
+    // The name is shown, so the avatar is decorative and the display has no dead tab stop (#165)
+    expect(user.querySelector('img')?.getAttribute('alt')).toBe('');
+    expect(user.tagName).not.toBe('BUTTON');
+    expect(queryByRole('button')).toBeNull();
   });
 
   test('shows no link status and a LOGIN ghost button when logged out', () => {

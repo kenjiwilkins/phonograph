@@ -13,21 +13,17 @@
       >
         {{ status.label }}
       </span>
-      <button
+      <!-- Shows who is signed in; it has no action, so it isn't a button (no dead tab stop) -->
+      <div
         v-if="loggedIn"
-        type="button"
         class="flex min-w-0 items-center gap-2 font-content text-sm font-bold text-ink"
         data-testid="user-button"
       >
-        <img
-          v-if="avatarUrl"
-          :src="avatarUrl"
-          :alt="user?.display_name"
-          class="pg-cut app-bar__avatar"
-        />
+        <!-- The name is shown next to it, so the avatar is decorative -->
+        <img v-if="avatarUrl" :src="avatarUrl" alt="" class="pg-cut app-bar__avatar" />
         <span v-else class="pg-cut app-bar__avatar" aria-hidden="true"></span>
         <span class="max-w-32 truncate">{{ user?.display_name }}</span>
-      </button>
+      </div>
       <PgButton v-else-if="!syncing" variant="ghost" data-testid="login-button">Login</PgButton>
     </div>
   </header>

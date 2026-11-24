@@ -70,16 +70,10 @@
   --shadow-glow-cyan: var(--glow-cyan);
 }
 
-/* Tailwind 4's OKLCH palette made the app's accent green noticeably different; keep v3's */
-@theme {
-  --color-green-400: #4ade80;
-  --color-green-500: #22c55e;
-}
-
 /*
- * Keep two Tailwind 3 defaults that Tailwind 4 changed (from the official upgrade guide):
- * borders without a color were gray-200 (now currentColor), and buttons and role="button"
- * elements such as the album and playlist rows showed a pointer cursor.
+ * Base rules: borders without a color use the `line` hairline (Tailwind 4 would use
+ * currentColor), buttons show a pointer cursor as in Tailwind 3, and keyboard focus is a 2px
+ * cyan outline everywhere.
  */
 @layer base {
   *,
@@ -87,7 +81,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--line);
   }
 
   button:not(:disabled),
@@ -101,31 +95,7 @@
   }
 }
 
-/* LINESeedSans is the PHONOGRAPH wordmark face only (--font-logo) */
-@font-face {
-  font-family: 'LINESeedSans';
-  font-weight: 400;
-  font-style: normal;
-  font-display: auto;
-  src: url('/src/assets/fonts/LINESeedSans_W_Rg.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'LINESeedSans';
-  font-weight: 700;
-  font-style: normal;
-  font-display: auto;
-  src: url('/src/assets/fonts/LINESeedSans_W_Bd.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'LINESeedSans';
-  font-weight: 300;
-  font-style: normal;
-  font-display: auto;
-  src: url('/src/assets/fonts/LINESeedSans_W_Th.woff2') format('woff2');
-}
-
+/* LINESeedSans is the PHONOGRAPH wordmark face only (--font-logo), always at 900 */
 @font-face {
   font-family: 'LINESeedSans';
   font-weight: 900;
@@ -139,7 +109,7 @@ body {
   font-family: var(--font-content);
   font-size: 16px;
   line-height: 1.5;
-  font-weight: 700;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
