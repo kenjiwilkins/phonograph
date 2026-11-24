@@ -1,21 +1,46 @@
+name: release-please
+
+# Versioning is decided at release time from the Conventional Commits on develop:
+# 1. Every push to develop updates the release PR (version bump + CHANGELOG).
+# 2. Merging the release PR tags vX.Y.Z and creates a GitHub Release.
+# 3. main is fast-forwarded to the release commit, which triggers the Vercel production deploy.
 on:
   push:
     branches:
-      - main
+      - develop
 
 permissions:
   contents: write
   pull-requests: write
 
-name: release-please
+concurrency:
+  group: release-please
+  cancel-in-progress: false
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
+      - id: release
+        uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # A PAT is used so that the release PR triggers CI and main (protected) can be updated.
+          token: ${{ secrets.RELEASE_TOKEN }}
+          target-branch: develop
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-      # Note: This workflow does NOT publish to npm. It only creates a GitHub Release.
+
+      - name: Checkout release commit
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.sha }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Fast-forward main to the release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        # A plain push only succeeds as a fast-forward, so main never loses commits.
+        run: git push origin "${RELEASE_SHA}:refs/heads/main"
