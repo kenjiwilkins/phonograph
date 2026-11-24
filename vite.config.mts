@@ -55,7 +55,8 @@ export default defineConfig({
         name: 'Phonograph - A Spotify Random Album Picker',
         short_name: 'Phonograph',
         description: 'A Spotify Random Album Picker',
-        theme_color: '#ffffff',
+        theme_color: '#05070b',
+        background_color: '#05070b',
         icons: [
           {
             src: 'android-chrome-192x192.png',

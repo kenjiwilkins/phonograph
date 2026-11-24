@@ -43,6 +43,7 @@ const loggedIn = computed(() => userStore.loggedInState);
 <style scoped>
 .glitch {
   position: relative;
+  font-family: var(--font-logo);
   animation: glitch 2s infinite;
 }
 

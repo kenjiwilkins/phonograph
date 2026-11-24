@@ -23,6 +23,9 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fontsource-variable/orbitron": "5.3.0",
+    "@fontsource/line-seed-jp": "5.3.2",
+    "@fontsource/share-tech-mono": "5.3.0",
     "@sentry/vue": "^11.17.0",
     "@vue/devtools-api": "^8.2.1",
     "axios": "^1.16.0",

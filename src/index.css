@@ -1,5 +1,75 @@
 @import 'tailwindcss';
 
+/*
+ * NEON GRID design tokens (#153).
+ * The raw values live on :root so plain CSS can read them (var(--volt)), and @theme inline
+ * maps them into Tailwind utilities (bg-void, text-volt, border-line, shadow-glow-volt ...).
+ */
+:root {
+  --void: #05070b;
+  --surface-100: #0a0e15;
+  --surface-200: #111824;
+  --surface-300: #1a2433;
+  --line: #243246;
+  --line-strong: #56739a;
+  /* ink and ink-muted pass 4.5:1 on every surface; ink-dim only on void and surface-100 */
+  --ink: #e9f3f5;
+  --ink-muted: #8a9bad;
+  --ink-dim: #6f8195;
+  --volt: #f5e60a;
+  --volt-deep: #a39a07;
+  --on-volt: var(--void);
+  --buzz-red: #ff0040;
+  --buzz-mint: #00ff9f;
+  --cyan: #19e3ff;
+  --scrim: rgba(5, 7, 11, 0.84);
+
+  /* cut-corner sizes for clip-path polygons */
+  --chamfer-sm: 8px;
+  --chamfer-md: 12px;
+  --chamfer-lg: 20px;
+
+  /* glows: only on signals */
+  --glow-volt: 0 0 18px rgba(245, 230, 10, 0.35);
+  --glow-mint: 0 0 12px rgba(0, 255, 159, 0.55);
+  --glow-cyan: 0 0 12px rgba(25, 227, 255, 0.45);
+
+  /* buzz timings */
+  --buzz-cycle: 2s;
+  --buzz-channel: 0.5s;
+  --hover-buzz: 180ms;
+}
+
+@theme {
+  --font-logo: 'LINESeedSans', 'LINE Seed JP', sans-serif;
+  --font-ui: 'Orbitron Variable', 'Orbitron', sans-serif;
+  --font-content: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, Menlo, monospace;
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-surface-100: var(--surface-100);
+  --color-surface-200: var(--surface-200);
+  --color-surface-300: var(--surface-300);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-dim: var(--ink-dim);
+  --color-volt: var(--volt);
+  --color-volt-deep: var(--volt-deep);
+  --color-on-volt: var(--on-volt);
+  --color-buzz-red: var(--buzz-red);
+  --color-buzz-mint: var(--buzz-mint);
+  --color-cyan: var(--cyan);
+  --color-scrim: var(--scrim);
+
+  --shadow-glow-volt: var(--glow-volt);
+  --shadow-glow-mint: var(--glow-mint);
+  --shadow-glow-cyan: var(--glow-cyan);
+}
+
 /* Tailwind 4's OKLCH palette made the app's accent green noticeably different; keep v3's */
 @theme {
   --color-green-400: #4ade80;
@@ -24,12 +94,14 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
 }
 
-body {
-  background-color: #030712;
-}
-
+/* LINESeedSans is the PHONOGRAPH wordmark face only (--font-logo) */
 @font-face {
   font-family: 'LINESeedSans';
   font-weight: 400;
@@ -63,7 +135,8 @@ body {
 }
 
 body {
-  font-family: 'LINESeedSans', sans-serif;
+  background-color: var(--void);
+  font-family: var(--font-content);
   font-size: 16px;
   line-height: 1.5;
   font-weight: 700;
@@ -78,20 +151,19 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #111827;
+  background: var(--surface-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 4px;
+  background: var(--line);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: var(--line-strong);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #374151 #111827;
+  scrollbar-color: var(--line) var(--surface-100);
 }

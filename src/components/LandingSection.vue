@@ -33,6 +33,7 @@ const description =
 <style scoped>
 .glitch {
   position: relative;
+  font-family: var(--font-logo);
   animation: glitch 2s infinite;
 }
 
