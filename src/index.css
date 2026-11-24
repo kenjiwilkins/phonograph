@@ -307,3 +307,39 @@ body {
     color: var(--buzz-mint);
   }
 }
+
+/* Skeleton block with a faint volt→cyan sweep (#162); still under reduced motion */
+@layer components {
+  .pg-skel {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-200);
+  }
+
+  .pg-skel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(245, 230, 10, 0.1) 45%,
+      rgba(25, 227, 255, 0.1) 55%,
+      transparent
+    );
+    animation: pg-sweep 1.4s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pg-skel::after {
+      display: none;
+    }
+  }
+}
+
+@keyframes pg-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}

@@ -8,7 +8,11 @@
         <div class="flex items-end justify-between gap-4">
           <div class="min-w-0 flex-1">
             <p class="m-0 whitespace-nowrap" data-testid="play-control-count">
-              <span class="readout__value">{{ readout.loaded }}</span>
+              <span
+                class="readout__value"
+                :class="{ 'readout__value--idle': readout.mode === 'loading' }"
+                >{{ readout.loaded }}</span
+              >
               <span class="readout__total"> / {{ readout.total }}</span>
               <span v-if="readout.summary" class="sr-only">{{ readout.summary }}</span>
             </p>
@@ -165,6 +169,12 @@ async function run(pick: () => Promise<void>) {
   line-height: 32px;
   color: var(--volt);
   text-shadow: var(--glow-volt);
+}
+
+/* nothing loaded yet: the dashes stay quiet instead of glowing volt */
+.readout__value--idle {
+  color: var(--ink-dim);
+  text-shadow: none;
 }
 
 .readout__total {

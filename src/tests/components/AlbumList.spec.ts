@@ -31,6 +31,8 @@ describe('AlbumList', () => {
     });
     expect(getByTestId('content-placeholder')).toBeTruthy();
     expect(getByTestId('loading')).toBeTruthy();
+    // The next-page indicator is one skeleton row, not text
+    expect(getByTestId('loading-row').querySelectorAll('li')).toHaveLength(1);
   });
   test('renders correctly - has albums', () => {
     const ALBUMS_LENGTH = 10;

@@ -83,4 +83,19 @@ describe('App', () => {
 
     expect(await findByText('Loading...')).toBeTruthy();
   });
+
+  test('shows the skeleton list and SYNC instead of a spinner while the profile loads (#162)', async () => {
+    (auth.useAuth as any).mockResolvedValue({ isAuthenticated: true, accessToken: 'mock-token' });
+
+    const { findByTestId, getByTestId, container } = render(App, {
+      global: {
+        plugins: [createTestingPinia({ initialState: { user: { user: null } } })]
+      }
+    });
+
+    const loading = await findByTestId('app-loading');
+    expect(loading.querySelector('[data-testid="content-placeholder"]')).not.toBeNull();
+    expect(getByTestId('link-status').textContent?.trim()).toBe('Sync');
+    expect(container.querySelector('.animate-spin')).toBeNull();
+  });
 });

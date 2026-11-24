@@ -28,7 +28,7 @@
         <span v-else class="pg-cut app-bar__avatar" aria-hidden="true"></span>
         <span class="max-w-32 truncate">{{ user?.display_name }}</span>
       </button>
-      <PgButton v-else variant="ghost" data-testid="login-button">Login</PgButton>
+      <PgButton v-else-if="!syncing" variant="ghost" data-testid="login-button">Login</PgButton>
     </div>
   </header>
 </template>
@@ -38,6 +38,11 @@ import { useUserStore, useUserSavedAlbumsStore } from '../data';
 import { getImageUrl } from '@/utils';
 import PhonographLogo from './PhonographLogo.vue';
 import PgButton from './PgButton.vue';
+
+const props = defineProps<{
+  /** Authenticated, but the user profile is still loading: show SYNC instead of LOGIN */
+  syncing?: boolean;
+}>();
 
 // store
 const userStore = useUserStore();
@@ -50,11 +55,14 @@ const avatarUrl = computed(() => getImageUrl(user.value?.images, 28));
 
 /**
  * Link status derived from the existing stores: LINK OK once the user is loaded, SYNC while the
- * saved albums are loading. The stores can't tell an auth error apart from not being logged in
- * yet, so there is no LINK LOST state; logged out shows no status.
+ * saved albums are loading (or, via the syncing prop, while the user profile loads). The stores
+ * can't tell an auth error apart from not being logged in yet, so there is no LINK LOST state;
+ * logged out shows no status.
  */
 const status = computed(() => {
-  if (!loggedIn.value) return null;
+  if (!loggedIn.value) {
+    return props.syncing ? ({ label: 'Sync', tone: 'sync' } as const) : null;
+  }
   if (userSavedAlbums.isLoading) return { label: 'Sync', tone: 'sync' } as const;
   return { label: 'Link ok', tone: 'ok' } as const;
 });

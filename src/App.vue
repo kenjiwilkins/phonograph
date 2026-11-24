@@ -5,7 +5,7 @@
     </template>
     <template v-else>
       <div class="h-full w-full bg-gray-950 text-white">
-        <app-bar />
+        <app-bar :syncing="!isLoggedIn" />
         <main class="min-h-full w-full overflow-x-hidden" v-if="isLoggedIn">
           <playlist-header v-if="isShowTrackList" />
           <play-control-area />
@@ -13,11 +13,11 @@
           <playlist-list v-if="isPlaylistTab && !isShowTrackList" />
           <track-list v-if="isShowTrackList" />
         </main>
-        <main v-else class="flex h-screen w-full flex-col items-center justify-center pb-16">
-          <p class="sr-only">Loading...</p>
-          <div
-            class="box-border inline-block h-8 w-8 animate-spin rounded-full border border-solid border-white border-b-green-500"
-          />
+        <!-- Authenticated, user profile still loading: the same screen as a loading library -->
+        <main v-else class="min-h-full w-full overflow-x-hidden" data-testid="app-loading">
+          <p class="sr-only" role="status">Loading...</p>
+          <play-control-area />
+          <content-placeholder />
         </main>
         <play-confirm-modal />
         <app-footer />
@@ -36,6 +36,7 @@ import PlaylistList from './components/PlaylistList.vue';
 import TrackList from './components/TrackList.vue';
 import PlayConfirmModal from './components/PlayConfirmModal.vue';
 import AppFooter from './components/AppFooter.vue';
+import ContentPlaceholder from './components/ContentPlaceholder.vue';
 import { useAuth } from './auth';
 import {
   useUserStore,
