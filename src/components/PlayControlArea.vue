@@ -13,7 +13,7 @@
       <div class="flex justify-end">
         <button
           :class="fetching ? 'border-gray-700 text-gray-700' : 'border-white text-white'"
-          class="flex gap-1 rounded border p-2"
+          class="flex gap-1 rounded-sm border p-2"
           @click="playRandomAlbum"
           :disabled="fetching"
           data-testid="play-control-album-button"
@@ -62,7 +62,7 @@
       <div class="flex justify-end">
         <button
           :class="fetching ? 'border-gray-700 text-gray-700' : 'border-white text-white'"
-          class="flex gap-1 rounded border p-2"
+          class="flex gap-1 rounded-sm border p-2"
           @click="playRandomTrackAlbum"
           :disabled="fetching"
           data-testid="play-control-track-button"
@@ -91,7 +91,7 @@
       </div>
       <div v-if="!isPlaylistSelected" class="flex justify-end">
         <button
-          class="flex gap-1 rounded border border-gray-500 bg-gray-500 p-2"
+          class="flex gap-1 rounded-sm border border-gray-500 bg-gray-500 p-2"
           data-testid="play-control-track-button"
         >
           <svg

@@ -24,7 +24,7 @@
           {{ playlist.name }}
         </p>
         <p
-          class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin"
+          class="text-md overflow-x-hidden font-thin text-ellipsis whitespace-nowrap"
           :data-testid="`playlist-li-playlist-total-${index}`"
         >
           <template v-if="getPlaylistItems(playlist)">
