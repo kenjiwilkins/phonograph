@@ -1100,6 +1100,21 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-10.6.0.tgz#b6b0248f0f59e0ac69ad6803167d58bb824f929d"
   integrity sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==
 
+"@fontsource-variable/orbitron@5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/orbitron/-/orbitron-5.3.0.tgz#2430145895ddde4f2863e0c97821a3d686c846ad"
+  integrity sha512-KwW0YX1DJNqF0v86W1hZonuauypCFaltGdpB6qwCeu5bUyHoFpeZ84aAjChZSRF7RWZFithg/il0nMwYxJgqDA==
+
+"@fontsource/line-seed-jp@5.3.2":
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/@fontsource/line-seed-jp/-/line-seed-jp-5.3.2.tgz#ff6a928f79ea0ff8688c71aa9ab20627ad70e71e"
+  integrity sha512-ng/gMt1yI9EAU0TlBcDtBuQAy8fB0FAvjxW3JY9NnYSN3CJgqkciMcEAldt/N0yUC4C4Oai4oeLzU9PYqyeghQ==
+
+"@fontsource/share-tech-mono@5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@fontsource/share-tech-mono/-/share-tech-mono-5.3.0.tgz#21a8f64d1c5130bef4b1541d40759a1fc02c03a3"
+  integrity sha512-hVEzVCzEid/fBfhggMyvkfDzn9ODrMihxC0EiOeQK3BuQNvdjmith2ERnoDNUkbW8zhufbKNuCgaSoT8LUNpuQ==
+
 "@humanfs/core@^0.19.2":
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.2.tgz#a8272ca03b2acf492670222b2320b6c421bfde60"
