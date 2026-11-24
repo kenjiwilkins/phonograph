@@ -166,4 +166,90 @@ describe('PlayControlArea', () => {
     await fireEvent.click(button);
     expect(button.textContent).toContain('Loading');
   });
+
+  test('shows the album readout padded to four digits with a meter (#159)', () => {
+    const { getByTestId } = render(PlayControlArea, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: {
+              tab: { currentTab: TabType.ALBUM },
+              userSavedAlbums: { albums: generateAlbums(12), totalAlbums: 48 }
+            }
+          })
+        ]
+      }
+    });
+    expect(getByTestId('play-control-label').textContent).toBe('// 01 Library.albums');
+    const count = getByTestId('play-control-count').textContent ?? '';
+    expect(count).toContain('0012');
+    expect(count).toContain('/ 0048');
+    expect(count).toContain('12 of 48 albums loaded');
+    expect(getByTestId('play-control-meter').style.width).toBe('25%');
+    const button = getByTestId('play-control-album-button');
+    expect(button.classList).toContain('pg-btn--primary');
+    expect(button.textContent).toContain('Play random');
+  });
+
+  test('shows the playlist readout without a play button (#159)', () => {
+    const { getByTestId, queryByRole } = render(PlayControlArea, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: {
+              tab: { currentTab: TabType.PLAYLIST },
+              userSavedPlaylists: { playlists: generatePlaylists(3), totalPlaylists: 3 }
+            }
+          })
+        ]
+      }
+    });
+    expect(getByTestId('play-control-label').textContent).toBe('// 02 Library.playlists');
+    expect(getByTestId('play-control-count').textContent).toContain('0003');
+    expect(getByTestId('play-control-meter').style.width).toBe('100%');
+    expect(queryByRole('button')).toBeNull();
+  });
+
+  test('shows the track readout label (#159)', () => {
+    const { getByTestId } = render(PlayControlArea, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: {
+              tab: { currentTab: TabType.PLAYLIST },
+              tracks: { tracks: [generateTrack()], totalTracks: 7 }
+            }
+          })
+        ]
+      }
+    });
+    expect(getByTestId('play-control-label').textContent).toBe('// 03 Playlist.tracks');
+    expect(getByTestId('play-control-count').textContent).toContain('0001');
+    expect(getByTestId('play-control-count').textContent).toContain('/ 0007');
+  });
+
+  test('shows dashes and a loading button before albums load (#159)', () => {
+    const { getByTestId } = render(PlayControlArea, {
+      global: {
+        plugins: [createTestingPinia({ initialState: { tab: { currentTab: TabType.ALBUM } } })]
+      }
+    });
+    expect(getByTestId('play-control-track')).toBeTruthy();
+    expect(getByTestId('play-control-count').textContent).toContain('---- / ----');
+    expect(getByTestId('play-control-meter').style.width).toBe('0%');
+    const button = getByTestId('play-control-track-button');
+    expect(button.textContent).toContain('Loading');
+    expect(button.hasAttribute('disabled')).toBe(true);
+  });
+
+  test('shows dashes without a button while playlists load (#159)', () => {
+    const { getByTestId, queryByRole } = render(PlayControlArea, {
+      global: {
+        plugins: [createTestingPinia({ initialState: { tab: { currentTab: TabType.PLAYLIST } } })]
+      }
+    });
+    expect(getByTestId('play-control-label').textContent).toBe('// 02 Library.playlists');
+    expect(getByTestId('play-control-count').textContent).toContain('---- / ----');
+    expect(queryByRole('button')).toBeNull();
+  });
 });
