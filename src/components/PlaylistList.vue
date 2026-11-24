@@ -51,6 +51,7 @@ const hasSavedPlaylists = computed(() => savedPlaylists.value.length > 0);
 // methods
 function selectPlaylist(playlist: Playlist) {
   tracksStore.setNextUrl(playlist.tracks.href);
+  tracksStore.setTracksUrl(playlist.tracks.href);
   tracksStore.setTotalTracks(playlist.tracks.total);
   userSavedPlaylists.setSelectedPlaylist(playlist);
 }

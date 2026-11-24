@@ -142,40 +142,24 @@ const isPlaylistSelected = computed(() => tabStore.currentTab === TabType.PLAYLI
 
 async function playRandomAlbum() {
   if (fetching.value) return;
-  if (albumsCount.value >= totalAlbums.value) {
-    userSavedAlbums.setSelectedAlbumRandomly();
-    return;
-  }
   try {
     fetching.value = true;
-    await userSavedAlbums.fetchAllUserSavedAlbums();
-    fetching.value = false;
+    await userSavedAlbums.pickRandomAlbum();
   } catch (error) {
-    if (error) {
-      console.log(error);
-    }
+    console.error(error);
+  } finally {
     fetching.value = false;
-    return;
   }
-  return userSavedAlbums.setSelectedAlbumRandomly();
 }
 async function playRandomTrackAlbum() {
   if (fetching.value) return;
-  if (tracksCount.value >= totalTracks.value) {
-    trackStore.setSelectedTrackRandomly();
-    return;
-  }
   try {
     fetching.value = true;
-    await trackStore.fetchAllTracks();
-    fetching.value = false;
+    await trackStore.pickRandomTrack();
   } catch (error) {
-    if (error) {
-      console.log(error);
-    }
+    console.error(error);
+  } finally {
     fetching.value = false;
-    return;
   }
-  return trackStore.setSelectedTrackRandomly();
 }
 </script>
