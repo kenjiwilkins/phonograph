@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.5.0](https://github.com/kenjiwilkins/phonograph/compare/v1.4.1...v1.5.0) (2026-11-24)
+
+
+### Features
+
+* **ui:** add cut-corner primitives and PgButton ([0b88776](https://github.com/kenjiwilkins/phonograph/commit/0b88776c19270252853f21db4b6721da8d378995)), closes [#156](https://github.com/kenjiwilkins/phonograph/issues/156)
+* **ui:** add cut-corner primitives and PgButton ([#178](https://github.com/kenjiwilkins/phonograph/issues/178)) ([d0dde2d](https://github.com/kenjiwilkins/phonograph/commit/d0dde2d1e80c1eee280879b24afc6e3ce5d8d7d3))
+* **ui:** add library readout to play control area ([7597ccc](https://github.com/kenjiwilkins/phonograph/commit/7597ccc802cf86558299a8831580a7f2f6983e58)), closes [#159](https://github.com/kenjiwilkins/phonograph/issues/159)
+* **ui:** add library readout to play control area ([#181](https://github.com/kenjiwilkins/phonograph/issues/181)) ([f14dfd3](https://github.com/kenjiwilkins/phonograph/commit/f14dfd3b1f0c36a7ec89148204c32d7367fc61bc))
+* **ui:** add MediaRow and apply to album list ([8e8e702](https://github.com/kenjiwilkins/phonograph/commit/8e8e702f0606100d2637d9706e1d394043079c01)), closes [#160](https://github.com/kenjiwilkins/phonograph/issues/160)
+* **ui:** add MediaRow and apply to album list ([#182](https://github.com/kenjiwilkins/phonograph/issues/182)) ([84d4c49](https://github.com/kenjiwilkins/phonograph/commit/84d4c49cae5280d150e5b2ca3528d1b18ad74393))
+* **ui:** add NEON GRID design tokens and self-hosted fonts ([b63f5f0](https://github.com/kenjiwilkins/phonograph/commit/b63f5f0a041bca4bd125cadc5b1a7a8ef47b5c8b)), closes [#154](https://github.com/kenjiwilkins/phonograph/issues/154)
+* **ui:** add NEON GRID design tokens and self-hosted fonts ([#175](https://github.com/kenjiwilkins/phonograph/issues/175)) ([d65c132](https://github.com/kenjiwilkins/phonograph/commit/d65c132e674db29131c3d8a406248ef7a1c83154))
+* **ui:** apply MediaRow to playlists and tracks ([6240863](https://github.com/kenjiwilkins/phonograph/commit/62408634da63bd02934f17ebff89ad42268f0685)), closes [#161](https://github.com/kenjiwilkins/phonograph/issues/161)
+* **ui:** apply MediaRow to playlists and tracks ([#183](https://github.com/kenjiwilkins/phonograph/issues/183)) ([e5637fc](https://github.com/kenjiwilkins/phonograph/commit/e5637fccb8ecc17914dfdb2cfd6956998c03abdd))
+* **ui:** extract PhonographLogo with buzz animation ([923ec27](https://github.com/kenjiwilkins/phonograph/commit/923ec2737a3efc6c569f886f1a0befbfd70173ea)), closes [#155](https://github.com/kenjiwilkins/phonograph/issues/155)
+* **ui:** extract PhonographLogo with buzz animation ([#177](https://github.com/kenjiwilkins/phonograph/issues/177)) ([a8ae3fd](https://github.com/kenjiwilkins/phonograph/commit/a8ae3fdff3f52d78772e1398fcbdbc9776cdef9e))
+* **ui:** redesign app bar ([3b45ccd](https://github.com/kenjiwilkins/phonograph/commit/3b45ccd8e5a9fef81f1a7844ccded3edd4de9dfd)), closes [#157](https://github.com/kenjiwilkins/phonograph/issues/157)
+* **ui:** redesign app bar ([#179](https://github.com/kenjiwilkins/phonograph/issues/179)) ([c2c1852](https://github.com/kenjiwilkins/phonograph/commit/c2c185204e58bfcf48bfb123e503dd5fb8139efa))
+* **ui:** redesign bottom tab bar ([9903729](https://github.com/kenjiwilkins/phonograph/commit/9903729c715e937076dda997e822fda19ffb6ecd)), closes [#158](https://github.com/kenjiwilkins/phonograph/issues/158)
+* **ui:** redesign bottom tab bar ([#180](https://github.com/kenjiwilkins/phonograph/issues/180)) ([45cae47](https://github.com/kenjiwilkins/phonograph/commit/45cae4738c58f5ca99bd379dc04e6edcf9709d8b))
+* **ui:** redesign landing page ([956d493](https://github.com/kenjiwilkins/phonograph/commit/956d493aaf9a20f901db1103e6d706c08e48554e)), closes [#164](https://github.com/kenjiwilkins/phonograph/issues/164)
+* **ui:** redesign landing page ([#186](https://github.com/kenjiwilkins/phonograph/issues/186)) ([7d28832](https://github.com/kenjiwilkins/phonograph/commit/7d28832a0368b8d5b2f5b940cfb32cab756483a8))
+* **ui:** redesign play confirm sheet ([333dda2](https://github.com/kenjiwilkins/phonograph/commit/333dda2e5a16db064ecd4ed39f20607159b9ebba)), closes [#163](https://github.com/kenjiwilkins/phonograph/issues/163)
+* **ui:** redesign play confirm sheet ([#185](https://github.com/kenjiwilkins/phonograph/issues/185)) ([fb1857c](https://github.com/kenjiwilkins/phonograph/commit/fb1857cda0475a1829532f9c3917995d84f1fe55))
+* **ui:** replace loading states with skeleton sweep ([99454d8](https://github.com/kenjiwilkins/phonograph/commit/99454d81f228b90f650a4df89377d15ec445c229)), closes [#162](https://github.com/kenjiwilkins/phonograph/issues/162)
+* **ui:** replace loading states with skeleton sweep ([#184](https://github.com/kenjiwilkins/phonograph/issues/184)) ([1662f4f](https://github.com/kenjiwilkins/phonograph/commit/1662f4fa5ec2268424cfe914b7f3cce8d73b2ca9))
+
 ## [1.4.1](https://github.com/kenjiwilkins/phonograph/compare/v1.4.0...v1.4.1) (2026-11-24)
 
 
