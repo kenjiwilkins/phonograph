@@ -3,9 +3,7 @@
     class="flex min-h-screen w-full flex-col items-center justify-center bg-gray-950 text-white"
   >
     <div class="flex max-w-4xl flex-col items-center justify-center px-6 text-center">
-      <h1 class="glitch mb-8 text-4xl font-bold sm:text-5xl md:text-6xl" data-text="PHONOGRAPH">
-        PHONOGRAPH
-      </h1>
+      <PhonographLogo size="xl" surge class="mb-8" />
       <p class="mb-12 text-xl whitespace-pre-wrap text-gray-300">
         {{ description }}
       </p>
@@ -26,88 +24,7 @@
 <script setup lang="ts">
 import { getAuth } from '@/auth';
 import GitHubButton from './GitHubButton.vue';
+import PhonographLogo from './PhonographLogo.vue';
 const description =
   'Your personal music companion.\n Discover, organize, and enjoy your favorite tracks.';
 </script>
-
-<style scoped>
-.glitch {
-  position: relative;
-  font-family: var(--font-logo);
-  animation: glitch 2s infinite;
-}
-
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.glitch::before {
-  animation: glitch-1 0.5s infinite;
-  color: #ff0040;
-  z-index: -1;
-}
-
-.glitch::after {
-  animation: glitch-2 0.5s infinite;
-  color: #00ff9f;
-  z-index: -2;
-}
-
-@keyframes glitch {
-  0%,
-  74%,
-  100% {
-    transform: translate(0);
-  }
-  75% {
-    transform: translate(-2px, 2px);
-  }
-  76% {
-    transform: translate(2px, -2px);
-  }
-  77% {
-    transform: translate(-2px, -2px);
-  }
-  78% {
-    transform: translate(2px, 2px);
-  }
-  79% {
-    transform: translate(-2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
-}
-
-@keyframes glitch-1 {
-  0%,
-  74%,
-  100% {
-    transform: translate(0);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
-  75% {
-    transform: translate(-2px, 2px);
-    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-  }
-}
-
-@keyframes glitch-2 {
-  0%,
-  74%,
-  100% {
-    transform: translate(0);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
-  75% {
-    transform: translate(2px, -2px);
-    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-  }
-}
-</style>
