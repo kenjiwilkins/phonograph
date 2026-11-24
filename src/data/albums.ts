@@ -1,7 +1,16 @@
 import { defineStore } from 'pinia';
-import { Album, UserSavedAlbumsItem } from '../types';
+import { markRaw } from 'vue';
+import { Album, AlbumSummary, UserSavedAlbumsItem } from '../types';
 import { getUserSavedAlbums, getNextUserSavedAlbums, getUserSavedAlbumAt } from '../api';
 import { randomOffset } from '../utils';
+
+/**
+ * Keeps only what the UI uses (saved album responses also include up to 50 tracks, copyrights,
+ * etc.) and marks it raw so Vue doesn't wrap every nested object in a reactive proxy.
+ */
+function toAlbumSummary({ id, name, images, artists, external_urls, uri }: AlbumSummary) {
+  return markRaw<AlbumSummary>({ id, name, images, artists, external_urls, uri });
+}
 
 // The request currently loading a page. Callers that arrive while it is loading wait for it
 // instead of returning early.
@@ -9,8 +18,8 @@ let inFlightRequest: Promise<void> | null = null;
 
 export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
   state: () => ({
-    albums: [] as Album[],
-    selectedAlbum: null as Album | null,
+    albums: [] as AlbumSummary[],
+    selectedAlbum: null as AlbumSummary | null,
     hasNext: false,
     isLoading: false,
     nextUrl: '',
@@ -28,16 +37,16 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       this.totalAlbums = 0;
       this.lastRandomOffset = null;
     },
-    addAlbums(albums: Album[]) {
+    addAlbums(albums: AlbumSummary[]) {
       const knownIds = new Set(this.albums.map((album) => album.id));
-      const newAlbums = albums.filter((album) => !knownIds.has(album.id));
+      const newAlbums = albums.filter((album) => !knownIds.has(album.id)).map(toAlbumSummary);
       this.albums.push(...newAlbums);
     },
-    overwriteAlbums(albums: Album[]) {
-      this.albums = albums;
+    overwriteAlbums(albums: AlbumSummary[]) {
+      this.albums = albums.map(toAlbumSummary);
     },
-    setSelectedAlbum(album: Album) {
-      this.selectedAlbum = album;
+    setSelectedAlbum(album: AlbumSummary) {
+      this.selectedAlbum = toAlbumSummary(album);
     },
     setSelectedAlbumRandomly(): void {
       if (this.albums.length === 0) {

@@ -9,7 +9,7 @@
       role="button"
     >
       <img
-        :src="album.images[0].url"
+        :src="getImageUrl(album.images, 64)"
         :alt="album.name"
         :height="64"
         :width="64"
@@ -42,7 +42,8 @@
 import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
 import { useUserSavedAlbumsStore } from '../data';
-import { Album } from '../types';
+import { AlbumSummary } from '../types';
+import { getImageUrl } from '@/utils';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();
@@ -54,7 +55,7 @@ const sentinel = ref<HTMLElement | null>(null);
 const savedAlbums = computed(() => userSavedAlbums.albums);
 const isLoading = computed(() => userSavedAlbums.isLoading);
 // methods
-function selectAlbum(album: Album) {
+function selectAlbum(album: AlbumSummary) {
   userSavedAlbums.setSelectedAlbum(album);
 }
 

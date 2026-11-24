@@ -58,9 +58,10 @@ export interface Device {
 }
 
 export interface Image {
-  height: number;
+  // Playlist images can have unknown dimensions
+  height: number | null;
   url: string;
-  width: number;
+  width: number | null;
 }
 
 export interface CopyRight {
@@ -97,6 +98,12 @@ export interface Album {
     items: Track[];
   };
 }
+
+/** The subset of an album kept in the store. Saved album responses also carry tracks etc. */
+export type AlbumSummary = Pick<
+  Album,
+  'id' | 'name' | 'images' | 'artists' | 'external_urls' | 'uri'
+>;
 
 export interface Track {
   id: string;

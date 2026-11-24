@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { isReactive } from 'vue';
 import { useUserSavedAlbumsStore } from '@/data';
 import { generateAlbum } from '../helpers';
 import * as api from '@/api';
@@ -257,6 +258,43 @@ describe('UserSavedAlbumsStore', () => {
 
       await store.pickRandomAlbum();
       expect(store.totalAlbums).toBe(12);
+    });
+  });
+
+  describe('stored album shape (#121)', () => {
+    it('keeps only the fields the UI needs', () => {
+      const store = useUserSavedAlbumsStore();
+      const album = generateAlbum();
+      store.addAlbums([album]);
+
+      const stored = store.albums[0];
+      expect(stored).toEqual({
+        id: album.id,
+        name: album.name,
+        images: album.images,
+        artists: album.artists,
+        external_urls: album.external_urls,
+        uri: album.uri
+      });
+      expect(stored).not.toHaveProperty('tracks');
+    });
+
+    it('does not make stored albums deeply reactive', () => {
+      const store = useUserSavedAlbumsStore();
+      store.addAlbums([generateAlbum()]);
+      expect(isReactive(store.albums[0])).toBe(false);
+    });
+
+    it('stores the randomly picked album in the same shape', async () => {
+      const store = useUserSavedAlbumsStore();
+      store.setTotalAlbums(10);
+      (api.getUserSavedAlbumAt as any).mockResolvedValue({
+        items: [{ album: generateAlbum() }],
+        total: 10
+      });
+
+      await store.pickRandomAlbum();
+      expect(store.selectedAlbum).not.toHaveProperty('tracks');
     });
   });
 });

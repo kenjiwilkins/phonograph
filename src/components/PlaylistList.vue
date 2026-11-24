@@ -9,7 +9,7 @@
       :data-testid="`playlist-li-${index}`"
     >
       <content-image
-        :src="playlist.images ? playlist.images[0].url : playlistIcon"
+        :src="getImageUrl(playlist.images, 64) ?? playlistIcon"
         :alt="playlist.name"
         :height="64"
         :width="64"
@@ -41,6 +41,7 @@ import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';
 import playlistIcon from '@assets/playlists.svg';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
+import { getImageUrl } from '@/utils';
 
 // stores
 const userSavedPlaylists = useUserSavedPlaylistsStore();

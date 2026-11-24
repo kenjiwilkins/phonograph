@@ -64,6 +64,7 @@ import { useUserSavedAlbumsStore, useTracksStore } from '@/data';
 import playIcon from '@assets/play.svg';
 import shuffleIcon from '@assets/shuffle.svg';
 import closeIcon from '@assets/close.svg';
+import { getImageUrl } from '@/utils';
 
 // stores
 const userSavedAlbums = useUserSavedAlbumsStore();
@@ -77,9 +78,9 @@ const showModal = computed(() => {
 });
 const imageUrl = computed(() => {
   if (selectedAlbum.value) {
-    return selectedAlbum.value.images[0].url;
+    return getImageUrl(selectedAlbum.value.images, 80);
   } else if (selectedTrack.value) {
-    return selectedTrack.value.album.images[0].url;
+    return getImageUrl(selectedTrack.value.album.images, 80);
   } else {
     return 'Ooops something went wrong';
   }

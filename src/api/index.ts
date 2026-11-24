@@ -43,13 +43,16 @@ export async function getUserProfile() {
 }
 
 export async function getUserSavedAlbums() {
-  const { data } = await request.get(`/me/albums?offset=0&limit=50`);
+  const { data } = await request.get(`/me/albums?offset=0&limit=50&market=from_token`);
   return data;
 }
 
 /** Fetches the single saved album at `offset`. Used to pick a random album without loading all of them. */
 export async function getUserSavedAlbumAt(offset: number) {
-  const { data } = await request.get('/me/albums', { params: { offset, limit: 1 } });
+  const { data } = await request.get('/me/albums', {
+    // market=from_token drops the ~180-entry available_markets list from every album
+    params: { offset, limit: 1, market: 'from_token' }
+  });
   return data;
 }
 
