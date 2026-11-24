@@ -10,14 +10,17 @@
         class="pg-cut pg-cut-sm"
         :src="imageSrc"
         :alt="imageAlt ?? title"
+        :placeholder-icon="placeholderIcon"
         :height="64"
         :width="64"
-        :data-testid="imageTestId"
+        v-bind="imageTestId ? { 'data-testid': imageTestId } : {}"
       />
     </span>
     <span class="media-row__text">
       <span class="media-row__title" :data-testid="titleTestId">{{ title }}</span>
-      <span v-if="meta" class="media-row__meta" :data-testid="metaTestId">{{ meta }}</span>
+      <span v-if="meta || $slots.meta" class="media-row__meta" :data-testid="metaTestId"
+        ><slot name="meta">{{ meta }}</slot></span
+      >
     </span>
     <span v-if="disabled" class="pg-tag pg-tag--red media-row__tag">Locked</span>
     <span v-else-if="index !== undefined" class="pg-hud-sm media-row__index"
@@ -39,6 +42,8 @@ const props = withDefaults(
     /** Zero-based position in the list; shown one-based as #0001 */
     index?: number;
     imageSrc?: string;
+    /** Icon shown when there is no image */
+    placeholderIcon?: 'image' | 'playlist';
     /** Defaults to the title */
     imageAlt?: string;
     /** The item open in the play sheet */
@@ -53,6 +58,7 @@ const props = withDefaults(
     meta: undefined,
     index: undefined,
     imageSrc: undefined,
+    placeholderIcon: 'image',
     imageAlt: undefined,
     current: false,
     disabled: false,

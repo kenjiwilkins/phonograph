@@ -9,7 +9,6 @@ import PlayConfirmModal from '@/components/PlayConfirmModal.vue';
 import { generateAlbum, generatePlaylist, generateTrack } from '../helpers';
 import { MockIntersectionObserver } from '../helpers/intersectionObserver';
 import { useTracksStore } from '@/data';
-import playlistIcon from '@assets/playlists.svg';
 
 // Regression tests for #127: Spotify data with missing images, artists or tracks
 describe('missing data (#127)', () => {
@@ -37,14 +36,20 @@ describe('missing data (#127)', () => {
 
   test('PlaylistList shows the playlist icon when images is an empty array', () => {
     const playlist = { ...generatePlaylist(), images: [] };
-    const { container } = render(PlaylistList, {
+    const { container, getByTestId } = render(PlaylistList, {
       global: {
         plugins: [
           createTestingPinia({ initialState: { userSavedPlaylists: { playlists: [playlist] } } })
         ]
       }
     });
-    expect(container.querySelector('img')?.getAttribute('src')).toBe(playlistIcon);
+    // The placeholder draws the playlist icon (#161) instead of an <img> of playlists.svg
+    expect(container.querySelector('img')).toBeNull();
+    expect(
+      getByTestId(`content-image-placeholder-${playlist.name}`).getAttribute(
+        'data-placeholder-icon'
+      )
+    ).toBe('playlist');
   });
 
   test('PlaylistList handles images: null', () => {

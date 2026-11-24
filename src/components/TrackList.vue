@@ -1,39 +1,24 @@
 <template>
-  <ul v-if="selectedPlaylist" class="flex w-full flex-col gap-2" data-testid="track-list">
-    <li
-      v-for="(track, index) in tracks"
-      :key="`${track.id}-${index}`"
-      class="flex w-full gap-2 px-2"
-      role="button"
-      @click="selectTrack(track)"
-      :data-testid="`track-li-${index}`"
-    >
-      <content-image
-        :src="getImageUrl(track.album.images, 64)"
-        :alt="track.name"
-        :height="64"
-        :width="64"
-      />
-      <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
-        <p
-          class="overflow-x-hidden text-sm text-ellipsis whitespace-nowrap"
-          :data-testid="`track-li-name-${index}`"
-        >
-          {{ track.name }}
-        </p>
-        <p
-          class="overflow-x-hidden text-sm font-thin text-ellipsis whitespace-nowrap"
-          :data-testid="`track-li-album-${index}`"
-        >
-          {{ track.album.name }}
-        </p>
-        <p
-          class="overflow-x-hidden text-sm font-thin text-ellipsis whitespace-nowrap"
-          :data-testid="`track-li-artist-${index}`"
-        >
-          {{ track.artists[0]?.name }}
-        </p>
-      </div>
+  <ul v-if="selectedPlaylist" class="w-full" data-testid="track-list">
+    <li v-for="(track, index) in tracks" :key="`${track.id}-${index}`">
+      <MediaRow
+        :title="track.name"
+        :index="index"
+        :image-src="getImageUrl(track.album.images, 64)"
+        :current="track.id === selectedTrackId"
+        :title-test-id="`track-li-name-${index}`"
+        :data-testid="`track-li-${index}`"
+        @click="selectTrack(track)"
+      >
+        <!-- One meta line, "Album · Artist", keeping a test id on each part -->
+        <template #meta>
+          <span :data-testid="`track-li-album-${index}`">{{ track.album.name }}</span>
+          <template v-if="track.artists[0]?.name">
+            ·
+            <span :data-testid="`track-li-artist-${index}`">{{ track.artists[0].name }}</span>
+          </template>
+        </template>
+      </MediaRow>
     </li>
   </ul>
   <ContentPlaceholder v-else />
@@ -41,7 +26,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
-import ContentImage from './ContentImage.vue';
+import MediaRow from './MediaRow.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { TrackSummary } from '@/types';
 import { getImageUrl } from '@/utils';
@@ -53,6 +38,7 @@ const tracksStore = useTracksStore();
 // computed
 const selectedPlaylist = computed(() => userSavedPlaylists.selectedPlaylist);
 const tracks = computed(() => tracksStore.tracks);
+const selectedTrackId = computed(() => tracksStore.selectedTrack?.id);
 
 // methods
 function selectTrack(track: TrackSummary) {

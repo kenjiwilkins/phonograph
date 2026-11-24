@@ -1,38 +1,18 @@
 <template>
-  <ul v-if="hasSavedPlaylists" class="flex w-full flex-col gap-2 py-2">
-    <li
-      v-for="(playlist, index) in savedPlaylists"
-      :key="playlist.id"
-      class="flex w-full gap-2 px-2"
-      :class="{ 'opacity-50': !getPlaylistItems(playlist) }"
-      @click="selectPlaylist(playlist)"
-      role="button"
-      :aria-disabled="!getPlaylistItems(playlist)"
-      :data-testid="`playlist-li-${index}`"
-    >
-      <content-image
-        :src="getImageUrl(playlist.images, 64) ?? playlistIcon"
-        :alt="playlist.name"
-        :height="64"
-        :width="64"
+  <ul v-if="hasSavedPlaylists" class="w-full" data-testid="playlist-list">
+    <li v-for="(playlist, index) in savedPlaylists" :key="playlist.id">
+      <MediaRow
+        :title="playlist.name"
+        :meta="playlistMeta(playlist)"
+        :index="index"
+        :image-src="getImageUrl(playlist.images, 64)"
+        placeholder-icon="playlist"
+        :disabled="!getPlaylistItems(playlist)"
+        :title-test-id="`playlist-li-playlist-name-${index}`"
+        :meta-test-id="`playlist-li-playlist-total-${index}`"
+        :data-testid="`playlist-li-${index}`"
+        @click="selectPlaylist(playlist)"
       />
-      <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
-        <p
-          class="overflow-x-hidden text-ellipsis whitespace-nowrap"
-          :data-testid="`playlist-li-playlist-name-${index}`"
-        >
-          {{ playlist.name }}
-        </p>
-        <p
-          class="text-md overflow-x-hidden font-thin text-ellipsis whitespace-nowrap"
-          :data-testid="`playlist-li-playlist-total-${index}`"
-        >
-          <template v-if="getPlaylistItems(playlist)">
-            {{ getPlaylistItems(playlist)?.total }} tracks
-          </template>
-          <template v-else>Tracks not available</template>
-        </p>
-      </div>
     </li>
   </ul>
   <ContentPlaceholder v-else />
@@ -41,10 +21,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
-import ContentImage from './ContentImage.vue';
+import MediaRow from './MediaRow.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';
-import playlistIcon from '@assets/playlists.svg';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import { getImageUrl, getPlaylistItems } from '@/utils';
 
@@ -60,6 +39,12 @@ const savedPlaylists = computed(() => userSavedPlaylists.playlists);
 const hasSavedPlaylists = computed(() => savedPlaylists.value.length > 0);
 
 // methods
+function playlistMeta(playlist: Playlist) {
+  const items = getPlaylistItems(playlist);
+  // Spotify only returns the contents of playlists the user owns or collaborates on
+  return items ? `${items.total} tracks` : 'Shared · tracks not available';
+}
+
 function selectPlaylist(playlist: Playlist) {
   // Spotify only returns the contents of playlists the user owns or collaborates on
   const items = getPlaylistItems(playlist);

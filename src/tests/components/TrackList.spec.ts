@@ -62,4 +62,26 @@ describe('TrackList', () => {
     await fireEvent.click(trackItem);
     expect(trackStore.setSelectedTrack).toHaveBeenCalled();
   });
+  test('shows album and artist on one meta line and marks the open track (#161)', () => {
+    const tracks = [generateTrack(), generateTrack()];
+    const { getByTestId, getAllByRole } = render(TrackList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: {
+              userSavedPlaylists: { selectedPlaylist: generatePlaylist() },
+              tracks: { tracks, selectedTrack: tracks[1] }
+            }
+          })
+        ]
+      }
+    });
+    const meta = getByTestId('track-li-album-0').parentElement!;
+    expect(meta.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      `${tracks[0].album.name} · ${tracks[0].artists[0].name}`
+    );
+    const rows = getAllByRole('button');
+    expect(rows[0].hasAttribute('aria-current')).toBe(false);
+    expect(rows[1].getAttribute('aria-current')).toBe('true');
+  });
 });
