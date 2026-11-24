@@ -7,11 +7,15 @@
   "author": {
     "name": "Michael Kenji Wilkins"
   },
+  "engines": {
+    "node": "26.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "build:CI": "tsc && vite build --mode test",
     "prettier": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint . -f compact --ext .ts,.vue",
     "preview": "vite preview",
     "test": "vitest run",

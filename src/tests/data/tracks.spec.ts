@@ -463,7 +463,12 @@ describe('TracksStore', () => {
 
           // The footer clears the store, then another playlist is opened
           store.clearAllStates();
-          store.openPlaylist({ playlistId: 'p2', snapshotId: 'snap-2', url: `${url}/p2`, total: 5 });
+          store.openPlaylist({
+            playlistId: 'p2',
+            snapshotId: 'snap-2',
+            url: `${url}/p2`,
+            total: 5
+          });
           page.resolve({ items: [{ item: generateTrack() }], next: `${url}?offset=100` });
           await loading;
 
@@ -497,9 +502,7 @@ describe('TracksStore', () => {
       it('ignores a failure for the previous playlist', async () => {
         const store = useTracksStore();
         let reject!: (error: unknown) => void;
-        vi.spyOn(api, 'getTracks').mockReturnValueOnce(
-          new Promise((_, r) => (reject = r)) as any
-        );
+        vi.spyOn(api, 'getTracks').mockReturnValueOnce(new Promise((_, r) => (reject = r)) as any);
         vi.spyOn(console, 'error').mockImplementation(() => undefined);
         store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
         const loading = store.fetchTracks();

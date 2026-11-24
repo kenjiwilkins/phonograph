@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           # A PAT is used so that the release PR triggers CI and main (protected) can be updated.
           token: ${{ secrets.RELEASE_TOKEN }}
@@ -32,7 +32,7 @@ jobs:
 
       - name: Checkout release commit
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.release.outputs.sha }}
           fetch-depth: 0
