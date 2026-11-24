@@ -333,4 +333,38 @@ describe('TracksStore', () => {
     await store.pickRandomTrack();
     expect(store.selectedTrack?.id).toBe(track.id);
   });
+
+  it('reads playlist items from the new `item` field (#131)', async () => {
+    const store = useTracksStore();
+    store.setNextUrl('https://api.spotify.com/v1/playlists/abc/items');
+    const track = generateTrack();
+    vi.spyOn(api, 'getTracks').mockResolvedValue({ items: [{ item: track }], next: null });
+
+    await store.fetchTracks();
+    expect(store.tracks.map((t) => t.id)).toEqual([track.id]);
+  });
+
+  it('skips podcast episodes in playlists (#131)', async () => {
+    const store = useTracksStore();
+    store.setNextUrl('https://api.spotify.com/v1/playlists/abc/items');
+    const track = generateTrack();
+    vi.spyOn(api, 'getTracks').mockResolvedValue({
+      items: [{ item: { ...generateTrack(), type: 'episode' } }, { item: track }],
+      next: null
+    });
+
+    await store.fetchTracks();
+    expect(store.tracks.map((t) => t.id)).toEqual([track.id]);
+  });
+
+  it('picks a random track from the new `item` field (#131)', async () => {
+    const store = useTracksStore();
+    store.setTracksUrl('https://api.spotify.com/v1/playlists/abc/items');
+    store.setTotalTracks(10);
+    const track = generateTrack();
+    vi.spyOn(api, 'getPlaylistTrackAt').mockResolvedValue({ items: [{ item: track }], total: 10 });
+
+    await store.pickRandomTrack();
+    expect(store.selectedTrack?.id).toBe(track.id);
+  });
 });
