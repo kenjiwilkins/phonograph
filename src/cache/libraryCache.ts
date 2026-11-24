@@ -46,10 +46,41 @@ interface Stored<T> {
 const albumsKey = (userId: string) => `${prefix}${userId}.albums`;
 const playlistKeyPrefix = (userId: string) => `${prefix}${userId}.playlist.`;
 
-function read<T>(key: string): T | null {
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+function isAlbumsEntry(data: unknown): data is AlbumsCacheEntry {
+  return (
+    isObject(data) &&
+    Array.isArray(data.albums) &&
+    typeof data.total === 'number' &&
+    typeof data.nextUrl === 'string' &&
+    isObject(data.fingerprint) &&
+    typeof data.fingerprint.total === 'number'
+  );
+}
+
+function isPlaylistTracksEntry(data: unknown): data is PlaylistTracksCacheEntry {
+  return (
+    isObject(data) &&
+    typeof data.snapshotId === 'string' &&
+    Array.isArray(data.tracks) &&
+    typeof data.total === 'number' &&
+    typeof data.nextUrl === 'string'
+  );
+}
+
+/** Returns the cached data, or null when it is missing, expired or not in the expected shape. */
+function read<T>(key: string, isValid: (data: unknown) => data is T): T | null {
   try {
-    const stored = JSON.parse(localStorage.getItem(key) ?? 'null') as Stored<T> | null;
-    if (!stored || stored.version !== version || Date.now() - stored.savedAt > maxAgeMs) {
+    const stored: unknown = JSON.parse(localStorage.getItem(key) ?? 'null');
+    if (
+      !isObject(stored) ||
+      stored.version !== version ||
+      typeof stored.savedAt !== 'number' ||
+      Date.now() - stored.savedAt > maxAgeMs ||
+      !isValid(stored.data)
+    ) {
       return null;
     }
     return stored.data;
@@ -82,7 +113,7 @@ function keys(startsWith: string): string[] {
 }
 
 export function readAlbumsCache(userId: string): AlbumsCacheEntry | null {
-  return read<AlbumsCacheEntry>(albumsKey(userId));
+  return read(albumsKey(userId), isAlbumsEntry);
 }
 
 export function writeAlbumsCache(userId: string, entry: AlbumsCacheEntry) {
@@ -103,7 +134,7 @@ export function readPlaylistTracksCache(
   snapshotId: string | undefined
 ): PlaylistTracksCacheEntry | null {
   if (!snapshotId) return null;
-  const entry = read<PlaylistTracksCacheEntry>(playlistKeyPrefix(userId) + playlistId);
+  const entry = read(playlistKeyPrefix(userId) + playlistId, isPlaylistTracksEntry);
   return entry?.snapshotId === snapshotId ? entry : null;
 }
 

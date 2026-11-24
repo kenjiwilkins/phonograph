@@ -60,6 +60,25 @@ describe('libraryCache (#80)', () => {
       expect(readAlbumsCache('user-1')).toBeNull();
     });
 
+    test('ignores entries that do not have the expected shape', () => {
+      writeAlbumsCache('user-1', albumsEntry());
+      const key = Object.keys({ ...localStorage })[0];
+      const stored = JSON.parse(localStorage.getItem(key)!);
+      const variants = [
+        { ...stored, data: null },
+        { ...stored, data: { ...stored.data, albums: null } },
+        { ...stored, data: { ...stored.data, fingerprint: null } },
+        { ...stored, data: { ...stored.data, total: '2' } },
+        { ...stored, data: { ...stored.data, nextUrl: null } },
+        { ...stored, savedAt: undefined },
+        { ...stored, savedAt: 'yesterday' }
+      ];
+      for (const variant of variants) {
+        localStorage.setItem(key, JSON.stringify(variant));
+        expect(readAlbumsCache('user-1')).toBeNull();
+      }
+    });
+
     test('does not throw when storage is full', () => {
       vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new DOMException('full', 'QuotaExceededError');
@@ -83,6 +102,20 @@ describe('libraryCache (#80)', () => {
       expect(readPlaylistTracksCache('user-1', 'p1', 'snap-2')).toBeNull();
       expect(readPlaylistTracksCache('user-1', 'p1', undefined)).toBeNull();
       expect(readPlaylistTracksCache('user-2', 'p1', 'snap-1')).toBeNull();
+    });
+
+    test('ignores entries that do not have the expected shape', () => {
+      writePlaylistTracksCache('user-1', 'p1', tracksEntry('snap-1'));
+      const key = Object.keys({ ...localStorage })[0];
+      const stored = JSON.parse(localStorage.getItem(key)!);
+      for (const data of [
+        { ...stored.data, tracks: null },
+        { ...stored.data, total: null },
+        { ...stored.data, nextUrl: 1 }
+      ]) {
+        localStorage.setItem(key, JSON.stringify({ ...stored, data }));
+        expect(readPlaylistTracksCache('user-1', 'p1', 'snap-1')).toBeNull();
+      }
     });
 
     test(`keeps at most ${maxCachedPlaylists} playlists, dropping the oldest`, () => {

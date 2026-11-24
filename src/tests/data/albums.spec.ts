@@ -390,6 +390,43 @@ describe('UserSavedAlbumsStore', () => {
       expect(readAlbumsCache('user-1')?.total).toBe(121);
     });
 
+    it('refetches the first page even when a scroll started loading the next page meanwhile', async () => {
+      const page = firstPage();
+      writeAlbumsCache('user-1', {
+        albums: page.items.map((item) => item.album),
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+      const added = generateAlbum();
+      const updated = firstPage([added, ...page.items.map((item) => item.album)], 121);
+      let resolveHead!: (value: unknown) => void;
+      (api.getSavedAlbumsHead as any).mockReturnValue(
+        new Promise((resolve) => (resolveHead = resolve))
+      );
+      let resolveNext!: (value: unknown) => void;
+      (api.getNextUserSavedAlbums as any).mockReturnValue(
+        new Promise((resolve) => (resolveNext = resolve))
+      );
+      (api.getUserSavedAlbums as any).mockResolvedValue(updated);
+
+      const store = useUserSavedAlbumsStore();
+      const loading = store.loadUserSavedAlbums();
+      // The user scrolls to the end of the cached list before the validation returns
+      const scrolling = store.fetchNextUserSavedAlbums();
+      resolveHead(head(updated));
+      resolveNext({ items: [{ album: generateAlbum() }], total: 121, next: null });
+      await Promise.all([loading, scrolling]);
+
+      expect(api.getUserSavedAlbums).toHaveBeenCalledTimes(1);
+      expect(store.albums[0].id).toBe(added.id);
+      expect(readAlbumsCache('user-1')?.fingerprint.firstId).toBe(added.id);
+    });
+
     it('refetches the first page when an album was removed', async () => {
       const page = firstPage();
       writeAlbumsCache('user-1', {

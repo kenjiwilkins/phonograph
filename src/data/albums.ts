@@ -167,6 +167,9 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
         return;
       }
       if (!sameFingerprint(current, cached.fingerprint)) {
+        // A scroll may have started loading the next cached page meanwhile. Its promise can't
+        // stand in for the first page: let it finish, then replace the list.
+        while (inFlightRequest) await inFlightRequest.catch(() => undefined);
         await this.fetchUserSavedAlbums();
       }
     },

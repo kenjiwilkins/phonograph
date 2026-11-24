@@ -17,6 +17,11 @@ function playableTracks(items: TrackResponseItem[]): Track[] {
 // Removed tracks and local files can't be picked; give up after this many of them in a row
 const maxRandomPickAttempts = 3;
 
+// Incremented whenever the store switches to another playlist (or is cleared), so a page that
+// was requested for the previous one is dropped instead of being added to, and cached for, the
+// new one. Comparing playlist ids isn't enough: the same playlist can be opened again.
+let generation = 0;
+
 export const useTracksStore = defineStore('tracks', {
   state: () => ({
     tracks: [] as TrackSummary[],
@@ -38,6 +43,7 @@ export const useTracksStore = defineStore('tracks', {
   },
   actions: {
     clearAllStates() {
+      generation++;
       this.tracks = [];
       this.selectedTrack = null;
       this.isLoading = false;
@@ -65,6 +71,8 @@ export const useTracksStore = defineStore('tracks', {
     }) {
       const userId = useUserStore().user?.id;
       const cached = userId ? readPlaylistTracksCache(userId, playlistId, snapshotId) : null;
+      generation++;
+      this.isLoading = false;
       this.playlistId = playlistId;
       this.snapshotId = snapshotId;
       this.tracksUrl = url;
@@ -99,11 +107,10 @@ export const useTracksStore = defineStore('tracks', {
       if (this.tracks.length === 0) {
         return;
       }
-      // Exclude the current track (by id: the selection is a copy) unless it is the only one
-      const candidates =
-        this.tracks.length > 1
-          ? this.tracks.filter((track) => track.id !== this.selectedTrack?.id)
-          : this.tracks;
+      // Exclude the current track (by id: the selection is a copy) unless it is the only one.
+      // A playlist can contain the same track several times, so compare ids, not lengths.
+      const others = this.tracks.filter((track) => track.id !== this.selectedTrack?.id);
+      const candidates = others.length > 0 ? others : this.tracks;
       this.setSelectedTrack(candidates[Math.floor(Math.random() * candidates.length)]);
     },
     clearSelectedTrack() {
@@ -124,34 +131,25 @@ export const useTracksStore = defineStore('tracks', {
     async fetchTracks() {
       if (this.isLoading) return;
       if (!this.hasNext) return;
+      const requestGeneration = generation;
       try {
         this.setIsLoading(true);
         const data = await getTracks(this.nextUrl);
+        // Another playlist was opened meanwhile: this page belongs to the previous one
+        if (requestGeneration !== generation) return;
         this.addTracks(playableTracks(data.items));
         this.setNextUrl(data.next);
         this.saveCache();
       } catch (error) {
+        if (requestGeneration !== generation) return;
         console.error(error);
         this.resetNextUrl();
       } finally {
-        this.setIsLoading(false);
+        if (requestGeneration === generation) this.setIsLoading(false);
       }
     },
-    async fetchNextTracks() {
-      if (this.isLoading) return;
-      if (!this.hasNext) return;
-      try {
-        this.setIsLoading(true);
-        const data = await getTracks(this.nextUrl);
-        this.addTracks(playableTracks(data.items));
-        this.setNextUrl(data.next);
-        this.saveCache();
-      } catch (error) {
-        console.error(error);
-        this.resetNextUrl();
-      } finally {
-        this.setIsLoading(false);
-      }
+    fetchNextTracks() {
+      return this.fetchTracks();
     },
     /**
      * Selects a random track of the selected playlist. When not every track is loaded yet, only

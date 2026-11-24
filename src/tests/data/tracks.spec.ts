@@ -444,6 +444,84 @@ describe('TracksStore', () => {
       expect(cached?.tracks.map((t) => t.id)).toEqual([track.id]);
       expect(cached?.nextUrl).toBe(`${url}?offset=100`);
     });
+
+    describe('responses that arrive after switching playlists', () => {
+      function pendingPage() {
+        let resolve!: (value: unknown) => void;
+        const promise = new Promise((r) => (resolve = r));
+        return { promise, resolve };
+      }
+
+      it.each(['fetchTracks', 'fetchNextTracks'] as const)(
+        '%s ignores a response for the previous playlist',
+        async (action) => {
+          const store = useTracksStore();
+          const page = pendingPage();
+          const getTracks = vi.spyOn(api, 'getTracks').mockReturnValueOnce(page.promise as any);
+          store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+          const loading = store[action]();
+
+          // The footer clears the store, then another playlist is opened
+          store.clearAllStates();
+          store.openPlaylist({ playlistId: 'p2', snapshotId: 'snap-2', url: `${url}/p2`, total: 5 });
+          page.resolve({ items: [{ item: generateTrack() }], next: `${url}?offset=100` });
+          await loading;
+
+          expect(store.tracks).toHaveLength(0);
+          expect(store.nextUrl).toBe(`${url}/p2`);
+          expect(readPlaylistTracksCache('user-1', 'p2', 'snap-2')).toBeNull();
+
+          // The new playlist can load its own tracks
+          const track = generateTrack();
+          getTracks.mockResolvedValueOnce({ items: [{ item: track }], next: null } as any);
+          await store.fetchTracks();
+          expect(store.tracks.map((t) => t.id)).toEqual([track.id]);
+        }
+      );
+
+      it('ignores a response for an earlier opening of the same playlist', async () => {
+        const store = useTracksStore();
+        const page = pendingPage();
+        vi.spyOn(api, 'getTracks').mockReturnValueOnce(page.promise as any);
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        const loading = store.fetchTracks();
+
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        page.resolve({ items: [{ item: generateTrack() }], next: `${url}?offset=100` });
+        await loading;
+
+        expect(store.tracks).toHaveLength(0);
+        expect(store.nextUrl).toBe(url);
+      });
+
+      it('ignores a failure for the previous playlist', async () => {
+        const store = useTracksStore();
+        let reject!: (error: unknown) => void;
+        vi.spyOn(api, 'getTracks').mockReturnValueOnce(
+          new Promise((_, r) => (reject = r)) as any
+        );
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        const loading = store.fetchTracks();
+
+        store.openPlaylist({ playlistId: 'p2', snapshotId: 'snap-2', url: `${url}/p2`, total: 5 });
+        reject(new Error('network'));
+        await loading;
+
+        expect(store.nextUrl).toBe(`${url}/p2`);
+      });
+    });
+  });
+
+  it('setSelectedTrackRandomly keeps working when every entry is the selected track', () => {
+    const store = useTracksStore();
+    const track = generateTrack();
+    // A playlist can contain the same track more than once
+    store.addTracks([track, track]);
+    store.setSelectedTrack(track);
+
+    expect(() => store.setSelectedTrackRandomly()).not.toThrow();
+    expect(store.selectedTrack?.id).toBe(track.id);
   });
 
   it('setSelectedTrackRandomly does not pick the current track again (#80)', () => {
