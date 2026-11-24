@@ -9,10 +9,11 @@ import PlayConfirmModal from '@/components/PlayConfirmModal.vue';
 import { generateAlbum, generatePlaylist, generateTrack } from '../helpers';
 import { MockIntersectionObserver } from '../helpers/intersectionObserver';
 import { useTracksStore } from '@/data';
+import playlistIcon from '@assets/playlists.svg';
 
 // Regression tests for #127: Spotify data with missing images, artists or tracks
 describe('missing data (#127)', () => {
-  let warn: MockInstance<Parameters<typeof console.warn>, void>;
+  let warn: MockInstance<typeof console.warn>;
   beforeEach(() => {
     MockIntersectionObserver.install();
     warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -43,7 +44,7 @@ describe('missing data (#127)', () => {
         ]
       }
     });
-    expect(container.querySelector('img')?.getAttribute('src')).toContain('playlists');
+    expect(container.querySelector('img')?.getAttribute('src')).toBe(playlistIcon);
   });
 
   test('PlaylistList handles images: null', () => {
