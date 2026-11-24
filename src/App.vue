@@ -4,7 +4,7 @@
       <LandingSection />
     </template>
     <template v-else>
-      <div class="h-full w-full bg-gray-950 text-white">
+      <div class="h-full w-full bg-void text-ink">
         <app-bar :syncing="!isLoggedIn" />
         <main class="min-h-full w-full overflow-x-hidden" v-if="isLoggedIn">
           <playlist-header v-if="isShowTrackList" />
