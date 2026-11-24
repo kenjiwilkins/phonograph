@@ -2,6 +2,7 @@ name: PR Title
 
 # PRs are squash-merged with the PR title as the commit message,
 # so the title must follow Conventional Commits for release-please to pick it up.
+# Implemented inline because this repository only allows GitHub-owned and verified actions.
 on:
   pull_request:
     types:
@@ -11,12 +12,21 @@ on:
       - reopened
 
 permissions:
-  pull-requests: read
+  contents: read
 
 jobs:
   conventional-title:
     runs-on: ubuntu-latest
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - name: Check Conventional Commits title
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Passed through env, never interpolated into the script, so titles can't inject shell
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)(\([a-z0-9._/-]+\))?!?: [^ ].*'
+          if printf '%s' "$TITLE" | grep -Eq "$pattern"; then
+            echo "PR title follows Conventional Commits: $TITLE"
+          else
+            echo "::error::PR title must follow Conventional Commits, e.g. 'fix(auth): refresh expiring tokens'. Got: $TITLE"
+            exit 1
+          fi
