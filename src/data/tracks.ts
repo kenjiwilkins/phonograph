@@ -4,7 +4,14 @@ import { Track, TrackResponseItem } from '@/types';
 import { getTracks, getPlaylistTrackAt } from '@/api';
 import { randomOffset } from '@/utils';
 
-// Removed tracks come back as `track: null`; give up after this many empty picks
+/** Returns the tracks that can be shown and opened in Spotify. */
+function playableTracks(items: TrackResponseItem[]): Track[] {
+  return items
+    .filter((item) => !item.is_local && item.track?.id)
+    .map((item) => item.track as Track);
+}
+
+// Removed tracks and local files can't be picked; give up after this many of them in a row
 const maxRandomPickAttempts = 3;
 
 export const useTracksStore = defineStore('tracks', {
@@ -77,7 +84,7 @@ export const useTracksStore = defineStore('tracks', {
       try {
         this.setIsLoading(true);
         const data = await getTracks(this.nextUrl);
-        this.addTracks(data.items.map((item: TrackResponseItem) => item.track));
+        this.addTracks(playableTracks(data.items));
         this.setNextUrl(data.next);
       } catch (error) {
         console.error(error);
@@ -92,7 +99,7 @@ export const useTracksStore = defineStore('tracks', {
       try {
         this.setIsLoading(true);
         const data = await getTracks(this.nextUrl);
-        this.addTracks(data.items.map((item: TrackResponseItem) => item.track));
+        this.addTracks(playableTracks(data.items));
         this.setNextUrl(data.next);
       } catch (error) {
         console.error(error);
@@ -115,7 +122,7 @@ export const useTracksStore = defineStore('tracks', {
         const offset = randomOffset(this.totalTracks, exclude);
         const data = await getPlaylistTrackAt(this.tracksUrl, offset);
         this.setTotalTracks(data.total);
-        const track: Track | null | undefined = data.items[0]?.track;
+        const [track] = playableTracks(data.items);
         if (track && track.id !== this.selectedTrack?.id) {
           this.lastRandomOffset = offset;
           this.setSelectedTrack(track);

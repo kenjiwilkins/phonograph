@@ -13,7 +13,13 @@
       >
         <div className="pb-2">. . .</div>
         <div class="flex w-full items-center justify-start gap-4">
-          <img :src="imageUrl" :alt="albumName" class="h-20 w-20 shadow-md" />
+          <content-image
+            :src="imageUrl"
+            :alt="albumName"
+            :height="80"
+            :width="80"
+            class="shadow-md"
+          />
           <div class="flex flex-col gap-1 font-bold">
             <p>
               <span class="" data-testid="play-confirm-modal-album-name">{{ albumName }}</span>
@@ -65,6 +71,7 @@ import playIcon from '@assets/play.svg';
 import shuffleIcon from '@assets/shuffle.svg';
 import closeIcon from '@assets/close.svg';
 import { getImageUrl } from '@/utils';
+import ContentImage from './ContentImage.vue';
 
 // stores
 const userSavedAlbums = useUserSavedAlbumsStore();
@@ -82,7 +89,7 @@ const imageUrl = computed(() => {
   } else if (selectedTrack.value) {
     return getImageUrl(selectedTrack.value.album.images, 80);
   } else {
-    return 'Ooops something went wrong';
+    return undefined;
   }
 });
 const albumName = computed(() => {
@@ -96,9 +103,9 @@ const albumName = computed(() => {
 });
 const artistName = computed(() => {
   if (selectedAlbum.value) {
-    return selectedAlbum.value.artists[0].name;
+    return selectedAlbum.value.artists[0]?.name ?? '';
   } else if (selectedTrack.value) {
-    return selectedTrack.value.artists[0].name;
+    return selectedTrack.value.artists[0]?.name ?? '';
   } else {
     return 'Ooops something went wrong';
   }

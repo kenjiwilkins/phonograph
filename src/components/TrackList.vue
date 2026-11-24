@@ -2,14 +2,14 @@
   <ul v-if="selectedPlaylist" class="flex w-full flex-col gap-2" data-testid="track-list">
     <li
       v-for="(track, index) in tracks"
-      :key="track.id"
+      :key="`${track.id}-${index}`"
       class="flex w-full gap-2 px-2"
       role="button"
       @click="selectTrack(track)"
       :data-testid="`track-li-${index}`"
     >
       <content-image
-        :src="getImageUrl(track.album.images, 64) ?? ''"
+        :src="getImageUrl(track.album.images, 64)"
         :alt="track.name"
         :height="64"
         :width="64"
@@ -31,7 +31,7 @@
           class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm font-thin"
           :data-testid="`track-li-artist-${index}`"
         >
-          {{ track.artists[0].name }}
+          {{ track.artists[0]?.name }}
         </p>
       </div>
     </li>
