@@ -147,4 +147,23 @@ describe('PlayControlArea', () => {
     await fireEvent.click(button);
     expect(trackStore.pickRandomTrack).toHaveBeenCalledTimes(1);
   });
+  test('shows "loading" while picking a random album (#132)', async () => {
+    const { getByTestId } = render(PlayControlArea, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            stubActions: false,
+            initialState: {
+              tab: { currentTab: TabType.ALBUM },
+              userSavedAlbums: { albums: generateAlbums(10), totalAlbums: 100 }
+            }
+          })
+        ]
+      }
+    });
+    useUserSavedAlbumsStore().pickRandomAlbum = vi.fn(() => new Promise<void>(() => {}));
+    const button = getByTestId('play-control-album-button');
+    await fireEvent.click(button);
+    expect(button.textContent).toContain('Loading');
+  });
 });
