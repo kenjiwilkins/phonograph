@@ -35,6 +35,8 @@ export default defineConfig({
       project: 'phonograph',
       authToken: process.env.SENTRY_AUTH_TOKEN,
       debug: true,
+      // Don't send build telemetry to Sentry
+      telemetry: false,
       sourcemaps: {
         filesToDeleteAfterUpload: ['dist:/**/*.map']
       }

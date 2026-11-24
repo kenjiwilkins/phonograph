@@ -11,7 +11,7 @@
         class="flex w-full flex-col items-center justify-center gap-2 rounded-t-3xl bg-gray-800 p-4"
         data-testid="play-confirm-modal"
       >
-        <div className="pb-2">. . .</div>
+        <div class="pb-2">. . .</div>
         <div class="flex w-full items-center justify-start gap-4">
           <content-image
             :src="imageUrl"
