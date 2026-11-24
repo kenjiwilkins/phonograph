@@ -3,15 +3,17 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
+
+const fromRoot = (dir: string) => fileURLToPath(new URL(dir, import.meta.url));
 
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@assets': path.resolve(__dirname, './src/assets'),
-      '@components': path.resolve(__dirname, './src/components')
+      '@': fromRoot('./src'),
+      '@assets': fromRoot('./src/assets'),
+      '@components': fromRoot('./src/components')
     }
   },
   build: {
