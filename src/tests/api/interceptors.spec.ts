@@ -23,9 +23,8 @@ vi.mock('@/auth', () => ({
   getAuth: vi.fn()
 }));
 
-vi.mock('@/utils', () => ({
-  getCookie: vi.fn(() => 'current-token'),
-  removeCookie: vi.fn()
+vi.mock('@/auth/tokenStorage', () => ({
+  getAccessToken: vi.fn(() => 'current-token')
 }));
 
 await import('@/api');
