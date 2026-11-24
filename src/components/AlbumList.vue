@@ -33,21 +33,22 @@
     </li>
   </ul>
   <ContentPlaceholder v-else />
+  <div v-if="savedAlbums.length" ref="sentinel" aria-hidden="true" data-testid="album-list-end" />
   <div v-if="isLoading" class="flex justify-center py-2" data-testid="loading">
     <p class="text-gray-500">Loading...</p>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onBeforeMount, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
-import { footerHeight } from '@/constants';
 import { useUserSavedAlbumsStore } from '../data';
 import { Album } from '../types';
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 // store
 const userSavedAlbums = useUserSavedAlbumsStore();
 
 // data
-const fetching = ref(false);
+const sentinel = ref<HTMLElement | null>(null);
 
 // computed
 const savedAlbums = computed(() => userSavedAlbums.albums);
@@ -56,30 +57,17 @@ const isLoading = computed(() => userSavedAlbums.isLoading);
 function selectAlbum(album: Album) {
   userSavedAlbums.setSelectedAlbum(album);
 }
-async function getMoreAlbums() {
-  if (isLoading.value) return;
-  if (fetching.value) return;
-  if (
-    window.innerHeight + window.scrollY >= document.body.offsetHeight - footerHeight &&
-    savedAlbums.value.length
-  ) {
-    fetching.value = true;
-    await userSavedAlbums.fetchNextUserSavedAlbums();
-    fetching.value = false;
-  }
-}
 
-// Add event listener to fetch more albums when the user scrolls to the bottom
+// Load the next page when the end of the list scrolls into view
+useInfiniteScroll(
+  sentinel,
+  () => userSavedAlbums.fetchNextUserSavedAlbums(),
+  () => userSavedAlbums.hasNext
+);
+
 onMounted(() => {
   if (savedAlbums.value.length === 0) {
     userSavedAlbums.fetchUserSavedAlbums();
   }
-  window.addEventListener('scroll', getMoreAlbums);
-  window.addEventListener('touchmove', getMoreAlbums);
-});
-// Remove event listener when the component is unmounted
-onBeforeMount(() => {
-  window.removeEventListener('scroll', getMoreAlbums);
-  window.removeEventListener('touchmove', getMoreAlbums);
 });
 </script>

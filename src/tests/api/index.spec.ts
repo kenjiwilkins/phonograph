@@ -66,7 +66,7 @@ describe('api', () => {
 
     const result = await api.getUserSavedPlaylists();
     expect(result).toEqual(mockData);
-    expect(mockInstance.get).toHaveBeenCalledWith('/me/playlists?offset=0&limit=20');
+    expect(mockInstance.get).toHaveBeenCalledWith('/me/playlists?offset=0&limit=50');
   });
 
   test('getNextUserSavedPlaylists', async () => {

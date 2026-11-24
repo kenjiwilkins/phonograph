@@ -59,7 +59,7 @@ export async function getNextUserSavedAlbums(url: string) {
 }
 
 export async function getUserSavedPlaylists() {
-  const { data } = await request.get(`/me/playlists?offset=0&limit=20`);
+  const { data } = await request.get(`/me/playlists?offset=0&limit=50`);
   return data;
 }
 

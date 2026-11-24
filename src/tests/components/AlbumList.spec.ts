@@ -1,11 +1,20 @@
 import { render, fireEvent } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { flushPromises } from '@vue/test-utils';
+import { MockIntersectionObserver } from '../helpers/intersectionObserver';
 import AlbumList from '@/components/AlbumList.vue';
 import { useUserSavedAlbumsStore } from '@/data';
 import { generateAlbums } from '../helpers';
 
 describe('AlbumList', () => {
+  beforeEach(() => {
+    MockIntersectionObserver.install();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
   test('renders correctly - is loading', () => {
     const { getByTestId } = render(AlbumList, {
       global: {
@@ -70,31 +79,57 @@ describe('AlbumList', () => {
     await fireEvent.click(albumListItem);
     expect(useUserSavedAlbumsStore().selectedAlbum).toEqual(albums[0]);
   });
-  test('functionality - scroll', async () => {
-    const ALBUMS_LENGTH = 10;
-    const albums = generateAlbums(ALBUMS_LENGTH);
-    const { getByTestId } = render(AlbumList, {
+  test('functionality - loads the next page when the end of the list is visible (#122)', async () => {
+    const albums = generateAlbums(10);
+    render(AlbumList, {
       global: {
         plugins: [
           createTestingPinia({
-            initialState: {
-              userSavedAlbums: {
-                isLoading: false,
-                albums,
-                hasNext: true
-              }
-            },
+            initialState: { userSavedAlbums: { albums, hasNext: true } },
             stubActions: false,
             createSpy: vi.fn
           })
         ]
       }
     });
-    vi.spyOn(useUserSavedAlbumsStore(), 'fetchUserSavedAlbums').mockResolvedValue(undefined);
-    await fireEvent.scroll(window, { target: { scrollY: 1000 } });
-    const loading = getByTestId('loading');
-    expect(loading).toBeTruthy();
-    await fireEvent.scroll(window, { target: { scrollY: 1000 } });
-    await fireEvent.scroll(window, { target: { scrollY: 1000 } });
+    const store = useUserSavedAlbumsStore();
+    const fetchNext = vi
+      .spyOn(store, 'fetchNextUserSavedAlbums')
+      .mockImplementation(async () => store.setHasNext(false));
+    await flushPromises();
+
+    MockIntersectionObserver.latest().trigger(true);
+    await flushPromises();
+    expect(fetchNext).toHaveBeenCalledTimes(1);
+  });
+  test('functionality - does not listen to window scroll events (#122)', () => {
+    const addEventListener = vi.spyOn(window, 'addEventListener');
+    render(AlbumList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedAlbums: { albums: generateAlbums(3), hasNext: true } }
+          })
+        ]
+      }
+    });
+    const eventNames = addEventListener.mock.calls.map(([name]) => name);
+    expect(eventNames).not.toContain('scroll');
+    expect(eventNames).not.toContain('touchmove');
+  });
+  test('functionality - stops observing on unmount (#122)', async () => {
+    const { unmount } = render(AlbumList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedAlbums: { albums: generateAlbums(3), hasNext: true } }
+          })
+        ]
+      }
+    });
+    await flushPromises();
+    const observer = MockIntersectionObserver.latest();
+    unmount();
+    expect(observer.disconnect).toHaveBeenCalled();
   });
 });

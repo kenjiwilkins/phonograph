@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { Playlist, UserSavedPlaylistsItem } from '@/types';
-import { getUserSavedPlaylists } from '@/api';
+import { getUserSavedPlaylists, getNextUserSavedPlaylists } from '@/api';
 
 export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
   state: () => ({
@@ -24,7 +24,8 @@ export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
       this.totalPlaylists = 0;
     },
     addPlaylists(playlists: Playlist[]) {
-      this.playlists = [...this.playlists, ...playlists];
+      const knownIds = new Set(this.playlists.map((playlist) => playlist.id));
+      this.playlists.push(...playlists.filter((playlist) => !knownIds.has(playlist.id)));
     },
     overwritePlaylists(playlists: Playlist[]) {
       this.playlists = playlists;
@@ -54,8 +55,24 @@ export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
       try {
         this.setIsLoading(true);
         const data = await getUserSavedPlaylists();
+        // The first page replaces the list so calling this again never duplicates playlists
+        this.overwritePlaylists([]);
         this.addPlaylists(data.items.map((item: UserSavedPlaylistsItem) => item));
         this.setTotalPlaylists(data.total);
+        this.setNextUrl(data.next);
+      } catch (error) {
+        console.error(error);
+        this.resetNextUrl();
+      } finally {
+        this.setIsLoading(false);
+      }
+    },
+    async fetchNextUserSavedPlaylists() {
+      if (this.isLoading || !this.hasNext) return;
+      try {
+        this.setIsLoading(true);
+        const data = await getNextUserSavedPlaylists(this.nextUrl);
+        this.addPlaylists(data.items);
         this.setNextUrl(data.next);
       } catch (error) {
         console.error(error);
