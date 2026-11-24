@@ -1,6 +1,6 @@
 <template>
   <img
-    v-if="!hasError"
+    v-if="src && !hasError"
     loading="lazy"
     :src="src"
     :alt="alt"
@@ -35,7 +35,7 @@ import { ref } from 'vue';
 // props
 
 interface Props {
-  src: string;
+  src?: string;
   alt: string;
   height: number;
   width: number;

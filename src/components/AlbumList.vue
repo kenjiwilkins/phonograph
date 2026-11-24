@@ -8,12 +8,11 @@
       :data-testid="'album-list-item-' + index"
       role="button"
     >
-      <img
+      <content-image
         :src="getImageUrl(album.images, 64)"
         :alt="album.name"
         :height="64"
         :width="64"
-        loading="lazy"
         :data-testid="`album-li-img-${index}`"
       />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
@@ -27,7 +26,7 @@
           class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin"
           :data-testid="`album-li-artist-${index}`"
         >
-          {{ album.artists[0].name }}
+          {{ album.artists[0]?.name }}
         </p>
       </div>
     </li>
@@ -41,6 +40,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
+import ContentImage from './ContentImage.vue';
 import { useUserSavedAlbumsStore } from '../data';
 import { AlbumSummary } from '../types';
 import { getImageUrl } from '@/utils';

@@ -120,7 +120,10 @@ export interface Track {
 }
 
 export interface TrackResponseItem {
-  track: Track;
+  // null for tracks that were removed from Spotify
+  track: Track | null;
+  // Local files have no Spotify id and can't be opened in Spotify
+  is_local?: boolean;
 }
 
 export interface PlaybackState {

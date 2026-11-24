@@ -302,4 +302,35 @@ describe('TracksStore', () => {
     store.addTracks([generateTrack()]);
     expect(isReactive(store.tracks[0])).toBe(false);
   });
+
+  it('skips removed tracks and local files when fetching (#127)', async () => {
+    const store = useTracksStore();
+    store.setNextUrl('https://api.spotify.com/v1/playlists/abc/tracks');
+    const track = generateTrack();
+    vi.spyOn(api, 'getTracks').mockResolvedValue({
+      items: [
+        { track: null },
+        { is_local: true, track: { ...generateTrack(), id: null } },
+        { track }
+      ],
+      next: null
+    });
+
+    await store.fetchTracks();
+
+    expect(store.tracks.map((t) => t.id)).toEqual([track.id]);
+  });
+
+  it('skips local files when picking a random track (#127)', async () => {
+    const store = useTracksStore();
+    store.setTracksUrl('https://api.spotify.com/v1/playlists/abc/tracks');
+    store.setTotalTracks(10);
+    const track = generateTrack();
+    vi.spyOn(api, 'getPlaylistTrackAt')
+      .mockResolvedValueOnce({ items: [{ is_local: true, track: generateTrack() }], total: 10 })
+      .mockResolvedValueOnce({ items: [{ track }], total: 10 });
+
+    await store.pickRandomTrack();
+    expect(store.selectedTrack?.id).toBe(track.id);
+  });
 });
