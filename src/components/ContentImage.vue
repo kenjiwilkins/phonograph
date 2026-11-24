@@ -12,13 +12,13 @@
   <div
     v-else
     :style="{ height: `${height}px`, width: `${width}px` }"
-    class="flex w-full animate-pulse items-center justify-center bg-gray-300"
+    class="flex items-center justify-center bg-surface-300"
     :data-testid="`content-image-placeholder-${alt}`"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      class="h-10 w-10 text-gray-200"
+      class="h-7 w-7 fill-ink-dim"
       height="24"
       viewBox="0 -960 960 960"
       width="24"

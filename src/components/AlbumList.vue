@@ -1,34 +1,18 @@
 <template>
-  <ul v-if="savedAlbums.length" class="flex w-full flex-col gap-2 py-2" data-testid="album-list">
-    <li
-      v-for="(album, index) in savedAlbums"
-      :key="album.id"
-      class="flex w-full gap-2 px-2"
-      @click="selectAlbum(album)"
-      :data-testid="'album-list-item-' + index"
-      role="button"
-    >
-      <content-image
-        :src="getImageUrl(album.images, 64)"
-        :alt="album.name"
-        :height="64"
-        :width="64"
-        :data-testid="`album-li-img-${index}`"
+  <ul v-if="savedAlbums.length" class="w-full" data-testid="album-list">
+    <li v-for="(album, index) in savedAlbums" :key="album.id">
+      <MediaRow
+        :title="album.name"
+        :meta="album.artists[0]?.name"
+        :index="index"
+        :image-src="getImageUrl(album.images, 64)"
+        :current="album.id === selectedAlbumId"
+        :image-test-id="`album-li-img-${index}`"
+        :title-test-id="`album-li-name-${index}`"
+        :meta-test-id="`album-li-artist-${index}`"
+        :data-testid="'album-list-item-' + index"
+        @click="selectAlbum(album)"
       />
-      <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
-        <p
-          class="overflow-x-hidden text-ellipsis whitespace-nowrap"
-          :data-testid="`album-li-name-${index}`"
-        >
-          {{ album.name }}
-        </p>
-        <p
-          class="text-md overflow-x-hidden font-thin text-ellipsis whitespace-nowrap"
-          :data-testid="`album-li-artist-${index}`"
-        >
-          {{ album.artists[0]?.name }}
-        </p>
-      </div>
     </li>
   </ul>
   <ContentPlaceholder v-else />
@@ -40,7 +24,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
-import ContentImage from './ContentImage.vue';
+import MediaRow from './MediaRow.vue';
 import { useUserSavedAlbumsStore } from '../data';
 import { AlbumSummary } from '../types';
 import { getImageUrl } from '@/utils';
@@ -54,6 +38,7 @@ const sentinel = ref<HTMLElement | null>(null);
 // computed
 const savedAlbums = computed(() => userSavedAlbums.albums);
 const isLoading = computed(() => userSavedAlbums.isLoading);
+const selectedAlbumId = computed(() => userSavedAlbums.selectedAlbum?.id);
 // methods
 function selectAlbum(album: AlbumSummary) {
   userSavedAlbums.setSelectedAlbum(album);

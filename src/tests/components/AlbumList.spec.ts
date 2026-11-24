@@ -149,4 +149,31 @@ describe('AlbumList', () => {
     });
     expect(getByTestId('album-li-img-0').getAttribute('src')).toBe('https://i.scdn.co/small');
   });
+  test('rows are real buttons reachable by keyboard (#160)', () => {
+    const { getAllByRole } = render(AlbumList, {
+      global: {
+        plugins: [
+          createTestingPinia({ initialState: { userSavedAlbums: { albums: generateAlbums(3) } } })
+        ]
+      }
+    });
+    const rows = getAllByRole('button');
+    expect(rows).toHaveLength(3);
+    rows.forEach((row) => expect(row.tagName).toBe('BUTTON'));
+    expect(rows[2].textContent).toContain('#0003');
+  });
+  test('marks the album open in the play sheet as current (#160)', () => {
+    const albums = generateAlbums(3);
+    const { getByTestId } = render(AlbumList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedAlbums: { albums, selectedAlbum: albums[1] } }
+          })
+        ]
+      }
+    });
+    expect(getByTestId('album-list-item-1').getAttribute('aria-current')).toBe('true');
+    expect(getByTestId('album-list-item-0').hasAttribute('aria-current')).toBe(false);
+  });
 });
