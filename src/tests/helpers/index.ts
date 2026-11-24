@@ -139,3 +139,14 @@ function generateArtist(): Artist {
     ]
   };
 }
+
+/**
+ * Converts a playlist to the February 2026 Web API shape: no legacy `tracks` field, and
+ * `items` only when the contents are available (pass undefined for playlists the user doesn't own).
+ */
+export function toNewPlaylistShape(playlist: Playlist, items?: { total: number }): Playlist {
+  const copy: Playlist = { ...playlist };
+  delete copy.tracks;
+  if (items) copy.items = items;
+  return copy;
+}

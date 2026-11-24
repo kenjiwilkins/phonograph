@@ -1,22 +1,24 @@
 export interface User {
-  country: string;
+  // country, email, explicit_content, followers and product are no longer returned
+  // for Development Mode apps since the February 2026 Web API changes
+  country?: string;
   display_name: string;
-  email: string;
-  explicit_content: {
+  email?: string;
+  explicit_content?: {
     filter_enabled: boolean;
     filter_locked: boolean;
   };
   external_urls: {
     spotify: string;
   };
-  followers: {
+  followers?: {
     href: string | null;
     total: number;
   };
   href: string;
   id: string;
   images: Image[];
-  product: string;
+  product?: string;
   type: string;
   uri: string;
 }
@@ -120,8 +122,10 @@ export interface Track {
 }
 
 export interface TrackResponseItem {
-  // null for tracks that were removed from Spotify
-  track: Track | null;
+  // February 2026 Web API name; null for content that was removed from Spotify
+  item?: Track | null;
+  // Legacy name of `item`
+  track?: Track | null;
   // Local files have no Spotify id and can't be opened in Spotify
   is_local?: boolean;
 }
@@ -168,7 +172,13 @@ export interface Playlist {
     uri: string;
   };
   public: boolean;
-  tracks: {
+  // February 2026 Web API: playlist contents moved from `tracks` to `items`. `items` is only
+  // returned for playlists the user owns or collaborates on. `tracks` is the legacy field.
+  items?: {
+    href?: string;
+    total: number;
+  };
+  tracks?: {
     href: string;
     total: number;
   };

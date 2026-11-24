@@ -7,8 +7,9 @@ import { randomOffset } from '@/utils';
 /** Returns the tracks that can be shown and opened in Spotify. */
 function playableTracks(items: TrackResponseItem[]): Track[] {
   return items
-    .filter((item) => !item.is_local && item.track?.id)
-    .map((item) => item.track as Track);
+    .filter((entry) => !entry.is_local)
+    .map((entry) => entry.item ?? entry.track)
+    .filter((track): track is Track => !!track?.id && track.type !== 'episode');
 }
 
 // Removed tracks and local files can't be picked; give up after this many of them in a row

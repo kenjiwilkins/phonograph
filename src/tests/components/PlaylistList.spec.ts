@@ -4,7 +4,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { flushPromises } from '@vue/test-utils';
 import { MockIntersectionObserver } from '../helpers/intersectionObserver';
 import PlaylistList from '@/components/PlaylistList.vue';
-import { generatePlaylists } from '../helpers';
+import { generatePlaylists, toNewPlaylistShape } from '../helpers';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 
 describe('PlaylistList', () => {
@@ -36,7 +36,7 @@ describe('PlaylistList', () => {
       expect(playlistName.textContent).toContain(playlists[i].name);
       const playlistTrackCount = getByTestId(`playlist-li-playlist-total-${i}`);
       expect(playlistTrackCount).toBeTruthy();
-      expect(playlistTrackCount.textContent).toContain(playlists[i].tracks.total);
+      expect(playlistTrackCount.textContent).toContain(String(playlists[i].tracks!.total));
     }
   });
   test('functionality - click', async () => {
@@ -74,8 +74,10 @@ describe('PlaylistList', () => {
     });
     const tracksStore = useTracksStore();
     await fireEvent.click(getByTestId('playlist-li-1'));
-    expect(tracksStore.tracksUrl).toBe(playlists[1].tracks.href);
-    expect(tracksStore.totalTracks).toBe(playlists[1].tracks.total);
+    expect(tracksStore.tracksUrl).toBe(
+      `https://api.spotify.com/v1/playlists/${playlists[1].id}/items`
+    );
+    expect(tracksStore.totalTracks).toBe(playlists[1].tracks!.total);
   });
   test('functionality - loads more playlists when the end of the list is visible (#126)', async () => {
     const playlists = generatePlaylists(50);
@@ -105,5 +107,42 @@ describe('PlaylistList', () => {
     MockIntersectionObserver.latest().trigger(true);
     await flushPromises();
     expect(fetchNext).toHaveBeenCalledTimes(1);
+  });
+  test('uses the /items endpoint when a playlist is selected (#131)', async () => {
+    const playlist = toNewPlaylistShape({ ...generatePlaylists(1)[0], id: 'abc' }, { total: 7 });
+    const { getByTestId } = render(PlaylistList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedPlaylists: { playlists: [playlist] } },
+            stubActions: false
+          })
+        ]
+      }
+    });
+    expect(getByTestId('playlist-li-playlist-total-0').textContent).toContain('7 tracks');
+
+    await fireEvent.click(getByTestId('playlist-li-0'));
+    const tracksStore = useTracksStore();
+    expect(tracksStore.tracksUrl).toBe('https://api.spotify.com/v1/playlists/abc/items');
+    expect(tracksStore.nextUrl).toBe('https://api.spotify.com/v1/playlists/abc/items');
+    expect(tracksStore.totalTracks).toBe(7);
+  });
+  test('marks playlists whose contents are not available and ignores clicks (#131)', async () => {
+    const playlist = toNewPlaylistShape(generatePlaylists(1)[0]);
+    const { getByTestId } = render(PlaylistList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedPlaylists: { playlists: [playlist] } },
+            stubActions: false
+          })
+        ]
+      }
+    });
+    expect(getByTestId('playlist-li-playlist-total-0').textContent).toContain('not available');
+
+    await fireEvent.click(getByTestId('playlist-li-0'));
+    expect(useUserSavedPlaylistsStore().selectedPlaylist).toBeNull();
   });
 });

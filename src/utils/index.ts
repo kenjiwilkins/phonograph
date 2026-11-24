@@ -1,4 +1,4 @@
-import type { Image } from '@/types';
+import type { Image, Playlist } from '@/types';
 
 export const isDev = import.meta.env.MODE === 'development';
 
@@ -97,4 +97,20 @@ export function getImageUrl(
   const target = displaySize * pixelRatio;
   return (bySize.find((image) => (image.width as number) >= target) ?? bySize[bySize.length - 1])
     .url;
+}
+
+const apiBaseUrl = 'https://api.spotify.com/v1';
+
+/**
+ * Where to load a playlist's contents from, or null when Spotify doesn't expose them
+ * (since February 2026, only for playlists the user owns or collaborates on).
+ * The URL is built from the id because the new `items` field isn't documented to carry an href.
+ */
+export function getPlaylistItems(playlist: Playlist): { url: string; total: number } | null {
+  const contents = playlist.items ?? playlist.tracks;
+  if (!contents) return null;
+  return {
+    url: `${apiBaseUrl}/playlists/${playlist.id}/items`,
+    total: contents.total
+  };
 }

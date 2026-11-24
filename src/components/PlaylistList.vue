@@ -4,8 +4,10 @@
       v-for="(playlist, index) in savedPlaylists"
       :key="playlist.id"
       class="flex w-full gap-2 px-2"
+      :class="{ 'opacity-50': !getPlaylistItems(playlist) }"
       @click="selectPlaylist(playlist)"
       role="button"
+      :aria-disabled="!getPlaylistItems(playlist)"
       :data-testid="`playlist-li-${index}`"
     >
       <content-image
@@ -25,7 +27,10 @@
           class="text-md overflow-x-hidden text-ellipsis whitespace-nowrap font-thin"
           :data-testid="`playlist-li-playlist-total-${index}`"
         >
-          {{ playlist.tracks.total }} tracks
+          <template v-if="getPlaylistItems(playlist)">
+            {{ getPlaylistItems(playlist)?.total }} tracks
+          </template>
+          <template v-else>Tracks not available</template>
         </p>
       </div>
     </li>
@@ -41,7 +46,7 @@ import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';
 import playlistIcon from '@assets/playlists.svg';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
-import { getImageUrl } from '@/utils';
+import { getImageUrl, getPlaylistItems } from '@/utils';
 
 // stores
 const userSavedPlaylists = useUserSavedPlaylistsStore();
@@ -56,9 +61,12 @@ const hasSavedPlaylists = computed(() => savedPlaylists.value.length > 0);
 
 // methods
 function selectPlaylist(playlist: Playlist) {
-  tracksStore.setNextUrl(playlist.tracks.href);
-  tracksStore.setTracksUrl(playlist.tracks.href);
-  tracksStore.setTotalTracks(playlist.tracks.total);
+  // Spotify only returns the contents of playlists the user owns or collaborates on
+  const items = getPlaylistItems(playlist);
+  if (!items) return;
+  tracksStore.setNextUrl(items.url);
+  tracksStore.setTracksUrl(items.url);
+  tracksStore.setTotalTracks(items.total);
   userSavedPlaylists.setSelectedPlaylist(playlist);
 }
 
