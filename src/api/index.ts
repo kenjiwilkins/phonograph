@@ -1,12 +1,14 @@
-import axios from 'axios';
-import { getCookie, removeCookie } from '../utils';
-import { getAccessTokenWithRefresh } from '../auth';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { getCookie } from '../utils';
+import { getAccessTokenWithRefresh, getAuth } from '../auth';
 
 const baseURL = 'https://api.spotify.com/v1';
 
 const request = axios.create({
   baseURL
 });
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 request.interceptors.request.use((config) => {
   const accessToken = getCookie('accessToken');
@@ -15,12 +17,23 @@ request.interceptors.request.use((config) => {
 });
 request.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      removeCookie('accessToken');
-      getAccessTokenWithRefresh();
+  async (error: AxiosError) => {
+    const config = error.config as RetriableRequestConfig | undefined;
+    if (error.response?.status !== 401 || !config || config._retry) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+    config._retry = true;
+    let accessToken: string;
+    try {
+      // Concurrent 401s share the same in-flight refresh
+      accessToken = await getAccessTokenWithRefresh();
+    } catch {
+      // The refresh token is no longer valid: start the login flow again
+      getAuth();
+      return Promise.reject(error);
+    }
+    config.headers['Authorization'] = `Bearer ${accessToken}`;
+    return request.request(config);
   }
 );
 
