@@ -1,8 +1,9 @@
-import { render, fireEvent } from '@testing-library/vue';
+import { render, fireEvent, waitFor } from '@testing-library/vue';
 import { describe, test, expect, afterEach, vi } from 'vitest';
 import { createTestingPinia } from '@pinia/testing';
 import PlayConfirmModal from '@/components/PlayConfirmModal.vue';
 import { generateAlbum, generateAlbums, generateTrack } from '../helpers';
+import { flashPromise } from '../utils';
 
 describe('PlayConfirmModal', () => {
   afterEach(() => {
@@ -212,5 +213,75 @@ describe('PlayConfirmModal', () => {
     expect(closeButton).toBeTruthy();
     await fireEvent.click(closeButton);
     expect(queryByTestId('play-confirm-modal')).not.toBeTruthy();
+  });
+
+  describe('NEON GRID sheet (#163)', () => {
+    function renderSheet(initialState: Record<string, unknown>) {
+      return render(PlayConfirmModal, {
+        global: {
+          stubs: { transition: false },
+          plugins: [createTestingPinia({ initialState, stubActions: false })]
+        }
+      });
+    }
+
+    test('is a labelled modal dialog that takes focus', async () => {
+      const albums = generateAlbums(3);
+      const { findByRole, unmount } = renderSheet({
+        userSavedAlbums: { selectedAlbum: albums[1], albums, totalAlbums: 40 }
+      });
+      const dialog = await findByRole('dialog', { name: albums[1].name });
+      expect(dialog.getAttribute('aria-modal')).toBe('true');
+      await flashPromise();
+      expect(document.activeElement).toBe(dialog);
+      unmount();
+    });
+
+    test('shows the target position as #index / total', async () => {
+      const albums = generateAlbums(3);
+      const { findByTestId, unmount } = renderSheet({
+        userSavedAlbums: { selectedAlbum: albums[1], albums, totalAlbums: 40 }
+      });
+      expect((await findByTestId('play-confirm-modal-position')).textContent).toBe('#0002 / 0040');
+      unmount();
+    });
+
+    test('uses the random offset when the album is beyond the loaded pages', async () => {
+      const { findByTestId, unmount } = renderSheet({
+        userSavedAlbums: {
+          selectedAlbum: generateAlbum(),
+          albums: generateAlbums(2),
+          totalAlbums: 500,
+          lastRandomOffset: 249
+        }
+      });
+      expect((await findByTestId('play-confirm-modal-position')).textContent).toBe('#0250 / 0500');
+      unmount();
+    });
+
+    test('closes on Escape', async () => {
+      const { findByRole, queryByRole, unmount } = renderSheet({
+        userSavedAlbums: { selectedAlbum: generateAlbum() }
+      });
+      await fireEvent.keyDown(await findByRole('dialog'), { key: 'Escape' });
+      await waitFor(() => expect(queryByRole('dialog')).toBeNull());
+      unmount();
+    });
+
+    test('renders the actions as NEON GRID buttons with inline icons', async () => {
+      const { findByTestId, getByTestId, container, unmount } = renderSheet({
+        userSavedAlbums: { selectedAlbum: generateAlbum() }
+      });
+      const play = await findByTestId('play-confirm-modal-play-button');
+      expect(play.classList).toContain('pg-btn--primary');
+      expect(play.classList).toContain('pg-btn--lg');
+      expect(play.textContent).toContain('Spotify ↗');
+      expect(getByTestId('play-confirm-modal-next-button').classList).toContain('pg-btn--ghost');
+      expect(getByTestId('play-confirm-modal-close-button').classList).toContain('pg-btn--text');
+      expect(
+        container.querySelectorAll('[data-testid="play-confirm-modal"] img[src$=".svg"]')
+      ).toHaveLength(0);
+      unmount();
+    });
   });
 });
