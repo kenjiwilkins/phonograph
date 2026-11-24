@@ -56,6 +56,14 @@ export async function getUserSavedAlbumAt(offset: number) {
   return data;
 }
 
+/** Fetches only the most recently saved album and the total, to check whether the cache is current. */
+export async function getSavedAlbumsHead() {
+  const { data } = await request.get('/me/albums', {
+    params: { offset: 0, limit: 1, market: 'from_token' }
+  });
+  return data;
+}
+
 export async function getNextUserSavedAlbums(url: string) {
   const { data } = await request.get(url);
   return data;

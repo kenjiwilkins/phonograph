@@ -4,6 +4,9 @@ import { isReactive } from 'vue';
 import { useTracksStore } from '@/data/tracks';
 import { Track } from '@/types';
 import * as api from '@/api';
+import { useUserStore } from '@/data';
+import { readPlaylistTracksCache, writePlaylistTracksCache } from '@/cache/libraryCache';
+import type { User } from '@/types';
 import { faker } from '@faker-js/faker';
 
 // Helper to generate a mock track
@@ -55,7 +58,7 @@ describe('TracksStore', () => {
     const tracks = [generateTrack(), generateTrack()];
     store.addTracks(tracks);
     expect(store.tracks).toHaveLength(2);
-    expect(store.tracks).toEqual(tracks);
+    expect(store.tracks.map((t) => t.id)).toEqual(tracks.map((t) => t.id));
   });
 
   it('should overwrite tracks', () => {
@@ -65,14 +68,14 @@ describe('TracksStore', () => {
     const newTracks = [generateTrack(), generateTrack()];
     store.overwriteTracks(newTracks);
     expect(store.tracks).toHaveLength(2);
-    expect(store.tracks).toEqual(newTracks);
+    expect(store.tracks.map((t) => t.id)).toEqual(newTracks.map((t) => t.id));
   });
 
   it('should set selected track', () => {
     const store = useTracksStore();
     const track = generateTrack();
     store.setSelectedTrack(track);
-    expect(store.selectedTrack).toEqual(track);
+    expect(store.selectedTrack?.id).toBe(track.id);
   });
 
   it('should clear selected track', () => {
@@ -153,7 +156,7 @@ describe('TracksStore', () => {
     store.setSelectedTrackRandomly();
 
     // Should remain the same track without crashing
-    expect(store.selectedTrack).toEqual(track);
+    expect(store.selectedTrack?.id).toBe(track.id);
   });
 
   describe('Async Actions', () => {
@@ -366,5 +369,169 @@ describe('TracksStore', () => {
 
     await store.pickRandomTrack();
     expect(store.selectedTrack?.id).toBe(track.id);
+  });
+
+  it('keeps only the track fields the UI needs (#80)', () => {
+    const store = useTracksStore();
+    store.addTracks([generateTrack()]);
+    expect(store.tracks[0]).not.toHaveProperty('duration_ms');
+    expect(store.tracks[0].album).not.toHaveProperty('tracks');
+  });
+
+  describe('playlist tracks cache (#80)', () => {
+    const url = 'https://api.spotify.com/v1/playlists/p1/items';
+
+    beforeEach(() => {
+      localStorage.clear();
+      useUserStore().setUser({ id: 'user-1' } as User);
+    });
+
+    it('starts empty when the playlist is not cached', () => {
+      const store = useTracksStore();
+      store.addTracks([generateTrack()]);
+
+      store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+
+      expect(store.tracks).toHaveLength(0);
+      expect(store.nextUrl).toBe(url);
+      expect(store.tracksUrl).toBe(url);
+      expect(store.totalTracks).toBe(30);
+    });
+
+    it('restores cached tracks for the same snapshot', () => {
+      const cachedTrack = generateTrack();
+      writePlaylistTracksCache('user-1', 'p1', {
+        snapshotId: 'snap-1',
+        tracks: [cachedTrack],
+        total: 30,
+        nextUrl: `${url}?offset=100`
+      });
+
+      const store = useTracksStore();
+      store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+
+      expect(store.tracks.map((t) => t.id)).toEqual([cachedTrack.id]);
+      expect(store.nextUrl).toBe(`${url}?offset=100`);
+    });
+
+    it('ignores the cache when the playlist changed', () => {
+      writePlaylistTracksCache('user-1', 'p1', {
+        snapshotId: 'snap-1',
+        tracks: [generateTrack()],
+        total: 30,
+        nextUrl: ''
+      });
+
+      const store = useTracksStore();
+      store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-2', url, total: 31 });
+
+      expect(store.tracks).toHaveLength(0);
+      expect(store.nextUrl).toBe(url);
+    });
+
+    it('caches loaded pages', async () => {
+      const store = useTracksStore();
+      store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+      const track = generateTrack();
+      vi.spyOn(api, 'getTracks').mockResolvedValue({
+        items: [{ item: track }],
+        next: `${url}?offset=100`
+      });
+
+      await store.fetchTracks();
+
+      const cached = readPlaylistTracksCache('user-1', 'p1', 'snap-1');
+      expect(cached?.tracks.map((t) => t.id)).toEqual([track.id]);
+      expect(cached?.nextUrl).toBe(`${url}?offset=100`);
+    });
+
+    describe('responses that arrive after switching playlists', () => {
+      function pendingPage() {
+        let resolve!: (value: unknown) => void;
+        const promise = new Promise((r) => (resolve = r));
+        return { promise, resolve };
+      }
+
+      it.each(['fetchTracks', 'fetchNextTracks'] as const)(
+        '%s ignores a response for the previous playlist',
+        async (action) => {
+          const store = useTracksStore();
+          const page = pendingPage();
+          const getTracks = vi.spyOn(api, 'getTracks').mockReturnValueOnce(page.promise as any);
+          store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+          const loading = store[action]();
+
+          // The footer clears the store, then another playlist is opened
+          store.clearAllStates();
+          store.openPlaylist({ playlistId: 'p2', snapshotId: 'snap-2', url: `${url}/p2`, total: 5 });
+          page.resolve({ items: [{ item: generateTrack() }], next: `${url}?offset=100` });
+          await loading;
+
+          expect(store.tracks).toHaveLength(0);
+          expect(store.nextUrl).toBe(`${url}/p2`);
+          expect(readPlaylistTracksCache('user-1', 'p2', 'snap-2')).toBeNull();
+
+          // The new playlist can load its own tracks
+          const track = generateTrack();
+          getTracks.mockResolvedValueOnce({ items: [{ item: track }], next: null } as any);
+          await store.fetchTracks();
+          expect(store.tracks.map((t) => t.id)).toEqual([track.id]);
+        }
+      );
+
+      it('ignores a response for an earlier opening of the same playlist', async () => {
+        const store = useTracksStore();
+        const page = pendingPage();
+        vi.spyOn(api, 'getTracks').mockReturnValueOnce(page.promise as any);
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        const loading = store.fetchTracks();
+
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        page.resolve({ items: [{ item: generateTrack() }], next: `${url}?offset=100` });
+        await loading;
+
+        expect(store.tracks).toHaveLength(0);
+        expect(store.nextUrl).toBe(url);
+      });
+
+      it('ignores a failure for the previous playlist', async () => {
+        const store = useTracksStore();
+        let reject!: (error: unknown) => void;
+        vi.spyOn(api, 'getTracks').mockReturnValueOnce(
+          new Promise((_, r) => (reject = r)) as any
+        );
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        store.openPlaylist({ playlistId: 'p1', snapshotId: 'snap-1', url, total: 30 });
+        const loading = store.fetchTracks();
+
+        store.openPlaylist({ playlistId: 'p2', snapshotId: 'snap-2', url: `${url}/p2`, total: 5 });
+        reject(new Error('network'));
+        await loading;
+
+        expect(store.nextUrl).toBe(`${url}/p2`);
+      });
+    });
+  });
+
+  it('setSelectedTrackRandomly keeps working when every entry is the selected track', () => {
+    const store = useTracksStore();
+    const track = generateTrack();
+    // A playlist can contain the same track more than once
+    store.addTracks([track, track]);
+    store.setSelectedTrack(track);
+
+    expect(() => store.setSelectedTrackRandomly()).not.toThrow();
+    expect(store.selectedTrack?.id).toBe(track.id);
+  });
+
+  it('setSelectedTrackRandomly does not pick the current track again (#80)', () => {
+    const store = useTracksStore();
+    const tracks = [generateTrack(), generateTrack()];
+    store.addTracks(tracks);
+    store.setSelectedTrack(tracks[0]);
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    store.setSelectedTrackRandomly();
+    expect(store.selectedTrack?.id).toBe(tracks[1].id);
   });
 });

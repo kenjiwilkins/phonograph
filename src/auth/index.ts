@@ -9,6 +9,13 @@ import {
   saveVerifier,
   takeVerifier
 } from './tokenStorage';
+import { clearLibraryCache } from '../cache/libraryCache';
+
+/** Ends the session: tokens and the cached library (which holds personal data) are removed. */
+function endSession() {
+  clearTokens();
+  clearLibraryCache();
+}
 
 const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || '';
 const tenMinutes = 10 * 60 * 1000;
@@ -193,7 +200,7 @@ export async function useAuth() {
 
   // Expired, expiring soon, or missing access token: refresh if possible
   if (!getRefreshToken()) {
-    clearTokens();
+    endSession();
     return {
       isAuthenticated: false,
       needsAuth: true
@@ -209,7 +216,7 @@ export async function useAuth() {
     };
   } catch (error) {
     console.error('Error refreshing token:', error);
-    clearTokens();
+    endSession();
     return {
       isAuthenticated: false,
       needsAuth: true,

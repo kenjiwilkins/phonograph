@@ -145,4 +145,27 @@ describe('PlaylistList', () => {
     await fireEvent.click(getByTestId('playlist-li-0'));
     expect(useUserSavedPlaylistsStore().selectedPlaylist).toBeNull();
   });
+  test('opens the playlist with its snapshot id so cached tracks can be reused (#80)', async () => {
+    const playlist = { ...generatePlaylists(1)[0], snapshot_id: 'snap-9' };
+    const { getByTestId } = render(PlaylistList, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            initialState: { userSavedPlaylists: { playlists: [playlist] } },
+            stubActions: false
+          })
+        ]
+      }
+    });
+    const tracksStore = useTracksStore();
+    const openPlaylist = vi.spyOn(tracksStore, 'openPlaylist');
+
+    await fireEvent.click(getByTestId('playlist-li-0'));
+    expect(openPlaylist).toHaveBeenCalledWith({
+      playlistId: playlist.id,
+      snapshotId: 'snap-9',
+      url: `https://api.spotify.com/v1/playlists/${playlist.id}/items`,
+      total: playlist.tracks!.total
+    });
+  });
 });

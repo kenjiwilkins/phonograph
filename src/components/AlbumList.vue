@@ -68,7 +68,7 @@ useInfiniteScroll(
 
 onMounted(() => {
   if (savedAlbums.value.length === 0) {
-    userSavedAlbums.fetchUserSavedAlbums();
+    userSavedAlbums.loadUserSavedAlbums();
   }
 });
 </script>

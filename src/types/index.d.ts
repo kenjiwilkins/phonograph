@@ -107,6 +107,14 @@ export type AlbumSummary = Pick<
   'id' | 'name' | 'images' | 'artists' | 'external_urls' | 'uri'
 >;
 
+/** The subset of a track kept in the store and the cache. */
+export type TrackSummary = Pick<
+  Track,
+  'id' | 'name' | 'type' | 'uri' | 'external_urls' | 'artists'
+> & {
+  album: AlbumSummary;
+};
+
 export interface Track {
   id: string;
   name: string;
@@ -172,6 +180,8 @@ export interface Playlist {
     uri: string;
   };
   public: boolean;
+  // Changes whenever the playlist's contents change
+  snapshot_id?: string;
   // February 2026 Web API: playlist contents moved from `tracks` to `items`. `items` is only
   // returned for playlists the user owns or collaborates on. `tracks` is the legacy field.
   items?: {

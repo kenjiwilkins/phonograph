@@ -43,7 +43,7 @@ import { computed, onMounted } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
 import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
-import { Track } from '@/types';
+import { TrackSummary } from '@/types';
 import { getImageUrl } from '@/utils';
 
 // stores
@@ -55,7 +55,7 @@ const selectedPlaylist = computed(() => userSavedPlaylists.selectedPlaylist);
 const tracks = computed(() => tracksStore.tracks);
 
 // methods
-function selectTrack(track: Track) {
+function selectTrack(track: TrackSummary) {
   tracksStore.setSelectedTrack(track);
 }
 
