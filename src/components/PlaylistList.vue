@@ -31,18 +31,23 @@
     </li>
   </ul>
   <ContentPlaceholder v-else />
+  <div v-if="hasSavedPlaylists" ref="sentinel" aria-hidden="true" data-testid="playlist-list-end" />
 </template>
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
 import ContentImage from './ContentImage.vue';
 import { useUserSavedPlaylistsStore, useTracksStore } from '@/data';
 import { Playlist } from '@/types';
 import playlistIcon from '@assets/playlists.svg';
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 
 // stores
 const userSavedPlaylists = useUserSavedPlaylistsStore();
 const tracksStore = useTracksStore();
+
+// data
+const sentinel = ref<HTMLElement | null>(null);
 
 // computed
 const savedPlaylists = computed(() => userSavedPlaylists.playlists);
@@ -55,6 +60,13 @@ function selectPlaylist(playlist: Playlist) {
   tracksStore.setTotalTracks(playlist.tracks.total);
   userSavedPlaylists.setSelectedPlaylist(playlist);
 }
+
+// Load the next page when the end of the list scrolls into view
+useInfiniteScroll(
+  sentinel,
+  () => userSavedPlaylists.fetchNextUserSavedPlaylists(),
+  () => userSavedPlaylists.hasNext
+);
 
 // life cycle
 onMounted(() => {

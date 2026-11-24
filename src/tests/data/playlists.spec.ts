@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useUserSavedPlaylistsStore } from '@/data';
-import { generatePlaylist } from '../helpers';
+import { generatePlaylist, generatePlaylists } from '../helpers';
 import * as api from '@/api';
 
 vi.mock('@/api', () => ({
-  getUserSavedPlaylists: vi.fn()
+  getUserSavedPlaylists: vi.fn(),
+  getNextUserSavedPlaylists: vi.fn()
 }));
 
 describe('UserSavedPlaylistsStore', () => {
@@ -97,6 +98,59 @@ describe('UserSavedPlaylistsStore', () => {
       expect(store.isLoading).toBe(false);
       expect(store.playlists).toHaveLength(0);
       expect(consoleSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('pagination (#126)', () => {
+    it('fetchNextUserSavedPlaylists appends the next page', async () => {
+      const store = useUserSavedPlaylistsStore();
+      store.addPlaylists(generatePlaylists(2));
+      store.setNextUrl('https://api.spotify.com/v1/me/playlists?offset=50');
+      const nextPage = generatePlaylists(3);
+      (api.getNextUserSavedPlaylists as any).mockResolvedValue({ items: nextPage, next: null });
+
+      await store.fetchNextUserSavedPlaylists();
+
+      expect(api.getNextUserSavedPlaylists).toHaveBeenCalledWith(
+        'https://api.spotify.com/v1/me/playlists?offset=50'
+      );
+      expect(store.playlists).toHaveLength(5);
+      expect(store.hasNext).toBe(false);
+      expect(store.isLoading).toBe(false);
+    });
+
+    it('fetchNextUserSavedPlaylists does nothing without a next page', async () => {
+      const store = useUserSavedPlaylistsStore();
+      await store.fetchNextUserSavedPlaylists();
+      expect(api.getNextUserSavedPlaylists).not.toHaveBeenCalled();
+    });
+
+    it('fetchNextUserSavedPlaylists skips playlists already in the list', async () => {
+      const store = useUserSavedPlaylistsStore();
+      const existing = generatePlaylists(1);
+      store.addPlaylists(existing);
+      store.setNextUrl('https://next');
+      (api.getNextUserSavedPlaylists as any).mockResolvedValue({
+        items: [...existing, ...generatePlaylists(1)],
+        next: null
+      });
+
+      await store.fetchNextUserSavedPlaylists();
+      expect(store.playlists).toHaveLength(2);
+    });
+
+    it('fetchUserSavedPlaylists replaces the list instead of appending', async () => {
+      const store = useUserSavedPlaylistsStore();
+      const firstPage = generatePlaylists(2);
+      (api.getUserSavedPlaylists as any).mockResolvedValue({
+        items: firstPage,
+        total: 2,
+        next: null
+      });
+
+      await store.fetchUserSavedPlaylists();
+      await store.fetchUserSavedPlaylists();
+      expect(store.playlists).toHaveLength(2);
     });
   });
 });
