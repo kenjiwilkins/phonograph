@@ -10,7 +10,9 @@ describe('ContentImage', () => {
     const { getByTestId, container, queryByTestId } = render(ContentImage, {
       props: {
         src: faker.image.url(),
-        alt: alt
+        alt: alt,
+        height: 64,
+        width: 64
       }
     });
     const img = getByTestId(`content-image-${alt}`);
@@ -24,7 +26,9 @@ describe('ContentImage', () => {
     const { getByTestId, container, queryByTestId } = render(ContentImage, {
       props: {
         src: faker.lorem.word(),
-        alt: alt
+        alt: alt,
+        height: 64,
+        width: 64
       }
     });
     const img = getByTestId(`content-image-${alt}`);
