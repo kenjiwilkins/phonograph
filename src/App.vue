@@ -7,6 +7,7 @@
       <div class="h-full w-full bg-gray-950 text-white">
         <app-bar />
         <main class="min-h-full w-full overflow-x-hidden" v-if="isLoggedIn">
+          <playlist-header v-if="isShowTrackList" />
           <play-control-area />
           <album-list v-if="isAlbumTab" />
           <playlist-list v-if="isPlaylistTab && !isShowTrackList" />
@@ -29,6 +30,7 @@
 import { computed, onMounted, ref } from 'vue';
 import AppBar from './components/AppBar.vue';
 import PlayControlArea from './components/PlayControlArea.vue';
+import PlaylistHeader from './components/PlaylistHeader.vue';
 import AlbumList from './components/AlbumList.vue';
 import PlaylistList from './components/PlaylistList.vue';
 import TrackList from './components/TrackList.vue';

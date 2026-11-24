@@ -140,7 +140,13 @@ describe('PlaylistList', () => {
         ]
       }
     });
-    expect(getByTestId('playlist-li-playlist-total-0').textContent).toContain('not available');
+    expect(getByTestId('playlist-li-playlist-total-0').textContent).toContain(
+      'Shared · tracks not available'
+    );
+    const row = getByTestId('playlist-li-0');
+    expect(row.tagName).toBe('BUTTON');
+    expect(row.getAttribute('aria-disabled')).toBe('true');
+    expect(row.textContent).toContain('Locked');
 
     await fireEvent.click(getByTestId('playlist-li-0'));
     expect(useUserSavedPlaylistsStore().selectedPlaylist).toBeNull();
