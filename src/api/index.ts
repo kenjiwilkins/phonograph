@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getCookie } from '../utils';
 import { getAccessTokenWithRefresh, getAuth } from '../auth';
+import { getAccessToken } from '../auth/tokenStorage';
 
 const baseURL = 'https://api.spotify.com/v1';
 
@@ -11,7 +11,7 @@ const request = axios.create({
 type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 request.interceptors.request.use((config) => {
-  const accessToken = getCookie('accessToken');
+  const accessToken = getAccessToken();
   config.headers['Authorization'] = `Bearer ${accessToken}`;
   return config;
 });

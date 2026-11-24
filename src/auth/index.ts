@@ -1,12 +1,14 @@
 import { isDev } from '../utils';
 import {
-  getCookie,
-  setCookie,
-  removeCookie,
-  verifyAccessToken,
-  verifyExpiresIn,
-  verifyRefreshToken
-} from '../utils';
+  clearTokens,
+  getAccessToken as getStoredAccessToken,
+  getExpiresAt,
+  getRefreshToken,
+  migrateLegacyCookies,
+  saveTokens,
+  saveVerifier,
+  takeVerifier
+} from './tokenStorage';
 
 const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || '';
 const tenMinutes = 10 * 60 * 1000;
@@ -38,34 +40,24 @@ async function requestToken(params: URLSearchParams): Promise<TokenResponse> {
 }
 
 function storeTokens({ access_token, expires_in, refresh_token }: TokenResponse) {
-  const expireTime = Date.now() + expires_in * 1000;
-  setCookie('accessToken', access_token);
-  // Spotify does not always rotate the refresh token; keep the current one if none is returned
-  if (refresh_token) {
-    setCookie('refreshToken', refresh_token);
-  }
-  setCookie('expiresIn', expireTime.toString());
-}
-
-function clearTokens() {
-  removeCookie('accessToken');
-  removeCookie('refreshToken');
-  removeCookie('expiresIn');
-  removeCookie('verifier');
+  saveTokens({
+    accessToken: access_token,
+    expiresAt: Date.now() + expires_in * 1000,
+    refreshToken: refresh_token
+  });
 }
 
 /** True when the token has expired or will expire within the buffer. */
-export function isTokenExpiring(expiresAt: string, now: number = Date.now()): boolean {
-  const expiresAtMs = parseInt(expiresAt);
-  if (Number.isNaN(expiresAtMs)) return true;
-  return now + tenMinutes >= expiresAtMs;
+export function isTokenExpiring(expiresAt: number | null, now: number = Date.now()): boolean {
+  if (expiresAt === null) return true;
+  return now + tenMinutes >= expiresAt;
 }
 
 export async function redirectToAuthCodeFlow(clientId: string) {
   const verifier = generateCodeVerifier(128);
   const challenge = await generateCodeChallenge(verifier);
 
-  setCookie('verifier', verifier, 1); // 1 day expiry for verifier
+  saveVerifier(verifier);
 
   const params = new URLSearchParams();
   params.append('client_id', clientId);
@@ -82,7 +74,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
 }
 
 export async function getAccessToken(clientId: string, code: string): Promise<string> {
-  const verifier = getCookie('verifier');
+  const verifier = takeVerifier();
 
   const params = new URLSearchParams();
   params.append('client_id', clientId);
@@ -98,11 +90,34 @@ export async function getAccessToken(clientId: string, code: string): Promise<st
   } finally {
     // The authorization code is single-use: remove it from the URL whether or not the exchange succeeded
     window.history.pushState(null, '', '/');
-    removeCookie('verifier');
   }
 }
 
 let refreshPromise: Promise<string> | null = null;
+
+function refreshWith(refreshToken: string | null): Promise<TokenResponse> {
+  const params = new URLSearchParams();
+  params.append('grant_type', 'refresh_token');
+  params.append('refresh_token', refreshToken ?? '');
+  params.append('client_id', getClientId());
+  return requestToken(params);
+}
+
+async function refresh(): Promise<string> {
+  const refreshToken = getRefreshToken();
+  let token: TokenResponse;
+  try {
+    token = await refreshWith(refreshToken);
+  } catch (error) {
+    // Refresh tokens are rotated and shared between tabs through localStorage: if another tab
+    // refreshed first, ours is no longer valid but the stored one is, so retry once with it
+    const latest = getRefreshToken();
+    if (!latest || latest === refreshToken) throw error;
+    token = await refreshWith(latest);
+  }
+  storeTokens(token);
+  return token.access_token;
+}
 
 /**
  * Refreshes the access token. Concurrent callers share a single in-flight request,
@@ -110,20 +125,9 @@ let refreshPromise: Promise<string> | null = null;
  */
 export function getAccessTokenWithRefresh(): Promise<string> {
   if (refreshPromise) return refreshPromise;
-
-  const params = new URLSearchParams();
-  params.append('grant_type', 'refresh_token');
-  params.append('refresh_token', getCookie('refreshToken'));
-  params.append('client_id', getClientId());
-
-  refreshPromise = requestToken(params)
-    .then((token) => {
-      storeTokens(token);
-      return token.access_token;
-    })
-    .finally(() => {
-      refreshPromise = null;
-    });
+  refreshPromise = refresh().finally(() => {
+    refreshPromise = null;
+  });
   return refreshPromise;
 }
 
@@ -151,30 +155,6 @@ export async function getCode() {
   return searchParams.get('code');
 }
 
-/**
- * Reads the tokens from cookies and removes values that were corrupted by earlier
- * versions (e.g. the string "undefined"). Expired tokens are kept so that they can be refreshed.
- */
-export function getAccessTokenFromCookies() {
-  const accessToken = getCookie('accessToken');
-  const expires_in = getCookie('expiresIn');
-  const refreshToken = getCookie('refreshToken');
-  if (accessToken === 'undefined') {
-    removeCookie('accessToken');
-  }
-  if (expires_in === 'undefined' || expires_in === 'NaN') {
-    removeCookie('expiresIn');
-  }
-  if (refreshToken === 'undefined') {
-    removeCookie('refreshToken');
-  }
-  return {
-    accessToken,
-    refreshToken,
-    expires_in
-  };
-}
-
 export function getAuth() {
   redirectToAuthCodeFlow(getClientId());
 }
@@ -200,11 +180,11 @@ export async function useAuth() {
     }
   }
 
-  const { accessToken, expires_in } = getAccessTokenFromCookies();
-  const hasAccessToken = verifyAccessToken() && verifyExpiresIn();
+  migrateLegacyCookies();
+  const accessToken = getStoredAccessToken();
 
   // Valid token that does not expire within the buffer
-  if (hasAccessToken && !isTokenExpiring(expires_in)) {
+  if (accessToken && !isTokenExpiring(getExpiresAt())) {
     return {
       isAuthenticated: true,
       accessToken
@@ -212,7 +192,7 @@ export async function useAuth() {
   }
 
   // Expired, expiring soon, or missing access token: refresh if possible
-  if (!verifyRefreshToken()) {
+  if (!getRefreshToken()) {
     clearTokens();
     return {
       isAuthenticated: false,
