@@ -1,9 +1,13 @@
 import { vi } from 'vitest';
 
-/** Minimal IntersectionObserver mock for jsdom. Call `trigger` to simulate visibility changes. */
+/**
+ * Minimal IntersectionObserver mock for jsdom. Like the real API, observing an element
+ * reports its current state asynchronously. Call `trigger` to simulate visibility changes.
+ */
 export class MockIntersectionObserver {
   callback: IntersectionObserverCallback;
   elements: Element[] = [];
+  isIntersecting = false;
   disconnect = vi.fn(() => {
     this.elements = [];
   });
@@ -15,6 +19,9 @@ export class MockIntersectionObserver {
 
   observe(element: Element) {
     this.elements.push(element);
+    queueMicrotask(() => {
+      if (this.elements.includes(element)) this.report([element]);
+    });
   }
 
   unobserve(element: Element) {
@@ -22,7 +29,12 @@ export class MockIntersectionObserver {
   }
 
   trigger(isIntersecting: boolean) {
-    const entries = this.elements.map((target) => ({ target, isIntersecting }));
+    this.isIntersecting = isIntersecting;
+    this.report(this.elements);
+  }
+
+  private report(targets: Element[]) {
+    const entries = targets.map((target) => ({ target, isIntersecting: this.isIntersecting }));
     this.callback(entries as unknown as IntersectionObserverEntry[], this as never);
   }
 

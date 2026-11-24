@@ -64,6 +64,34 @@ describe('useInfiniteScroll (#122)', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(3);
   });
 
+  test('keeps loading past 10 pages while the sentinel stays visible', async () => {
+    // Regression: a cap on consecutive loads left the list stuck when the sentinel never left
+    // the viewport, because IntersectionObserver only reports changes
+    let pagesLeft = 15;
+    const onLoadMore = vi.fn(async () => {
+      pagesLeft--;
+    });
+    mountWith(onLoadMore, () => pagesLeft > 0);
+    await flushPromises();
+
+    MockIntersectionObserver.latest().trigger(true);
+    await flushPromises();
+    expect(onLoadMore).toHaveBeenCalledTimes(15);
+  });
+
+  test('stops loading once the sentinel is pushed out of view', async () => {
+    const onLoadMore = vi.fn(async () => {
+      // The new page pushes the sentinel below the viewport
+      MockIntersectionObserver.latest().isIntersecting = false;
+    });
+    mountWith(onLoadMore, () => true);
+    await flushPromises();
+
+    MockIntersectionObserver.latest().trigger(true);
+    await flushPromises();
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
   test('does not start a second load while one is running', async () => {
     let resolveLoad!: () => void;
     const onLoadMore = vi.fn(() => new Promise<void>((resolve) => (resolveLoad = resolve)));

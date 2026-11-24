@@ -1,15 +1,15 @@
 import { Ref, watch } from 'vue';
 
-// Safety net in case `onLoadMore` resolves without making progress
-const maxConsecutiveLoads = 10;
-
 /**
  * Calls `onLoadMore` when `sentinel` (an element placed after the list) scrolls into view.
  *
  * Replaces window scroll/touchmove listeners: the observer is disconnected automatically
  * when the component unmounts, and nothing runs while the user scrolls elsewhere.
- * If the sentinel is still visible after a page loads (e.g. a short page on a tall screen),
- * it keeps loading until `canLoadMore` returns false.
+ *
+ * IntersectionObserver only reports changes, so a sentinel that is still visible after a page
+ * loads (e.g. a short page on a tall screen) wouldn't trigger again. After each load the
+ * sentinel is observed again: observing reports the current state, so loading continues only
+ * while it is really visible. Reports arrive with the next frame, so this never spins.
  */
 export function useInfiniteScroll(
   sentinel: Ref<HTMLElement | null>,
@@ -17,34 +17,35 @@ export function useInfiniteScroll(
   canLoadMore: () => boolean,
   rootMargin = '200px'
 ) {
-  let isVisible = false;
   let isLoading = false;
-
-  async function loadWhileVisible() {
-    if (isLoading) return;
-    isLoading = true;
-    try {
-      for (let i = 0; i < maxConsecutiveLoads && isVisible && canLoadMore(); i++) {
-        await onLoadMore();
-      }
-    } finally {
-      isLoading = false;
-    }
-  }
 
   watch(
     sentinel,
     (element, _previous, onCleanup) => {
       if (!element || typeof IntersectionObserver === 'undefined') return;
+      let active = true;
       const observer = new IntersectionObserver(
-        (entries) => {
-          isVisible = entries.some((entry) => entry.isIntersecting);
-          if (isVisible) loadWhileVisible();
+        async (entries) => {
+          const isVisible = entries.some((entry) => entry.isIntersecting);
+          if (!isVisible || isLoading || !canLoadMore()) return;
+          isLoading = true;
+          try {
+            await onLoadMore();
+          } finally {
+            isLoading = false;
+          }
+          if (active && canLoadMore()) {
+            observer.unobserve(element);
+            observer.observe(element);
+          }
         },
         { rootMargin }
       );
       observer.observe(element);
-      onCleanup(() => observer.disconnect());
+      onCleanup(() => {
+        active = false;
+        observer.disconnect();
+      });
     },
     { immediate: true, flush: 'post' }
   );
