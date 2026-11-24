@@ -64,9 +64,12 @@ function selectPlaylist(playlist: Playlist) {
   // Spotify only returns the contents of playlists the user owns or collaborates on
   const items = getPlaylistItems(playlist);
   if (!items) return;
-  tracksStore.setNextUrl(items.url);
-  tracksStore.setTracksUrl(items.url);
-  tracksStore.setTotalTracks(items.total);
+  tracksStore.openPlaylist({
+    playlistId: playlist.id,
+    snapshotId: playlist.snapshot_id,
+    url: items.url,
+    total: items.total
+  });
   userSavedPlaylists.setSelectedPlaylist(playlist);
 }
 

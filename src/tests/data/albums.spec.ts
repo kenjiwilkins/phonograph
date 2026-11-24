@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { isReactive } from 'vue';
-import { useUserSavedAlbumsStore } from '@/data';
+import { useUserSavedAlbumsStore, useUserStore } from '@/data';
+import { readAlbumsCache, writeAlbumsCache } from '@/cache/libraryCache';
+import type { User } from '@/types';
 import { generateAlbum } from '../helpers';
 import * as api from '@/api';
 
 vi.mock('@/api', () => ({
   getUserSavedAlbums: vi.fn(),
   getNextUserSavedAlbums: vi.fn(),
-  getUserSavedAlbumAt: vi.fn()
+  getUserSavedAlbumAt: vi.fn(),
+  getSavedAlbumsHead: vi.fn()
 }));
 
 describe('UserSavedAlbumsStore', () => {
@@ -295,6 +298,161 @@ describe('UserSavedAlbumsStore', () => {
 
       await store.pickRandomAlbum();
       expect(store.selectedAlbum).not.toHaveProperty('tracks');
+    });
+  });
+
+  describe('loadUserSavedAlbums (#80)', () => {
+    const firstPage = (albums = [generateAlbum(), generateAlbum()], total = 120) => ({
+      items: albums.map((album, i) => ({ album, added_at: `2026-11-0${i + 1}T00:00:00Z` })),
+      total,
+      next: 'https://api.spotify.com/v1/me/albums?offset=50&limit=50'
+    });
+    const head = (page: ReturnType<typeof firstPage>) => ({
+      ...page,
+      items: page.items.slice(0, 1)
+    });
+
+    beforeEach(() => {
+      localStorage.clear();
+      useUserStore().setUser({ id: 'user-1' } as User);
+    });
+
+    it('fetches the first page and caches it when nothing is cached', async () => {
+      const page = firstPage();
+      (api.getUserSavedAlbums as any).mockResolvedValue(page);
+
+      await useUserSavedAlbumsStore().loadUserSavedAlbums();
+
+      expect(api.getSavedAlbumsHead).not.toHaveBeenCalled();
+      expect(readAlbumsCache('user-1')).toMatchObject({
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+    });
+
+    it('shows cached albums immediately and keeps them when the library is unchanged', async () => {
+      const page = firstPage();
+      writeAlbumsCache('user-1', {
+        albums: page.items.map((item) => item.album),
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+      let resolveHead!: (value: unknown) => void;
+      (api.getSavedAlbumsHead as any).mockReturnValue(
+        new Promise((resolve) => (resolveHead = resolve))
+      );
+
+      const store = useUserSavedAlbumsStore();
+      const loading = store.loadUserSavedAlbums();
+      // Rendered from the cache before the validation request returns
+      expect(store.albums).toHaveLength(2);
+      expect(store.totalAlbums).toBe(120);
+      expect(store.nextUrl).toBe(page.next);
+      expect(store.hasNext).toBe(true);
+
+      resolveHead(head(page));
+      await loading;
+      expect(api.getUserSavedAlbums).not.toHaveBeenCalled();
+      expect(store.albums).toHaveLength(2);
+    });
+
+    it('refetches the first page when an album was added', async () => {
+      const page = firstPage();
+      writeAlbumsCache('user-1', {
+        albums: page.items.map((item) => item.album),
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+      const updated = firstPage([generateAlbum(), ...page.items.map((item) => item.album)], 121);
+      (api.getSavedAlbumsHead as any).mockResolvedValue(head(updated));
+      (api.getUserSavedAlbums as any).mockResolvedValue(updated);
+
+      const store = useUserSavedAlbumsStore();
+      await store.loadUserSavedAlbums();
+
+      expect(api.getUserSavedAlbums).toHaveBeenCalledTimes(1);
+      expect(store.albums).toHaveLength(3);
+      expect(readAlbumsCache('user-1')?.total).toBe(121);
+    });
+
+    it('refetches the first page when an album was removed', async () => {
+      const page = firstPage();
+      writeAlbumsCache('user-1', {
+        albums: page.items.map((item) => item.album),
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+      (api.getSavedAlbumsHead as any).mockResolvedValue({ ...head(page), total: 119 });
+      (api.getUserSavedAlbums as any).mockResolvedValue({ ...page, total: 119 });
+
+      await useUserSavedAlbumsStore().loadUserSavedAlbums();
+      expect(api.getUserSavedAlbums).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the cached albums when the validation request fails', async () => {
+      const page = firstPage();
+      writeAlbumsCache('user-1', {
+        albums: page.items.map((item) => item.album),
+        total: 120,
+        nextUrl: page.next,
+        fingerprint: {
+          total: 120,
+          firstId: page.items[0].album.id,
+          firstAddedAt: page.items[0].added_at
+        }
+      });
+      (api.getSavedAlbumsHead as any).mockRejectedValue(new Error('offline'));
+
+      const store = useUserSavedAlbumsStore();
+      await store.loadUserSavedAlbums();
+      expect(store.albums).toHaveLength(2);
+      expect(api.getUserSavedAlbums).not.toHaveBeenCalled();
+    });
+
+    it('adds the next page to the cache', async () => {
+      const page = firstPage();
+      (api.getUserSavedAlbums as any).mockResolvedValue(page);
+      (api.getNextUserSavedAlbums as any).mockResolvedValue({
+        items: [{ album: generateAlbum(), added_at: '2026-10-01T00:00:00Z' }],
+        next: null
+      });
+
+      const store = useUserSavedAlbumsStore();
+      await store.loadUserSavedAlbums();
+      await store.fetchNextUserSavedAlbums();
+
+      const cached = readAlbumsCache('user-1');
+      expect(cached?.albums).toHaveLength(3);
+      expect(cached?.nextUrl).toBe('');
+      expect(cached?.fingerprint.firstId).toBe(page.items[0].album.id);
+    });
+
+    it('does not cache without a logged-in user', async () => {
+      useUserStore().$reset();
+      (api.getUserSavedAlbums as any).mockResolvedValue(firstPage());
+
+      await useUserSavedAlbumsStore().loadUserSavedAlbums();
+      expect(Object.keys({ ...localStorage })).toHaveLength(0);
     });
   });
 });

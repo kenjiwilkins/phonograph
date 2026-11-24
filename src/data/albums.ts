@@ -1,15 +1,28 @@
 import { defineStore } from 'pinia';
-import { markRaw } from 'vue';
 import { Album, AlbumSummary, UserSavedAlbumsItem } from '../types';
-import { getUserSavedAlbums, getNextUserSavedAlbums, getUserSavedAlbumAt } from '../api';
+import {
+  getUserSavedAlbums,
+  getNextUserSavedAlbums,
+  getUserSavedAlbumAt,
+  getSavedAlbumsHead
+} from '../api';
+import { AlbumsFingerprint, readAlbumsCache, writeAlbumsCache } from '../cache/libraryCache';
+import { useUserStore } from './user';
+import { toAlbumSummary } from './summaries';
 import { randomOffset } from '../utils';
 
-/**
- * Keeps only what the UI uses (saved album responses also include up to 50 tracks, copyrights,
- * etc.) and marks it raw so Vue doesn't wrap every nested object in a reactive proxy.
- */
-function toAlbumSummary({ id, name, images, artists, external_urls, uri }: AlbumSummary) {
-  return markRaw<AlbumSummary>({ id, name, images, artists, external_urls, uri });
+/** Identifies the state of the saved albums list from its first page (see libraryCache). */
+function fingerprintOf(data: { total: number; items: UserSavedAlbumsItem[] }): AlbumsFingerprint {
+  const first = data.items[0];
+  return {
+    total: data.total,
+    firstId: first?.album.id ?? null,
+    firstAddedAt: first?.added_at ?? null
+  };
+}
+
+function sameFingerprint(a: AlbumsFingerprint, b: AlbumsFingerprint) {
+  return a.total === b.total && a.firstId === b.firstId && a.firstAddedAt === b.firstAddedAt;
 }
 
 // The request currently loading a page. Callers that arrive while it is loading wait for it
@@ -24,7 +37,8 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     isLoading: false,
     nextUrl: '',
     totalAlbums: 0,
-    lastRandomOffset: null as number | null
+    lastRandomOffset: null as number | null,
+    fingerprint: null as AlbumsFingerprint | null
   }),
   actions: {
     clearAllStates() {
@@ -36,6 +50,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
       this.nextUrl = '';
       this.totalAlbums = 0;
       this.lastRandomOffset = null;
+      this.fingerprint = null;
     },
     addAlbums(albums: AlbumSummary[]) {
       const knownIds = new Set(this.albums.map((album) => album.id));
@@ -90,6 +105,8 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
           this.setTotalAlbums(data.total);
           this.setHasNext(!!data.next);
           this.setNextUrl(data.next);
+          this.fingerprint = fingerprintOf(data);
+          this.saveCache();
         } catch (error) {
           console.error(error);
           this.setNextUrl('');
@@ -112,6 +129,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
           this.addAlbums(data.items.map((item: UserSavedAlbumsItem) => item.album));
           this.setHasNext(!!data.next);
           this.setNextUrl(data.next);
+          this.saveCache();
         } catch (error) {
           console.error(error);
           this.setNextUrl('');
@@ -122,6 +140,45 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
         }
       })();
       return inFlightRequest;
+    },
+    /**
+     * Loads the saved albums, rendering the cached list right away when there is one
+     * (stale-while-revalidate, #80). The cache is validated with a single `limit=1` request:
+     * if the total or the most recently saved album changed, the first page is fetched again.
+     * Otherwise the cached pages (including those loaded by scrolling) are kept.
+     */
+    async loadUserSavedAlbums() {
+      const userId = useUserStore().user?.id;
+      const cached = userId ? readAlbumsCache(userId) : null;
+      if (!cached) return this.fetchUserSavedAlbums();
+
+      this.overwriteAlbums(cached.albums);
+      this.setTotalAlbums(cached.total);
+      this.setNextUrl(cached.nextUrl);
+      this.setHasNext(!!cached.nextUrl);
+      this.fingerprint = cached.fingerprint;
+
+      let current: AlbumsFingerprint;
+      try {
+        current = fingerprintOf(await getSavedAlbumsHead());
+      } catch (error) {
+        // Offline or a transient error: keep showing the cached list
+        console.error(error);
+        return;
+      }
+      if (!sameFingerprint(current, cached.fingerprint)) {
+        await this.fetchUserSavedAlbums();
+      }
+    },
+    saveCache() {
+      const userId = useUserStore().user?.id;
+      if (!userId || !this.fingerprint) return;
+      writeAlbumsCache(userId, {
+        albums: this.albums,
+        total: this.totalAlbums,
+        nextUrl: this.nextUrl ?? '',
+        fingerprint: this.fingerprint
+      });
     },
     /**
      * Selects a random saved album. When not every album is loaded yet, only the album at a

@@ -8,6 +8,7 @@ import {
   saveVerifier,
   takeVerifier
 } from '@/auth/tokenStorage';
+import { readAlbumsCache, writeAlbumsCache } from '@/cache/libraryCache';
 
 // Mocking window.location
 const mockLocation = new URL('http://localhost:5173/');
@@ -244,6 +245,32 @@ describe('auth', () => {
       expect(result.isAuthenticated).toBe(false);
       expect(result.needsAuth).toBe(true);
       expect(getRefreshToken()).toBeNull();
+    });
+
+    test('clears the cached library when the session can no longer be refreshed (#80)', async () => {
+      writeAlbumsCache('user-1', {
+        albums: [],
+        total: 0,
+        nextUrl: '',
+        fingerprint: { total: 0, firstId: null, firstAddedAt: null }
+      });
+      saveTokens({ accessToken: 'at', expiresAt: Date.now() - 1000, refreshToken: 'rt' });
+      mockTokenEndpoint({ error: 'invalid_grant' }, 400);
+
+      await auth.useAuth();
+      expect(readAlbumsCache('user-1')).toBeNull();
+    });
+
+    test('clears the cached library when there is no session (#80)', async () => {
+      writeAlbumsCache('user-1', {
+        albums: [],
+        total: 0,
+        nextUrl: '',
+        fingerprint: { total: 0, firstId: null, firstAddedAt: null }
+      });
+
+      await auth.useAuth();
+      expect(readAlbumsCache('user-1')).toBeNull();
     });
 
     test('moves tokens from cookies written by earlier versions (#130)', async () => {

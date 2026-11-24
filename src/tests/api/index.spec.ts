@@ -120,4 +120,14 @@ describe('api', () => {
       }
     );
   });
+
+  test('getSavedAlbumsHead (#80)', async () => {
+    const mockInstance = (axios.create as any)();
+    mockInstance.get.mockResolvedValue({ data: { items: [], total: 0 } });
+
+    await api.getSavedAlbumsHead();
+    expect(mockInstance.get).toHaveBeenCalledWith('/me/albums', {
+      params: { offset: 0, limit: 1, market: 'from_token' }
+    });
+  });
 });

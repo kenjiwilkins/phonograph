@@ -80,7 +80,7 @@ async function init() {
 async function getData() {
   try {
     await userStore.getUser();
-    await userSavedAlbums.fetchUserSavedAlbums();
+    await userSavedAlbums.loadUserSavedAlbums();
   } catch (error) {
     if (error) {
       console.error(error);
