@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.1](https://github.com/kenjiwilkins/phonograph/compare/v1.4.0...v1.4.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependencies within their current ranges ([f35faad](https://github.com/kenjiwilkins/phonograph/commit/f35faad1a86e8ed73881534cd54bfbb2e5999737))
+* **deps:** update dependencies within their current ranges ([#152](https://github.com/kenjiwilkins/phonograph/issues/152)) ([1718ca3](https://github.com/kenjiwilkins/phonograph/commit/1718ca3787d8633bb64cad75ed65464bd8dfb1b1))
+* **deps:** upgrade Sentry to v11 and keep personal data off ([2f35ec8](https://github.com/kenjiwilkins/phonograph/commit/2f35ec8aea70efb1b606965a92ee2df8bf69e5b5))
+* **deps:** upgrade Sentry to v11 and keep personal data off ([#172](https://github.com/kenjiwilkins/phonograph/issues/172)) ([54c2fd0](https://github.com/kenjiwilkins/phonograph/commit/54c2fd0c6b3c870b6b5ff9b7891904d8430f11f9))
+* **deps:** upgrade to Pinia 4 ([f822581](https://github.com/kenjiwilkins/phonograph/commit/f822581737358cc7f618a22850bbd14963c42e38))
+* **deps:** upgrade to Pinia 4 ([#171](https://github.com/kenjiwilkins/phonograph/issues/171)) ([3186dcf](https://github.com/kenjiwilkins/phonograph/commit/3186dcf1f03d46d2069016cdde35aee46abef38a))
+
 ## [1.4.0](https://github.com/kenjiwilkins/phonograph/compare/v1.3.3...v1.4.0) (2026-11-24)
 
 
