@@ -16,19 +16,19 @@
       />
       <div class="flex w-full max-w-full flex-col justify-center overflow-x-hidden text-white">
         <p
-          class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm"
+          class="overflow-x-hidden text-sm text-ellipsis whitespace-nowrap"
           :data-testid="`track-li-name-${index}`"
         >
           {{ track.name }}
         </p>
         <p
-          class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm font-thin"
+          class="overflow-x-hidden text-sm font-thin text-ellipsis whitespace-nowrap"
           :data-testid="`track-li-album-${index}`"
         >
           {{ track.album.name }}
         </p>
         <p
-          class="overflow-x-hidden text-ellipsis whitespace-nowrap text-sm font-thin"
+          class="overflow-x-hidden text-sm font-thin text-ellipsis whitespace-nowrap"
           :data-testid="`track-li-artist-${index}`"
         >
           {{ track.artists[0]?.name }}

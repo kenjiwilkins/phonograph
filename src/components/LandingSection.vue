@@ -6,7 +6,7 @@
       <h1 class="glitch mb-8 text-4xl font-bold sm:text-5xl md:text-6xl" data-text="PHONOGRAPH">
         PHONOGRAPH
       </h1>
-      <p class="mb-12 whitespace-pre-wrap text-xl text-gray-300">
+      <p class="mb-12 text-xl whitespace-pre-wrap text-gray-300">
         {{ description }}
       </p>
       <button

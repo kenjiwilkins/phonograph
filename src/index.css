@@ -1,6 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tailwind 4's OKLCH palette made the app's accent green noticeably different; keep v3's */
+@theme {
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+}
+
+/*
+ * Keep two Tailwind 3 defaults that Tailwind 4 changed (from the official upgrade guide):
+ * borders without a color were gray-200 (now currentColor), and buttons and role="button"
+ * elements such as the album and playlist rows showed a pointer cursor.
+ */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 body {
   background-color: #030712;

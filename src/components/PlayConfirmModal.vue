@@ -2,7 +2,7 @@
   <Transition>
     <div
       v-if="showModal"
-      class="overlay fixed left-0 top-0 z-20 flex h-full w-full flex-col items-center justify-end bg-gray-950 bg-opacity-80 text-white"
+      class="overlay fixed top-0 left-0 z-20 flex h-full w-full flex-col items-center justify-end bg-gray-950/80 text-white"
       @click.self="close"
       data-testid="play-confirm-modal-overlay"
     >
