@@ -30,8 +30,8 @@
     "vue": "^3.4.19"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.0.0",
-    "@commitlint/config-conventional": "^19.0.0",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.6.0",
     "@pinia/testing": "^2.0.2",
