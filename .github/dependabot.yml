@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Security updates only. Version update PRs are disabled.
+    open-pull-requests-limit: 0
+    # Conventional Commits prefixes so release-please can classify the change:
+    # production dependency fixes produce a patch release (and a deploy), dev dependencies don't.
+    commit-message:
+      prefix: 'fix(deps)'
+      prefix-development: 'chore(deps-dev)'

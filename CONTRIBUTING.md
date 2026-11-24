@@ -6,13 +6,54 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a
-   build.
-2. Update the README.md with details of changes to the interface, this includes new environment
-   variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the approval from the code owner.
+1. Create a branch from `develop` (e.g. `fix/signin-issue`, `feature/issue-templates`) and open the PR against `develop`.
+2. Use a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) PR title, e.g. `fix(auth): refresh expiring tokens`. The `PR Title` check enforces this.
+3. Make sure `yarn test`, `yarn lint` and `yarn build` pass.
+4. PRs are **squash-merged** with the PR title as the commit message, once approved by the code owner.
+5. Do **not** bump the version in `package.json` yourself. It is decided at release time (see below).
+
+## Versioning and Releases
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please) and follow [SemVer](https://semver.org/).
+
+```
+feature PR --squash--> develop --> release-please keeps a release PR up to date
+                                   (package.json version + CHANGELOG.md)
+                                        | merge the release PR
+                                        v
+                       tag vX.Y.Z + GitHub Release
+                                        |
+                                        v
+                       main is fast-forwarded --> Vercel production deploy
+```
+
+- `main` only tracks the latest release. Never commit or open PRs to `main` directly.
+- The next version is computed from the commits merged since the last release, so it is fine if a change turns out bigger than expected: the release PR is recalculated on every push to `develop`.
+
+### Which PR title type to use
+
+Phonograph is an app, not a library, so "breaking" means something users have to act on.
+
+| Change                                                                                                  | Title example                                  | Release    |
+| ------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------- |
+| Users must act or lose something: re-authorization / new Spotify scopes, removed features, changed URLs | `feat!: require playlist-read scope`           | major      |
+| New user-visible feature                                                                                | `feat: add playlist shuffle`                   | minor      |
+| Bug fix, performance improvement, production dependency fix                                             | `fix: ...`, `perf: ...`, `fix(deps): ...`      | patch      |
+| Tests, docs, CI, refactoring, dev dependencies                                                          | `test:`, `docs:`, `ci:`, `refactor:`, `chore:` | no release |
+
+### Overriding the version
+
+To force a specific version, set `"release-as": "x.y.z"` for the `.` package in `release-please-config.json`, merge that change, then remove it after the release.
+
+### Maintainer setup
+
+The workflow needs a fine-grained personal access token from a repository admin stored as the `RELEASE_TOKEN` secret, with access to this repository only and these permissions:
+
+- Contents: Read and write
+- Pull requests: Read and write
+- Workflows: Read and write (main is fast-forwarded over commits that may change workflow files)
+
+The token lets the release PR trigger CI and lets the workflow update the protected `main` branch. Renew it before it expires.
 
 ## Code of Conduct
 
