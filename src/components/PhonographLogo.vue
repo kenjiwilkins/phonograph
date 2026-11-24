@@ -7,7 +7,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    /** md: 20px for the app bar; xl: 64px (44px on narrow screens) for the landing page */
+    /** md: 20px for the app bar; xl: up to 64px, scaled down to fit narrow screens, for the landing page */
     size?: 'md' | 'xl';
     /** Wider buzz with a horizontal tear. Landing page only; never at md. */
     surge?: boolean;
@@ -61,15 +61,13 @@ const text = 'PHONOGRAPH';
   font-size: 20px;
 }
 
+/*
+ * Scales with the viewport so the wordmark (about 8.1x its font size wide) fits a phone screen
+ * with 24px gutters: 39px at 375px wide, capped at 64px from about 580px.
+ */
 .pg-logo--xl {
-  font-size: 44px;
+  font-size: clamp(32px, calc(12vw - 6px), 64px);
   letter-spacing: 0.04em;
-}
-
-@media (min-width: 640px) {
-  .pg-logo--xl {
-    font-size: 64px;
-  }
 }
 
 .pg-logo--surge {
