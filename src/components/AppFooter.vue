@@ -1,7 +1,10 @@
 <template>
-  <div class="h-16"></div>
-  <footer class="fixed inset-x-0 bottom-0 z-10 h-16 border-t border-line bg-surface-100">
-    <nav class="mx-auto grid h-full max-w-lg grid-cols-3" aria-label="Library">
+  <!-- Keeps the last row clear of the dock -->
+  <div class="dock-spacer" aria-hidden="true"></div>
+  <footer class="dock">
+    <nav class="dock__bar" aria-label="Library">
+      <!-- 1px edge that follows the cut corner; drawn apart so the bar can keep its backdrop blur -->
+      <span class="dock__edge" aria-hidden="true"></span>
       <a
         href="https://github.com/kenjiwilkins/phonograph"
         target="_blank"
@@ -80,6 +83,90 @@ function setTab(tab: TabType) {
 </script>
 
 <style scoped>
+/* floating dock: detached from the sides and the bottom; only the bar takes taps */
+.dock-spacer {
+  height: calc(64px + 24px + env(safe-area-inset-bottom));
+}
+
+.dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: 0 12px max(12px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+/* clip-path and backdrop-filter sit on the same element; no filter: drop-shadow() on an ancestor */
+.dock__bar {
+  --cut: var(--chamfer-md);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 64px;
+  max-width: 420px;
+  margin-inline: auto;
+  pointer-events: auto;
+  background: var(--dock-glass);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dock__bar {
+    background: var(--surface-100);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.dock__edge {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  pointer-events: none;
+  background: var(--line-strong);
+  /* keep only a 1px ring: the border box minus the content box */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* the diagonal of the top-right cut, plus a small volt tick on it */
+.dock__bar::before,
+.dock__bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--cut);
+  height: var(--cut);
+  pointer-events: none;
+}
+
+.dock__bar::before {
+  background: linear-gradient(
+    to bottom left,
+    transparent calc(50% - 0.7px),
+    var(--line-strong) calc(50% - 0.7px) calc(50% + 0.7px),
+    transparent calc(50% + 0.7px)
+  );
+}
+
+.dock__bar::after {
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  background: var(--volt);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+}
+
 .tab-bar__tab {
   position: relative;
   display: flex;
@@ -109,12 +196,12 @@ function setTab(tab: TabType) {
   color: var(--ink);
 }
 
-/* keep the focus ring inside the fixed bar */
+/* keep the focus ring inside the dock */
 .tab-bar__tab:focus-visible {
-  outline-offset: -2px;
+  outline-offset: -4px;
 }
 
-/* current tab: mint with a glowing 2px bar on the top edge and a small cut tick */
+/* current tab: mint with a glowing 2px bar inside the top edge */
 .tab-bar__tab[aria-current='page'] {
   color: var(--buzz-mint);
 }
@@ -122,22 +209,11 @@ function setTab(tab: TabType) {
 .tab-bar__tab[aria-current='page']::before {
   content: '';
   position: absolute;
-  top: -1px;
+  top: 1px;
   left: 28%;
   right: 28%;
   height: 2px;
   background: var(--buzz-mint);
   box-shadow: var(--glow-mint);
-}
-
-.tab-bar__tab[aria-current='page']::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: calc(72% - 6px);
-  width: 6px;
-  height: 6px;
-  background: var(--buzz-mint);
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
 }
 </style>

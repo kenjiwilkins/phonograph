@@ -23,6 +23,7 @@
   --buzz-mint: #00ff9f;
   --cyan: #19e3ff;
   --scrim: rgba(5, 7, 11, 0.84);
+  --dock-glass: rgba(10, 14, 21, 0.78);
 
   /* cut-corner sizes for clip-path polygons */
   --chamfer-sm: 8px;
