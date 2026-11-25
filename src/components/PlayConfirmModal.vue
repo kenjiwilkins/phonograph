@@ -48,6 +48,7 @@
               >
                 {{ artistName }}
               </p>
+              <SpotifyAttribution class="sheet__attr" />
             </div>
           </div>
           <div class="flex flex-col gap-2">
@@ -61,8 +62,8 @@
               <template #icon>
                 <svg viewBox="0 -960 960 960"><path d="M320-200v-560l440 280-440 280Z" /></svg>
               </template>
-              Play album
-              <template #keyHint>Spotify ↗</template>
+              Play on Spotify
+              <template #keyHint>↗</template>
             </PgButton>
             <PgButton
               variant="ghost"
@@ -107,6 +108,7 @@ import { useUserSavedAlbumsStore, useTracksStore } from '@/data';
 import { getImageUrl } from '@/utils';
 import ContentImage from './ContentImage.vue';
 import PgButton from './PgButton.vue';
+import SpotifyAttribution from './SpotifyAttribution.vue';
 
 // stores
 const userSavedAlbums = useUserSavedAlbumsStore();
@@ -329,6 +331,10 @@ function close() {
   overflow-wrap: anywhere;
   /* one buzz when the sheet opens or the album changes */
   animation: name-buzz 0.5s steps(5) 1;
+}
+
+.sheet__attr {
+  margin-left: -16px;
 }
 
 .sheet__artist {

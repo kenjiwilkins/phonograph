@@ -44,7 +44,7 @@ describe('missing data (#127)', () => {
       }
     });
     // The placeholder draws the playlist icon (#161) instead of an <img> of playlists.svg
-    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('img:not(.pg-attr__logo)')).toBeNull();
     expect(
       getByTestId(`content-image-placeholder-${playlist.name}`).getAttribute(
         'data-placeholder-icon'

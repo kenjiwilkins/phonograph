@@ -275,11 +275,13 @@ describe('PlayConfirmModal', () => {
       const play = await findByTestId('play-confirm-modal-play-button');
       expect(play.classList).toContain('pg-btn--primary');
       expect(play.classList).toContain('pg-btn--lg');
-      expect(play.textContent).toContain('Spotify ↗');
+      expect(play.textContent).toContain('Play on Spotify');
       expect(getByTestId('play-confirm-modal-next-button').classList).toContain('pg-btn--ghost');
       expect(getByTestId('play-confirm-modal-close-button').classList).toContain('pg-btn--text');
       expect(
-        container.querySelectorAll('[data-testid="play-confirm-modal"] img[src$=".svg"]')
+        container.querySelectorAll(
+          '[data-testid="play-confirm-modal"] img[src$=".svg"]:not(.pg-attr__logo)'
+        )
       ).toHaveLength(0);
       unmount();
     });

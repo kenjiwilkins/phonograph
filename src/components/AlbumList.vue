@@ -1,4 +1,5 @@
 <template>
+  <SpotifyAttribution />
   <ul v-if="savedAlbums.length" class="w-full" data-testid="album-list">
     <li v-for="(album, index) in savedAlbums" :key="album.id">
       <MediaRow
@@ -26,6 +27,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import ContentPlaceholder from './ContentPlaceholder.vue';
+import SpotifyAttribution from './SpotifyAttribution.vue';
 import MediaRow from './MediaRow.vue';
 import { useUserSavedAlbumsStore } from '../data';
 import { AlbumSummary } from '../types';
