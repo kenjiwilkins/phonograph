@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.6.0](https://github.com/kenjiwilkins/phonograph/compare/v1.5.0...v1.6.0) (2026-11-25)
+
+
+### Features
+
+* **ui:** add Spotify attribution and "Play on Spotify" ([f679254](https://github.com/kenjiwilkins/phonograph/commit/f6792543e0de7ec8af7d74f4d6d3a16df97e3ae0)), closes [#190](https://github.com/kenjiwilkins/phonograph/issues/190)
+* **ui:** add Spotify attribution and "Play on Spotify" ([#195](https://github.com/kenjiwilkins/phonograph/issues/195)) ([2a2661f](https://github.com/kenjiwilkins/phonograph/commit/2a2661f311838f098b593d8c1d9ccf8d5c008024))
+* **ui:** enlarge PgButton key hints and give them room ([caf94c8](https://github.com/kenjiwilkins/phonograph/commit/caf94c866989e22be7d94b64e18fcf5db19a3c2e)), closes [#192](https://github.com/kenjiwilkins/phonograph/issues/192)
+* **ui:** enlarge PgButton key hints and give them room ([#206](https://github.com/kenjiwilkins/phonograph/issues/206)) ([f0b62f1](https://github.com/kenjiwilkins/phonograph/commit/f0b62f1c53c38b38842f928bfbfa1e87ef5c953d))
+* **ui:** float the bottom tab bar as a dock ([ac52e01](https://github.com/kenjiwilkins/phonograph/commit/ac52e01a13e371c756e22750aa9d709921bba399)), closes [#191](https://github.com/kenjiwilkins/phonograph/issues/191)
+* **ui:** float the bottom tab bar as a dock ([#205](https://github.com/kenjiwilkins/phonograph/issues/205)) ([16168ba](https://github.com/kenjiwilkins/phonograph/commit/16168ba3059e6140e84eca70904fc34dd241db5e))
+
+
+### Bug Fixes
+
+* **ui:** show Spotify artwork uncropped with rounded corners ([063405b](https://github.com/kenjiwilkins/phonograph/commit/063405b2ba8a529f1cf44464d8ce139a9b352d6e)), closes [#188](https://github.com/kenjiwilkins/phonograph/issues/188)
+* **ui:** show Spotify artwork uncropped with rounded corners ([#193](https://github.com/kenjiwilkins/phonograph/issues/193)) ([34eacea](https://github.com/kenjiwilkins/phonograph/commit/34eaceabf1d54c20d1cf2ad177efdffdf28714d4))
+
 ## [1.5.0](https://github.com/kenjiwilkins/phonograph/compare/v1.4.1...v1.5.0) (2026-11-24)
 
 
