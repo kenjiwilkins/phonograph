@@ -28,9 +28,8 @@
       </section>
 
       <div class="flex flex-col gap-3 px-6">
-        <PgButton variant="primary" size="lg" block @click="startAuth">
+        <PgButton variant="primary" size="lg" block key-hint="return" @click="startAuth">
           Get Started
-          <template #keyHint>⏎</template>
         </PgButton>
         <PgButton
           variant="ghost"
@@ -67,7 +66,7 @@ import PhonographLogo from './PhonographLogo.vue';
 
 const description =
   'Your personal music companion. Discover, organize, and enjoy your favorite tracks.';
-const steps = ['Link your Spotify library', 'Roll a random album', 'Press play. No scrolling.'];
+const steps = ['Link your Spotify library', 'Roll a random album', 'Press play'];
 const year = new Date().getFullYear();
 
 // Resolve getAuth on click, not at render

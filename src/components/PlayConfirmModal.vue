@@ -56,6 +56,7 @@
               variant="primary"
               size="lg"
               block
+              key-hint="external"
               @click.prevent="play"
               data-testid="play-confirm-modal-play-button"
             >
@@ -63,7 +64,6 @@
                 <svg viewBox="0 -960 960 960"><path d="M320-200v-560l440 280-440 280Z" /></svg>
               </template>
               Play on Spotify
-              <template #keyHint>↗</template>
             </PgButton>
             <PgButton
               variant="ghost"
