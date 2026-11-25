@@ -20,8 +20,8 @@
         data-testid="user-button"
       >
         <!-- The name is shown next to it, so the avatar is decorative -->
-        <img v-if="avatarUrl" :src="avatarUrl" alt="" class="pg-cut app-bar__avatar" />
-        <span v-else class="pg-cut app-bar__avatar" aria-hidden="true"></span>
+        <img v-if="avatarUrl" :src="avatarUrl" alt="" class="app-bar__avatar" />
+        <span v-else class="app-bar__avatar" aria-hidden="true"></span>
         <span class="max-w-32 truncate">{{ user?.display_name }}</span>
       </div>
       <PgButton v-else-if="!syncing" variant="ghost" data-testid="login-button">Login</PgButton>
@@ -97,12 +97,12 @@ const status = computed(() => {
 }
 
 .app-bar__avatar {
-  --cut: 6px;
   display: block;
   flex: none;
   width: 28px;
   height: 28px;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: var(--radius-art);
   background: var(--surface-300);
 }
 </style>

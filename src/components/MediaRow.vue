@@ -7,7 +7,6 @@
   >
     <span class="media-row__thumb">
       <ContentImage
-        class="pg-cut pg-cut-sm"
         :src="imageSrc"
         :alt="imageAlt ?? title"
         :placeholder-icon="placeholderIcon"
@@ -104,7 +103,8 @@ const paddedIndex = computed(() => String((props.index ?? 0) + 1).padStart(4, '0
   display: block;
   width: 64px;
   height: 64px;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: var(--radius-art);
 }
 
 /* corner brackets */
@@ -119,15 +119,15 @@ const paddedIndex = computed(() => String((props.index ?? 0) + 1).padStart(4, '0
 }
 
 .media-row__thumb::before {
-  top: -3px;
-  left: -3px;
+  top: -8px;
+  left: -8px;
   border-top-width: 2px;
   border-left-width: 2px;
 }
 
 .media-row__thumb::after {
-  right: -3px;
-  bottom: -3px;
+  right: -8px;
+  bottom: -8px;
   border-right-width: 2px;
   border-bottom-width: 2px;
 }
