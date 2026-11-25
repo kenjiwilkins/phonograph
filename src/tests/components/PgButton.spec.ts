@@ -62,12 +62,29 @@ describe('PgButton', () => {
     expect(button.classList).toContain('pg-btn--disabled');
   });
 
-  test('renders icon and key hint slots', () => {
-    const { getByRole, getByText } = render(PgButton, {
-      slots: { default: 'Get started', icon: '<svg data-testid="icon"></svg>', keyHint: '⏎' }
+  test('renders the icon slot and the key hint as an inline SVG icon', () => {
+    const { getByRole, getByTestId } = render(PgButton, {
+      props: { keyHint: 'return' },
+      slots: { default: 'Get started', icon: '<svg data-testid="icon"></svg>' }
     });
     expect(getByRole('button').querySelector('.pg-btn__icon svg')).not.toBeNull();
-    expect(getByText('⏎').classList).toContain('pg-btn__key');
+    const key = getByTestId('pg-btn-key-hint');
+    expect(key.classList).toContain('pg-btn__key');
+    expect(key.getAttribute('aria-hidden')).toBe('true');
+    expect(key.getAttribute('data-key-hint')).toBe('return');
+    expect(key.querySelector('svg path')).not.toBeNull();
+    expect(key.textContent?.trim()).toBe('');
+  });
+
+  test('has no key hint by default and draws a different icon for external', () => {
+    const none = render(PgButton, { slots: { default: 'Close' } });
+    expect(none.container.querySelector('[data-testid="pg-btn-key-hint"]')).toBeNull();
+    const ret = render(PgButton, { props: { keyHint: 'return' }, slots: { default: 'A' } });
+    const ext = render(PgButton, { props: { keyHint: 'external' }, slots: { default: 'B' } });
+    const d = (r: typeof ret) =>
+      r.container.querySelector('[data-testid="pg-btn-key-hint"] path')?.getAttribute('d');
+    expect(d(ext)).toBeTruthy();
+    expect(d(ext)).not.toBe(d(ret));
   });
 
   test('href renders an <a>', () => {

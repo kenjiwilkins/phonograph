@@ -14,7 +14,15 @@
       <template v-if="loading">Loading</template>
       <slot v-else />
     </span>
-    <span v-if="$slots.keyHint" class="pg-btn__key"><slot name="keyHint" /></span>
+    <span
+      v-if="keyHint"
+      class="pg-btn__key"
+      :data-key-hint="keyHint"
+      data-testid="pg-btn-key-hint"
+      aria-hidden="true"
+    >
+      <svg viewBox="0 -960 960 960"><path :d="keyHintPaths[keyHint]" /></svg>
+    </span>
   </component>
 </template>
 
@@ -35,6 +43,8 @@ const props = withDefaults(
     /** renders an <a> instead of a <button> */
     href?: string;
     type?: 'button' | 'submit' | 'reset';
+    /** Icon at the right end: return = submits or moves on; external = leaves the app */
+    keyHint?: 'return' | 'external';
   }>(),
   {
     variant: 'primary',
@@ -43,9 +53,16 @@ const props = withDefaults(
     loading: false,
     disabled: false,
     href: undefined,
-    type: 'button'
+    type: 'button',
+    keyHint: undefined
   }
 );
+
+// Material Symbols paths (viewBox 0 -960 960 960)
+const keyHintPaths = {
+  return: 'M360-240 120-480l240-240 56 56-144 144h488v-160h80v240H272l144 144-56 56Z',
+  external: 'm256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z'
+};
 
 const inactive = computed(() => props.disabled || props.loading);
 
@@ -82,6 +99,7 @@ const elementAttrs = computed(() => {
   --btn-bg: transparent;
   position: relative;
   isolation: isolate;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -124,6 +142,8 @@ const elementAttrs = computed(() => {
 
 .pg-btn--block .pg-btn__key {
   margin-left: auto;
+  /* with the button padding, clears the top-right chamfer */
+  margin-right: 8px;
 }
 
 .pg-btn__icon {
@@ -139,14 +159,22 @@ const elementAttrs = computed(() => {
 }
 
 .pg-btn__key {
-  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  height: 22px;
+  min-width: 28px;
+  padding: 0 6px;
   border: 1px solid currentColor;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 400;
-  line-height: 12px;
-  letter-spacing: 0.16em;
-  opacity: 0.72;
+  opacity: 0.8;
+}
+
+.pg-btn .pg-btn__key svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 /* primary: volt fill */
