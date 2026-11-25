@@ -12,7 +12,7 @@
       class="skeleton-row"
       :data-testid="`placeholder-${index}`"
     >
-      <span class="pg-skel pg-cut pg-cut-sm block h-16 w-16"></span>
+      <span class="pg-skel skeleton-art block h-16 w-16"></span>
       <span class="flex min-w-0 flex-col gap-2.5">
         <span class="pg-skel block h-3.5" :style="{ width: widthOf(index).title }"></span>
         <span class="pg-skel block h-3" :style="{ width: widthOf(index).meta }"></span>
@@ -73,5 +73,10 @@ onMounted(() => {
   gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--line);
+}
+
+/* same shape as the loaded artwork: rounded, never cut */
+.skeleton-art {
+  border-radius: var(--radius-art);
 }
 </style>

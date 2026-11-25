@@ -30,13 +30,7 @@
           </div>
           <div class="mb-4 flex items-center gap-4 border-b border-line pb-4">
             <span class="sheet__thumb">
-              <ContentImage
-                class="pg-cut pg-cut-sm"
-                :src="imageUrl"
-                :alt="albumName"
-                :height="96"
-                :width="96"
-              />
+              <ContentImage :src="imageUrl" :alt="albumName" :height="96" :width="96" />
             </span>
             <div class="min-w-0">
               <h2
@@ -297,7 +291,8 @@ function close() {
   display: block;
   width: 96px;
   height: 96px;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: var(--radius-art);
 }
 
 .sheet__thumb::before,
@@ -311,15 +306,15 @@ function close() {
 }
 
 .sheet__thumb::before {
-  top: -3px;
-  left: -3px;
+  top: -8px;
+  left: -8px;
   border-top-width: 2px;
   border-left-width: 2px;
 }
 
 .sheet__thumb::after {
-  right: -3px;
-  bottom: -3px;
+  right: -8px;
+  bottom: -8px;
   border-right-width: 2px;
   border-bottom-width: 2px;
 }

@@ -29,6 +29,10 @@
   --chamfer-md: 12px;
   --chamfer-lg: 20px;
 
+  /* Spotify artwork (album covers, profile images) is never cropped or clipped: rounded only */
+  --radius-art: 4px;
+  --radius-art-lg: 8px;
+
   /* glows: only on signals */
   --glow-volt: 0 0 18px rgba(245, 230, 10, 0.35);
   --glow-mint: 0 0 12px rgba(0, 255, 159, 0.55);
@@ -38,6 +42,12 @@
   --buzz-cycle: 2s;
   --buzz-channel: 0.5s;
   --hover-buzz: 180ms;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --radius-art: var(--radius-art-lg);
+  }
 }
 
 @theme {
