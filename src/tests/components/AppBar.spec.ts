@@ -53,13 +53,14 @@ describe('AppBar', () => {
     expect(getByTestId('login-button').textContent).toContain('Login');
   });
   test('renders correctly with logged in', async () => {
-    const { getByTestId, queryByRole } = renderLoggedIn();
+    const { getByTestId } = renderLoggedIn();
     const user = getByTestId('user-button');
     expect(user.textContent).toContain('test');
-    // The name is shown, so the avatar is decorative and the display has no dead tab stop (#165)
+    // The name is shown, so the avatar is decorative (#165); the display opens the account menu
     expect(user.querySelector('img')?.getAttribute('alt')).toBe('');
-    expect(user.tagName).not.toBe('BUTTON');
-    expect(queryByRole('button')).toBeNull();
+    expect(user.tagName).toBe('BUTTON');
+    expect(user.getAttribute('aria-label')).toBe('Account menu: test');
+    expect(user.getAttribute('aria-haspopup')).toBe('dialog');
   });
 
   test('shows no link status and a LOGIN ghost button when logged out', () => {
@@ -88,7 +89,7 @@ describe('AppBar', () => {
   test('falls back to a placeholder avatar when the user has no image', () => {
     const { getByTestId, queryByRole } = renderLoggedIn(false, { ...loggedInUser, images: [] });
     expect(queryByRole('img')).toBeNull();
-    expect(getByTestId('user-button').querySelector('.app-bar__avatar')).not.toBeNull();
+    expect(getByTestId('user-button').querySelector('.account-avatar')).not.toBeNull();
   });
 
   test('shows SYNC instead of LOGIN while the user profile loads (#162)', () => {

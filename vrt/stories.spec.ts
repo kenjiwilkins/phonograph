@@ -7,6 +7,11 @@ const storybookDir = path.resolve(process.env.STORYBOOK_DIR ?? 'storybook-static
 // Never resolved: every request for it is answered from storybookDir
 const origin = 'http://storybook.test';
 
+// The part of Storybook's preview global that tells how far the story has got
+interface StoryPreview {
+  currentRender?: { phase?: string };
+}
+
 interface IndexEntry {
   id: string;
   type: 'story' | 'docs';
@@ -38,6 +43,12 @@ for (const { id } of stories) {
     const body = page.locator('body');
     await expect(body).toHaveClass(/sb-show-(main|errordisplay|nopreview)/);
     await expect(body, 'the story failed to render').toHaveClass(/sb-show-main/);
+    // Some stories interact first (e.g. opening a menu) in their play function
+    await page.waitForFunction(() => {
+      const preview = (window as unknown as { __STORYBOOK_PREVIEW__?: StoryPreview })
+        .__STORYBOOK_PREVIEW__;
+      return ['completed', 'finished'].includes(preview?.currentRender?.phase ?? '');
+    });
     await page.evaluate(() => document.fonts.ready);
     await expect
       .poll(() => page.evaluate(() => [...document.images].every((image) => image.complete)))
