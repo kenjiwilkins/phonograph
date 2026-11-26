@@ -12,6 +12,17 @@ Please note we have a code of conduct, please follow it in all your interactions
 4. PRs are **squash-merged** with the PR title as the commit message, once approved by the code owner.
 5. Do **not** bump the version in `package.json` yourself. It is decided at release time (see below).
 
+## Storybook and visual regression tests
+
+`yarn storybook` shows the components on http://localhost:6006. Stories live in `src/stories`; use the fixed data in `fixtures.ts` (nothing random or loaded from the network) and put store state in `parameters.seed`.
+
+The visual regression tests screenshot every story at a phone (375px) and a desktop (1280px) width. Baseline images are not committed:
+
+- **In CI**, the `Visual Regression` workflow captures the base of the PR and compares the head with it. If it fails, download the `vrt-report` artifact and check the differences. It fails for intended changes too, so it doesn't block merging.
+- **Locally**, run `yarn playwright install chromium` once. Then run `yarn vrt:update` before your change (e.g. on `develop`) and `yarn vrt` after it. The report is in `.vrt/report`.
+
+Stories without a baseline (newly added) are skipped when comparing.
+
 ## Versioning and Releases
 
 Releases are automated with [release-please](https://github.com/googleapis/release-please) and follow [SemVer](https://semver.org/).

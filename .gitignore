@@ -11,6 +11,9 @@ node_modules
 dist
 dev-dist
 coverage
+storybook-static
+.vrt
+*storybook.log
 dist-ssr
 *.local
 .env

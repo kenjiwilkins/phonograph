@@ -20,6 +20,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "storybook:build": "storybook build",
+    "vrt": "yarn storybook:build && playwright test -c vrt",
+    "vrt:update": "yarn storybook:build && playwright test -c vrt --update-snapshots=all",
     "prepare": "husky"
   },
   "dependencies": {
@@ -38,7 +42,9 @@
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.6.0",
     "@pinia/testing": "^2.0.2",
+    "@playwright/test": "^1.65.1",
     "@sentry/vite-plugin": "^11.17.0",
+    "@storybook/vue3-vite": "^10.6.9",
     "@tailwindcss/vite": "^4.3.5",
     "@testing-library/vue": "^8.0.3",
     "@types/node": "^26.6.6",
@@ -56,6 +62,7 @@
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "storybook": "^10.6.9",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.74.0",

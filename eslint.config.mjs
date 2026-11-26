@@ -16,7 +16,9 @@ export default defineConfigWithVueTs(
       '**/*.d.ts',
       'dist/**',
       'dev-dist/**',
-      'coverage/**'
+      'coverage/**',
+      'storybook-static/**',
+      '.vrt/**'
     ]
   },
   js.configs.recommended,
@@ -43,6 +45,13 @@ export default defineConfigWithVueTs(
   {
     // Vue single-file components are default exports by design
     files: ['**/*.vue'],
+    rules: {
+      'import-x/no-default-export': 'off'
+    }
+  },
+  {
+    // Storybook and Playwright read their configuration and stories from default exports
+    files: ['.storybook/**/*.ts', 'src/stories/**/*.stories.ts', 'vrt/playwright.config.ts'],
     rules: {
       'import-x/no-default-export': 'off'
     }

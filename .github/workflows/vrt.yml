@@ -1,0 +1,72 @@
+name: Visual Regression
+
+# Screenshots every Storybook story at the base of the PR and at its head on the same runner, so
+# no baseline images are committed. A failure means something looks different: check the report
+# artifact. Intended UI changes also fail, so don't make this a required check.
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: vrt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vrt:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # The merge commit and its first parent, the base revision
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+
+      - name: Build Storybook of the head
+        run: yarn storybook:build
+
+      - name: Build Storybook of the base
+        id: base
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/base" HEAD^1
+          cd "$RUNNER_TEMP/base"
+          if [ ! -d .storybook ]; then
+            echo "::notice::The base has no Storybook yet: only checking that the stories render"
+            exit 0
+          fi
+          yarn install --frozen-lockfile
+          yarn storybook:build
+          echo "dir=$RUNNER_TEMP/base/storybook-static" >> "$GITHUB_OUTPUT"
+
+      - name: Capture the baseline
+        env:
+          STORYBOOK_DIR: ${{ steps.base.outputs.dir || 'storybook-static' }}
+        run: yarn playwright test -c vrt --update-snapshots=all
+
+      - name: Compare the head with the baseline
+        run: yarn playwright test -c vrt
+
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: vrt-report
+          path: .vrt/report
+          retention-days: 14
