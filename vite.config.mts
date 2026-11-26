@@ -29,7 +29,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary', 'json', 'html'],
       reportOnFailure: true,
-      include: ['src/**/*.ts', 'src/**/*.vue']
+      include: ['src/**/*.ts', 'src/**/*.vue'],
+      // Storybook stories are exercised by the VRT, not by unit tests
+      exclude: ['src/stories/**']
     }
   },
   plugins: [

@@ -2,3 +2,6 @@
 CHANGELOG.md
 # Third-party agent skills, installed from skills-lock.json
 .gemini/skills/
+# Build and VRT output
+storybook-static/
+.vrt/
