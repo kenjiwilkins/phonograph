@@ -5,11 +5,16 @@ import tailwindcss from '@tailwindcss/vite';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath } from 'node:url';
+// release-please bumps this, so the version shown in the app follows each release
+import { version } from './package.json' with { type: 'json' };
 
 const fromRoot = (dir: string) => fileURLToPath(new URL(dir, import.meta.url));
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(version)
+  },
   resolve: {
     alias: {
       '@': fromRoot('./src'),

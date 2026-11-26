@@ -98,7 +98,7 @@
                 >
                   Open profile in Spotify
                   <svg viewBox="0 -960 960 960" aria-hidden="true">
-                    <path d="m256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z" />
+                    <path :d="externalIcon" />
                   </svg>
                   <span class="sr-only"> (opens in a new tab)</span>
                 </a>
@@ -116,6 +116,33 @@
                 </dd>
               </div>
             </dl>
+
+            <div>
+              <h3 id="account-about" class="pg-section pg-hud account-section"><b>//</b> About</h3>
+              <ul class="account-list" aria-labelledby="account-about">
+                <li v-for="link in aboutLinks" :key="link.label">
+                  <a
+                    class="account-item"
+                    :href="link.href"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :data-testid="link.testId"
+                  >
+                    <svg class="account-item__icon" viewBox="0 -960 960 960" aria-hidden="true">
+                      <path :d="link.icon" />
+                    </svg>
+                    <span class="account-item__label">{{ link.label }}</span>
+                    <span class="account-item__trail">
+                      <span v-if="link.detail">{{ link.detail }}</span>
+                      <svg viewBox="0 -960 960 960" aria-hidden="true">
+                        <path :d="externalIcon" />
+                      </svg>
+                    </span>
+                    <span class="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
       </div>
@@ -137,6 +164,29 @@ defineProps<{
 // Material Symbols "person" (viewBox 0 -960 960 960)
 const personIcon =
   'M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z';
+
+const externalIcon = 'm256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z';
+
+const repository = 'https://github.com/kenjiwilkins/phonograph';
+const aboutLinks = [
+  {
+    label: 'Source on GitHub',
+    href: repository,
+    detail: '',
+    testId: 'account-source-link',
+    // Material Symbols "code": no brand logos inside the UI
+    icon: 'M320-240 80-480l240-240 57 57-184 184 183 183-56 56Zm320 0-57-57 184-184-183-183 56-56 240 240-240 240Z'
+  },
+  {
+    label: 'Changelog',
+    // HEAD is the repository's default branch
+    href: `${repository}/blob/HEAD/CHANGELOG.md`,
+    detail: `v${__APP_VERSION__}`,
+    testId: 'account-changelog-link',
+    // Material Symbols "history"
+    icon: 'M480-120q-138 0-240.5-91.5T122-440h82q14 104 92.5 172T480-200q117 0 198.5-81.5T760-480q0-117-81.5-198.5T480-760q-69 0-129 32t-101 88h110v80H120v-240h80v94q51-64 124.5-99T480-840q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-480q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-120Zm112-192L440-464v-216h80v184l128 128-56 56Z'
+  }
+];
 
 // stores
 const userStore = useUserStore();
@@ -457,6 +507,68 @@ function close() {
 
 .account-stat__value--pending {
   color: var(--ink-dim);
+}
+
+/* a group of menu items under a section label */
+.account-section {
+  margin: 0 0 4px;
+}
+
+.account-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.account-item:hover {
+  background: var(--surface-300);
+}
+
+.account-item:hover .account-item__label {
+  text-shadow:
+    -1px 0 var(--buzz-red),
+    1px 0 var(--buzz-mint);
+}
+
+.account-item__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: var(--ink-muted);
+}
+
+.account-item__trail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--ink-muted);
+}
+
+.account-item__trail svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 /* popover under the trigger, no scrim */
