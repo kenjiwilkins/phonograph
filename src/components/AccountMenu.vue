@@ -143,6 +143,59 @@
                 </li>
               </ul>
             </div>
+
+            <div>
+              <h3 class="pg-section pg-hud account-section"><b>//</b> Session</h3>
+              <div
+                v-if="isConfirming"
+                role="alertdialog"
+                aria-labelledby="logout-title"
+                aria-describedby="logout-description"
+                class="pg-frame account-confirm"
+                data-testid="account-logout-confirm"
+                @keydown.esc.prevent.stop="cancelLogout"
+              >
+                <span id="logout-title" class="pg-hud account-confirm__title">
+                  // Log out of this device?
+                </span>
+                <p id="logout-description" class="account-confirm__text">
+                  Removes your saved login and library cache from <b>this browser</b>. Your Spotify
+                  account and Phonograph's access to it stay as they are.
+                </p>
+                <div class="account-confirm__actions">
+                  <PgButton
+                    ref="cancelButton"
+                    variant="ghost"
+                    data-testid="account-logout-cancel"
+                    @click="cancelLogout"
+                  >
+                    Cancel
+                  </PgButton>
+                  <PgButton variant="danger" data-testid="account-logout-ok" @click="confirmLogout">
+                    <template #icon>
+                      <svg viewBox="0 -960 960 960"><path :d="logoutIcon" /></svg>
+                    </template>
+                    Log out
+                  </PgButton>
+                </div>
+              </div>
+              <button
+                v-else
+                ref="logoutItem"
+                type="button"
+                class="account-item account-item--danger"
+                data-testid="account-logout"
+                @click="askLogout"
+              >
+                <svg class="account-item__icon" viewBox="0 -960 960 960" aria-hidden="true">
+                  <path :d="logoutIcon" />
+                </svg>
+                <span>
+                  <span class="account-item__label">Log out</span>
+                  <span class="account-item__sub">This device only</span>
+                </span>
+              </button>
+            </div>
           </div>
         </section>
       </div>
@@ -155,6 +208,8 @@ import { computed, nextTick, ref } from 'vue';
 import { useUserStore, useUserSavedAlbumsStore, useUserSavedPlaylistsStore } from '@/data';
 import { trapTab } from '@/composables/trapTab';
 import { getImageUrl } from '@/utils';
+import { logout } from '@/auth';
+import PgButton from './PgButton.vue';
 
 defineProps<{
   /** The user profile is still loading: skeletons, but the menu already opens */
@@ -166,6 +221,10 @@ const personIcon =
   'M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z';
 
 const externalIcon = 'm256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z';
+
+// Material Symbols "logout"
+const logoutIcon =
+  'M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z';
 
 const repository = 'https://github.com/kenjiwilkins/phonograph';
 const aboutLinks = [
@@ -197,6 +256,10 @@ const userSavedPlaylists = useUserSavedPlaylistsStore();
 const trigger = ref<HTMLButtonElement | null>(null);
 const dialog = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
+// Logging out takes two steps: the item turns into a confirmation panel
+const isConfirming = ref(false);
+const logoutItem = ref<HTMLButtonElement | null>(null);
+const cancelButton = ref<InstanceType<typeof PgButton> | null>(null);
 
 // computed
 const user = computed(() => userStore.user);
@@ -210,6 +273,7 @@ const stats = computed(() => [
 
 // methods
 async function open() {
+  isConfirming.value = false;
   isOpen.value = true;
   await nextTick();
   dialog.value?.focus();
@@ -218,6 +282,24 @@ async function open() {
 function close() {
   isOpen.value = false;
   trigger.value?.focus();
+}
+
+// Focus starts on Cancel, the choice that changes nothing
+async function askLogout() {
+  isConfirming.value = true;
+  await nextTick();
+  (cancelButton.value?.$el as HTMLElement | undefined)?.focus();
+}
+
+async function cancelLogout() {
+  isConfirming.value = false;
+  await nextTick();
+  logoutItem.value?.focus();
+}
+
+function confirmLogout() {
+  close();
+  logout();
 }
 </script>
 
@@ -569,6 +651,73 @@ function close() {
   width: 16px;
   height: 16px;
   fill: currentColor;
+}
+
+/* red text is 4.5:1 on surface-200 but not on surface-300: hover darkens instead */
+.account-item--danger {
+  box-sizing: border-box;
+  width: 100%;
+  padding-block: 6px;
+  border-width: 0 0 1px;
+  background: none;
+  text-align: left;
+  color: var(--buzz-red);
+}
+
+.account-item--danger:hover {
+  background: var(--surface-100);
+}
+
+.account-item--danger .account-item__icon {
+  fill: currentColor;
+}
+
+.account-item__label,
+.account-item__sub {
+  display: block;
+}
+
+.account-item__sub {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  color: var(--ink-muted);
+}
+
+.account-confirm {
+  --frame: var(--buzz-red);
+  --fill: var(--surface-200);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 16px;
+}
+
+.account-confirm__title {
+  color: var(--buzz-red);
+}
+
+.account-confirm__text {
+  margin: 0;
+  font-family: var(--font-content);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.account-confirm__text b {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.account-confirm__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  --btn-fill: var(--surface-200);
 }
 
 /* popover under the trigger, no scrim */

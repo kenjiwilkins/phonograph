@@ -1,7 +1,9 @@
 import { render, fireEvent } from '@testing-library/vue';
 import { describe, test, expect, vi, afterEach } from 'vitest';
+import { nextTick } from 'vue';
 import LandingSection from '@/components/LandingSection.vue';
 import * as auth from '@/auth';
+import { saveLogoutNotice } from '@/auth/tokenStorage';
 import { version } from '../../../package.json';
 
 vi.mock('@/auth', () => ({
@@ -11,6 +13,35 @@ vi.mock('@/auth', () => ({
 describe('LandingSection', () => {
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
+    sessionStorage.clear();
+  });
+
+  test('shows no logout notice on a normal visit', () => {
+    const { getByTestId } = render(LandingSection);
+    const region = getByTestId('logout-toast');
+    expect(region.getAttribute('role')).toBe('status');
+    expect(region.getAttribute('aria-live')).toBe('polite');
+    expect(region.textContent?.trim()).toBe('');
+  });
+
+  test('announces the logout once and dismisses the notice by itself (#200)', async () => {
+    vi.useFakeTimers();
+    saveLogoutNotice();
+
+    const first = render(LandingSection, { global: { stubs: { transition: true } } });
+    await nextTick();
+    const region = first.getByTestId('logout-toast');
+    expect(region.textContent).toContain('Logged out on this device');
+
+    vi.advanceTimersByTime(5000);
+    await nextTick();
+    expect(region.textContent).not.toContain('Logged out');
+    first.unmount();
+
+    const second = render(LandingSection);
+    await nextTick();
+    expect(second.getByTestId('logout-toast').textContent?.trim()).toBe('');
   });
 
   test('renders correctly', () => {

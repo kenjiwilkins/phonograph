@@ -8,6 +8,7 @@ import {
   isAccountChoiceRequested,
   migrateLegacyCookies,
   requestAccountChoice,
+  saveLogoutNotice,
   saveTokens,
   saveVerifier,
   takeVerifier
@@ -32,6 +33,7 @@ export function logout() {
   isLoggingOut = true;
   endSession();
   requestAccountChoice();
+  saveLogoutNotice();
   // Requests still in flight can store data again before the page is gone: remove it once more
   window.addEventListener('pagehide', endSession, { once: true });
   window.location.replace('/');
