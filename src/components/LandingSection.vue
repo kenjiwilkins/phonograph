@@ -1,5 +1,6 @@
 <template>
   <div class="pg-scanlines flex min-h-screen w-full flex-col bg-void text-ink">
+    <LogoutToast />
     <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-between gap-8">
       <div class="flex justify-between gap-4 p-4" data-testid="landing-hud">
         <span class="pg-hud-sm">Sys.boot // v{{ version }}</span>
@@ -61,6 +62,7 @@
 <script setup lang="ts">
 import { getAuth } from '@/auth';
 import { version } from '../../package.json';
+import LogoutToast from './LogoutToast.vue';
 import PgButton from './PgButton.vue';
 import PhonographLogo from './PhonographLogo.vue';
 

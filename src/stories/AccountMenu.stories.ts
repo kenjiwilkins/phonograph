@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { nextTick } from 'vue';
 import AppBar from '@/components/AppBar.vue';
 import { useUserSavedAlbumsStore, useUserSavedPlaylistsStore, useUserStore } from '@/data';
 import { user } from './fixtures';
@@ -24,6 +25,19 @@ function logIn(overrides: Partial<typeof user> = {}) {
 }
 
 export const Open: Story = { parameters: { seed: () => logIn() } };
+
+export const ConfirmLogout: Story = {
+  parameters: { seed: () => logIn() },
+  play: async () => {
+    const click = async (testId: string) => {
+      // The menu is teleported to <body>, outside the story's canvas
+      document.querySelector<HTMLElement>(`[data-testid="${testId}"]`)?.click();
+      await nextTick();
+    };
+    await click('user-button');
+    await click('account-logout');
+  }
+};
 
 export const Loading: Story = { args: { syncing: true } };
 

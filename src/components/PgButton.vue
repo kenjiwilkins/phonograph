@@ -31,8 +31,9 @@ import { computed } from 'vue';
 
 const props = withDefaults(
   defineProps<{
-    /** primary: the one volt action per view; ghost: cyan frame; text: quiet ink-muted */
-    variant?: 'primary' | 'ghost' | 'text';
+    /** primary: the one volt action per view; ghost: cyan frame; text: quiet ink-muted;
+     * danger: red frame, for actions that remove something */
+    variant?: 'primary' | 'ghost' | 'text' | 'danger';
     /** md: 44px; lg: 56px */
     size?: 'md' | 'lg';
     /** full width, label left and key hint right */
@@ -187,13 +188,19 @@ const elementAttrs = computed(() => {
   --btn-bg: var(--volt-deep);
 }
 
-/* ghost: 1px cyan line that follows the cut; set --btn-fill when it sits on a raised panel */
+/* ghost and danger: a 1px line that follows the cut; set --btn-fill on a raised panel */
 .pg-btn--ghost {
   --btn-bg: var(--cyan);
   color: var(--cyan);
 }
 
-.pg-btn--ghost::after {
+.pg-btn--danger {
+  --btn-bg: var(--buzz-red);
+  color: var(--buzz-red);
+}
+
+.pg-btn--ghost::after,
+.pg-btn--danger::after {
   content: '';
   position: absolute;
   inset: 1px;
@@ -220,7 +227,8 @@ const elementAttrs = computed(() => {
 
 /* hover = the buzz: a short jitter and a red/mint split, no colour change */
 .pg-btn--primary:hover,
-.pg-btn--ghost:hover {
+.pg-btn--ghost:hover,
+.pg-btn--danger:hover {
   animation: pg-btn-jitter var(--hover-buzz) steps(3) 1;
   text-shadow:
     -2px 0 var(--buzz-red),

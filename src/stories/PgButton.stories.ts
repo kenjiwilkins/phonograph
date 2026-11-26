@@ -21,6 +21,7 @@ export const Variants = gallery(`
   <PgButton variant="primary">Primary</PgButton>
   <PgButton variant="ghost">Ghost</PgButton>
   <PgButton variant="text">Text</PgButton>
+  <PgButton variant="danger">Danger</PgButton>
   <PgButton variant="primary" size="lg">Primary large</PgButton>
   <PgButton variant="ghost" size="lg">Ghost large</PgButton>
 `);
@@ -40,5 +41,6 @@ export const WithIcon = gallery(`
 export const Inactive = gallery(`
   <PgButton disabled>Disabled</PgButton>
   <PgButton variant="ghost" disabled>Disabled ghost</PgButton>
+  <PgButton variant="danger" disabled>Disabled danger</PgButton>
   <PgButton loading>Hidden label</PgButton>
 `);

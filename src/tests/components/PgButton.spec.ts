@@ -13,10 +13,13 @@ describe('PgButton', () => {
     expect(button.hasAttribute('disabled')).toBe(false);
   });
 
-  test.each(['primary', 'ghost', 'text'] as const)('applies the %s variant', (variant) => {
-    const { getByRole } = render(PgButton, { props: { variant }, slots: { default: 'Go' } });
-    expect(getByRole('button').classList).toContain(`pg-btn--${variant}`);
-  });
+  test.each(['primary', 'ghost', 'text', 'danger'] as const)(
+    'applies the %s variant',
+    (variant) => {
+      const { getByRole } = render(PgButton, { props: { variant }, slots: { default: 'Go' } });
+      expect(getByRole('button').classList).toContain(`pg-btn--${variant}`);
+    }
+  );
 
   test('applies size and block', () => {
     const { getByRole } = render(PgButton, {
@@ -26,6 +29,16 @@ describe('PgButton', () => {
     const button = getByRole('button');
     expect(button.classList).toContain('pg-btn--lg');
     expect(button.classList).toContain('pg-btn--block');
+  });
+
+  test.each(['disabled', 'loading'] as const)('a %s danger button cannot be used', (state) => {
+    const { getByRole } = render(PgButton, {
+      props: { variant: 'danger', [state]: true },
+      slots: { default: 'Log out' }
+    });
+    const button = getByRole('button');
+    expect(button.classList).toContain('pg-btn--disabled');
+    expect(button.hasAttribute('disabled')).toBe(true);
   });
 
   test('emits click when enabled', async () => {

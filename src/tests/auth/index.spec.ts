@@ -6,6 +6,7 @@ import {
   getRefreshToken,
   saveTokens,
   saveVerifier,
+  takeLogoutNotice,
   takeVerifier
 } from '@/auth/tokenStorage';
 import { readAlbumsCache, writeAlbumsCache } from '@/cache/libraryCache';
@@ -312,6 +313,14 @@ describe('auth', () => {
       expect(takeVerifier()).toBeNull();
       expect(readAlbumsCache('user-1')).toBeNull();
       expect(locationMock.replace).toHaveBeenCalledWith('/');
+    });
+
+    test('leaves a notice for the landing page, readable once (#200)', () => {
+      expect(takeLogoutNotice()).toBe(false);
+      auth.logout();
+      window.dispatchEvent(new Event('pagehide'));
+      expect(takeLogoutNotice()).toBe(true);
+      expect(takeLogoutNotice()).toBe(false);
     });
 
     test('removes data stored again before the page is gone', () => {

@@ -1,9 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { User } from '@/types';
 import AccountMenu from '@/components/AccountMenu.vue';
+import { logout } from '@/auth';
 import { version } from '../../../package.json';
+
+vi.mock('@/auth', () => ({
+  logout: vi.fn()
+}));
 
 const user: User = {
   id: 'listener-id',
@@ -54,6 +59,7 @@ describe('AccountMenu (#198)', () => {
     unmounts.push(renderMenu(options).unmount);
   }
   afterEach(() => {
+    vi.clearAllMocks();
     unmounts.splice(0).forEach((unmount) => unmount());
     document.body.innerHTML = '';
   });
@@ -98,7 +104,7 @@ describe('AccountMenu (#198)', () => {
     mounted();
     await openMenu();
     const close = screen.getByRole('button', { name: 'Close' });
-    const link = screen.getByTestId('account-changelog-link');
+    const link = screen.getByTestId('account-logout');
 
     link.focus();
     await fireEvent.keyDown(link, { key: 'Tab' });
@@ -164,5 +170,57 @@ describe('AccountMenu (#198)', () => {
     expect(document.querySelectorAll('img')).toHaveLength(0);
     expect(document.querySelectorAll('.account-avatar--empty')).toHaveLength(2);
     expect(screen.getByTestId('account-name').textContent?.trim()).toBe(name);
+  });
+
+  describe('log out (#200)', () => {
+    const item = () => screen.queryByTestId('account-logout');
+    const panel = () => screen.queryByRole('alertdialog');
+    async function askToLogOut() {
+      mounted();
+      await openMenu();
+      await fireEvent.click(item() as Element);
+    }
+
+    test('replaces the item with a labelled confirmation, focused on Cancel', async () => {
+      await askToLogOut();
+
+      expect(logout).not.toHaveBeenCalled();
+      expect(item()).toBeNull();
+      expect(screen.getByRole('alertdialog', { name: '// Log out of this device?' })).toBe(panel());
+      expect(panel()?.getAttribute('aria-describedby')).toBe('logout-description');
+      expect(document.activeElement).toBe(screen.getByTestId('account-logout-cancel'));
+    });
+
+    test.each([
+      ['Cancel', () => fireEvent.click(screen.getByTestId('account-logout-cancel'))],
+      ['Esc', () => fireEvent.keyDown(panel() as Element, { key: 'Escape' })]
+    ])('%s returns to the item and keeps the menu open', async (_name, cancel) => {
+      await askToLogOut();
+
+      await cancel();
+
+      expect(logout).not.toHaveBeenCalled();
+      expect(panel()).toBeNull();
+      expect(dialog()).not.toBeNull();
+      expect(document.activeElement).toBe(item());
+    });
+
+    test('logs out and closes the menu on confirm', async () => {
+      await askToLogOut();
+
+      await fireEvent.click(screen.getByTestId('account-logout-ok'));
+
+      expect(logout).toHaveBeenCalledTimes(1);
+      expect(dialog()).toBeNull();
+    });
+
+    test('asks again after the menu was closed', async () => {
+      await askToLogOut();
+      await fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+      await openMenu();
+
+      expect(panel()).toBeNull();
+      expect(item()).not.toBeNull();
+    });
   });
 });
