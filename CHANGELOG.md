@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.7.0](https://github.com/kenjiwilkins/phonograph/compare/v1.6.0...v1.7.0) (2026-11-26)
+
+
+### Features
+
+* **auth:** add logout that clears the session ([a158671](https://github.com/kenjiwilkins/phonograph/commit/a1586717beeeac513707911ce8f80833c229d12d))
+* **auth:** add logout that clears the session ([#208](https://github.com/kenjiwilkins/phonograph/issues/208)) ([ac3c227](https://github.com/kenjiwilkins/phonograph/commit/ac3c22799302c7e9ec061978abdd00adeeaf64cb))
+* **ui:** add account menu to app bar ([6a67fa6](https://github.com/kenjiwilkins/phonograph/commit/6a67fa658070c25e88db875933b3c46506590296))
+* **ui:** add account menu to app bar ([#212](https://github.com/kenjiwilkins/phonograph/issues/212)) ([f86468f](https://github.com/kenjiwilkins/phonograph/commit/f86468f207d8225172dd91cf65ce00781998e04f))
+* **ui:** add log out with confirmation to account menu ([b0d8d23](https://github.com/kenjiwilkins/phonograph/commit/b0d8d23c50899f2f066f2d411d0ea23f751b5b2e))
+* **ui:** add log out with confirmation to account menu ([#214](https://github.com/kenjiwilkins/phonograph/issues/214)) ([a0b988d](https://github.com/kenjiwilkins/phonograph/commit/a0b988d0f81a38ff55a9fb1a72a5fee83d85a4a9))
+* **ui:** move GitHub link and version into account menu ([8b8b060](https://github.com/kenjiwilkins/phonograph/commit/8b8b0608c92686d404494abc55b18a452808c57d))
+* **ui:** move GitHub link and version into account menu ([#213](https://github.com/kenjiwilkins/phonograph/issues/213)) ([f485ee3](https://github.com/kenjiwilkins/phonograph/commit/f485ee36ba7bff28f7f953896b720215b76ca408))
+* **ui:** show the playlist count in the account menu without opening the playlists tab ([67df93d](https://github.com/kenjiwilkins/phonograph/commit/67df93d8b4bafcaa767e4a671df932777fe19663))
+* **ui:** show the playlist count in the account menu without opening the playlists tab ([#217](https://github.com/kenjiwilkins/phonograph/issues/217)) ([822e3e9](https://github.com/kenjiwilkins/phonograph/commit/822e3e95889ebfcd1797ba2deab73d8c5600ddff))
+
+
+### Bug Fixes
+
+* **ui:** show the user name in the app bar on narrow screens ([9828945](https://github.com/kenjiwilkins/phonograph/commit/98289459874d645f62d64696fd637fd7528cd26a))
+* **ui:** show the user name in the app bar on narrow screens when "Link ok" takes the space ([#215](https://github.com/kenjiwilkins/phonograph/issues/215)) ([d21b520](https://github.com/kenjiwilkins/phonograph/commit/d21b5204069356c0aec95b89e5d5fb853eaecb15))
+
 ## [1.6.0](https://github.com/kenjiwilkins/phonograph/compare/v1.5.0...v1.6.0) (2026-11-25)
 
 
