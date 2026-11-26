@@ -413,6 +413,17 @@ function confirmLogout() {
   fill: var(--ink-dim);
 }
 
+/*
+ * Too narrow for even a short name: avatar and caret only. The name is still in the button's
+ * label and in the menu.
+ */
+@media (max-width: 359px) {
+  .account-chip__name,
+  .account-chip__skeleton {
+    display: none;
+  }
+}
+
 /* the sheet and the open chip are surface-200, the default skeleton colour: step up one */
 .account-chip .pg-skel,
 .account-profile .pg-skel {

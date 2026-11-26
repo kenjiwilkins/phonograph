@@ -79,6 +79,14 @@ describe('AppBar', () => {
     expect(status.getAttribute('role')).toBe('status');
   });
 
+  // Narrow screens hide this element visually and keep the dot (#210); the text must stay inside
+  // the live region so it is still announced
+  test('keeps the status text in its own element inside the live region', () => {
+    const { getByRole } = renderLoggedIn();
+    const label = getByRole('status').querySelector('.app-bar__status-label');
+    expect(label?.textContent?.trim()).toBe('Link ok');
+  });
+
   test('shows SYNC while the saved albums are loading', () => {
     const { getByTestId } = renderLoggedIn(true);
     const status = getByTestId('link-status');
