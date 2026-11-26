@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { Playlist, UserSavedPlaylistsItem } from '@/types';
 import { getUserSavedPlaylists, getNextUserSavedPlaylists } from '@/api';
+import { useLibraryTotalsStore } from './libraryTotals';
 
 export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
   state: () => ({
@@ -38,6 +39,7 @@ export const useUserSavedPlaylistsStore = defineStore('userSavedPlaylists', {
     },
     setTotalPlaylists(totalPlaylists: number) {
       this.totalPlaylists = totalPlaylists;
+      useLibraryTotalsStore().setPlaylists(totalPlaylists);
     },
     setIsLoading(isLoading: boolean) {
       this.isLoading = isLoading;

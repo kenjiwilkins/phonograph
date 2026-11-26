@@ -1,5 +1,10 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { useTracksStore, useUserSavedAlbumsStore, useUserSavedPlaylistsStore } from '@/data';
+import {
+  useLibraryTotalsStore,
+  useTracksStore,
+  useUserSavedAlbumsStore,
+  useUserSavedPlaylistsStore
+} from '@/data';
 
 /**
  * A fresh Pinia for one story. The actions that call the Spotify API are replaced with no-ops,
@@ -11,6 +16,7 @@ export function createStoryPinia(seed?: () => void) {
   setActivePinia(pinia);
 
   const noop = async () => {};
+  useLibraryTotalsStore(pinia).fetchMissing = noop;
   const albums = useUserSavedAlbumsStore(pinia);
   albums.loadUserSavedAlbums = noop;
   albums.fetchUserSavedAlbums = noop;

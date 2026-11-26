@@ -74,6 +74,12 @@ export async function getUserSavedPlaylists() {
   return data;
 }
 
+/** Fetches a single playlist with the total, to count the playlists without loading them. */
+export async function getSavedPlaylistsHead() {
+  const { data } = await request.get('/me/playlists', { params: { offset: 0, limit: 1 } });
+  return data;
+}
+
 export async function getNextUserSavedPlaylists(url: string) {
   const { data } = await request.get(url);
   return data;

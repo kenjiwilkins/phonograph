@@ -8,6 +8,7 @@ import {
 } from '../api';
 import { AlbumsFingerprint, readAlbumsCache, writeAlbumsCache } from '../cache/libraryCache';
 import { useUserStore } from './user';
+import { useLibraryTotalsStore } from './libraryTotals';
 import { toAlbumSummary } from './summaries';
 import { randomOffset } from '../utils';
 
@@ -80,6 +81,7 @@ export const useUserSavedAlbumsStore = defineStore('userSavedAlbums', {
     },
     setTotalAlbums(totalAlbums: number) {
       this.totalAlbums = totalAlbums;
+      useLibraryTotalsStore().setAlbums(totalAlbums);
     },
     setHasNext(hasNext: boolean) {
       this.hasNext = hasNext;

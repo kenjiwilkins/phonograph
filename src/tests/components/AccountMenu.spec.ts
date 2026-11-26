@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { User } from '@/types';
 import AccountMenu from '@/components/AccountMenu.vue';
 import { logout } from '@/auth';
+import { useLibraryTotalsStore } from '@/data';
 import { version } from '../../../package.json';
 
 vi.mock('@/auth', () => ({
@@ -23,8 +24,8 @@ const user: User = {
 function renderMenu({
   loading = false,
   profile = user as User | null,
-  totalAlbums = 412,
-  totalPlaylists = 24
+  totalAlbums = 412 as number | null,
+  totalPlaylists = 24 as number | null
 } = {}) {
   return render(AccountMenu, {
     props: { loading },
@@ -35,8 +36,7 @@ function renderMenu({
         createTestingPinia({
           initialState: {
             user: { user: profile, loggedInState: !!profile },
-            userSavedAlbums: { totalAlbums },
-            userSavedPlaylists: { totalPlaylists }
+            libraryTotals: { albums: totalAlbums, playlists: totalPlaylists }
           }
         })
       ]
@@ -146,13 +146,28 @@ describe('AccountMenu (#198)', () => {
   });
 
   test('shows dashes for totals that are not known yet', async () => {
-    mounted({ totalPlaylists: 0 });
+    mounted({ totalPlaylists: null });
     await openMenu();
     expect(screen.getByTestId('account-stat-playlists').textContent?.trim()).toBe('----');
   });
 
+  test('shows 0000 for an empty library (#211)', async () => {
+    mounted({ totalAlbums: 0, totalPlaylists: 0 });
+    await openMenu();
+    expect(screen.getByTestId('account-stat-albums').textContent?.trim()).toBe('0000');
+    expect(screen.getByTestId('account-stat-playlists').textContent?.trim()).toBe('0000');
+  });
+
+  test('asks for the missing totals when it opens (#211)', async () => {
+    mounted();
+    const store = useLibraryTotalsStore();
+    expect(store.fetchMissing).not.toHaveBeenCalled();
+    await openMenu();
+    expect(store.fetchMissing).toHaveBeenCalledTimes(1);
+  });
+
   test('shows skeletons and still opens while the profile loads', async () => {
-    mounted({ loading: true, profile: null, totalAlbums: 0, totalPlaylists: 0 });
+    mounted({ loading: true, profile: null, totalAlbums: null, totalPlaylists: null });
     expect(trigger().getAttribute('aria-label')).toBe('Account menu');
     expect(screen.getByTestId('account-trigger-skeleton')).toBeTruthy();
 
