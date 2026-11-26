@@ -39,6 +39,16 @@ export const ConfirmLogout: Story = {
   }
 };
 
+export const EmptyLibrary: Story = {
+  parameters: {
+    seed: () => {
+      logIn();
+      useUserSavedAlbumsStore().setTotalAlbums(0);
+      useUserSavedPlaylistsStore().setTotalPlaylists(0);
+    }
+  }
+};
+
 export const Loading: Story = { args: { syncing: true } };
 
 export const NoAvatarAndLongName: Story = {

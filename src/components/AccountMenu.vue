@@ -109,10 +109,13 @@
               <div v-for="stat in stats" :key="stat.label" class="pg-frame account-stat">
                 <dt class="pg-hud-sm account-stat__label">{{ stat.label }}</dt>
                 <dd
-                  :class="['account-stat__value', { 'account-stat__value--pending': !stat.total }]"
+                  :class="[
+                    'account-stat__value',
+                    { 'account-stat__value--pending': stat.isPending }
+                  ]"
                   :data-testid="stat.testId"
                 >
-                  {{ stat.total ? String(stat.total).padStart(4, '0') : '----' }}
+                  {{ stat.value }}
                 </dd>
               </div>
             </dl>
@@ -205,7 +208,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
-import { useUserStore, useUserSavedAlbumsStore, useUserSavedPlaylistsStore } from '@/data';
+import { useUserStore, useLibraryTotalsStore } from '@/data';
 import { trapTab } from '@/composables/trapTab';
 import { getImageUrl } from '@/utils';
 import { logout } from '@/auth';
@@ -249,8 +252,7 @@ const aboutLinks = [
 
 // stores
 const userStore = useUserStore();
-const userSavedAlbums = useUserSavedAlbumsStore();
-const userSavedPlaylists = useUserSavedPlaylistsStore();
+const libraryTotals = useLibraryTotalsStore();
 
 // data
 const trigger = ref<HTMLButtonElement | null>(null);
@@ -265,16 +267,22 @@ const cancelButton = ref<InstanceType<typeof PgButton> | null>(null);
 const user = computed(() => userStore.user);
 const triggerImage = computed(() => getImageUrl(user.value?.images, 28));
 const profileImage = computed(() => getImageUrl(user.value?.images, 56));
-// A total of 0 is also the stores' "not fetched yet"
-const stats = computed(() => [
-  { label: 'Saved albums', total: userSavedAlbums.totalAlbums, testId: 'account-stat-albums' },
-  { label: 'Playlists', total: userSavedPlaylists.totalPlaylists, testId: 'account-stat-playlists' }
-]);
+const stats = computed(() =>
+  [
+    { label: 'Saved albums', total: libraryTotals.albums, testId: 'account-stat-albums' },
+    { label: 'Playlists', total: libraryTotals.playlists, testId: 'account-stat-playlists' }
+  ].map(({ total, ...stat }) => ({
+    ...stat,
+    isPending: total === null,
+    value: total === null ? '----' : String(total).padStart(4, '0')
+  }))
+);
 
 // methods
 async function open() {
   isConfirming.value = false;
   isOpen.value = true;
+  libraryTotals.fetchMissing();
   await nextTick();
   dialog.value?.focus();
 }
