@@ -3,6 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { afterEach, describe, expect, test } from 'vitest';
 import type { User } from '@/types';
 import AccountMenu from '@/components/AccountMenu.vue';
+import { version } from '../../../package.json';
 
 const user: User = {
   id: 'listener-id',
@@ -97,7 +98,7 @@ describe('AccountMenu (#198)', () => {
     mounted();
     await openMenu();
     const close = screen.getByRole('button', { name: 'Close' });
-    const link = screen.getByTestId('account-spotify-link');
+    const link = screen.getByTestId('account-changelog-link');
 
     link.focus();
     await fireEvent.keyDown(link, { key: 'Tab' });
@@ -119,6 +120,23 @@ describe('AccountMenu (#198)', () => {
     expect(link.textContent).toContain('(opens in a new tab)');
     expect(screen.getByTestId('account-stat-albums').textContent?.trim()).toBe('0412');
     expect(screen.getByTestId('account-stat-playlists').textContent?.trim()).toBe('0024');
+  });
+
+  test('links to the source and to the changelog with the app version (#199)', async () => {
+    mounted();
+    await openMenu();
+
+    const source = screen.getByTestId('account-source-link');
+    const changelog = screen.getByTestId('account-changelog-link');
+    expect(source.getAttribute('href')).toBe('https://github.com/kenjiwilkins/phonograph');
+    expect(changelog.getAttribute('href')).toBe(
+      'https://github.com/kenjiwilkins/phonograph/blob/HEAD/CHANGELOG.md'
+    );
+    expect(changelog.textContent).toContain(`v${version}`);
+    for (const link of [source, changelog]) {
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.textContent).toContain('(opens in a new tab)');
+    }
   });
 
   test('shows dashes for totals that are not known yet', async () => {

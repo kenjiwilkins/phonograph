@@ -5,19 +5,6 @@
     <nav class="dock__bar" aria-label="Library">
       <!-- 1px edge that follows the cut corner; drawn apart so the bar can keep its backdrop blur -->
       <span class="dock__edge" aria-hidden="true"></span>
-      <a
-        href="https://github.com/kenjiwilkins/phonograph"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="tab-bar__tab"
-        data-testid="github-button"
-      >
-        <!-- A plain star instead of the GitHub mark: no brand logos inside the UI -->
-        <svg viewBox="0 0 24 24" aria-hidden="true" data-testid="github-star-icon">
-          <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.2 5.8 20.9l1.6-7L2 9.2l7.1-.6z" />
-        </svg>
-        <span>Star me<span class="sr-only"> on GitHub</span></span>
-      </a>
       <button
         type="button"
         class="tab-bar__tab"
@@ -102,9 +89,9 @@ function setTab(tab: TabType) {
   --cut: var(--chamfer-md);
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   height: 64px;
-  max-width: 420px;
+  max-width: 280px;
   margin-inline: auto;
   pointer-events: auto;
   background: var(--dock-glass);
@@ -182,7 +169,6 @@ function setTab(tab: TabType) {
   line-height: 16px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-decoration: none;
   color: var(--ink-muted);
 }
 

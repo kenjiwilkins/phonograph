@@ -25,20 +25,14 @@ function renderFooter(currentTab = TabType.ALBUM) {
 }
 
 describe('AppFooter', () => {
-  test('renders the three tabs in a labelled nav', () => {
-    const { getByRole, getByTestId } = renderFooter();
+  test('renders the two library tabs in a labelled nav', () => {
+    const { getByRole, getByTestId, getAllByRole, queryByRole } = renderFooter();
     expect(getByRole('navigation', { name: 'Library' })).toBeTruthy();
     expect(getByTestId('album-span').textContent).toContain('Albums');
     expect(getByTestId('playlist-span').textContent).toContain('Playlists');
-    const star = getByRole('link', { name: /Star me/ });
-    expect(star.getAttribute('href')).toBe('https://github.com/kenjiwilkins/phonograph');
-    expect(star.getAttribute('target')).toBe('_blank');
-  });
-
-  test('uses a star icon instead of the GitHub logo', () => {
-    const { getByTestId, queryByAltText } = renderFooter();
-    expect(getByTestId('github-star-icon').getAttribute('aria-hidden')).toBe('true');
-    expect(queryByAltText('GitHub')).toBeNull();
+    expect(getAllByRole('button')).toHaveLength(2);
+    // The GitHub link lives in the account menu (#199)
+    expect(queryByRole('link')).toBeNull();
   });
 
   test('marks the current tab with aria-current', async () => {
@@ -52,11 +46,6 @@ describe('AppFooter', () => {
     await flashPromise();
     expect(albumButton.hasAttribute('aria-current')).toBe(false);
     expect(playlistButton.getAttribute('aria-current')).toBe('page');
-  });
-
-  test('never marks the Star me link as current', () => {
-    const { getByTestId } = renderFooter();
-    expect(getByTestId('github-button').hasAttribute('aria-current')).toBe(false);
   });
 
   test('switches tabs on click', async () => {
