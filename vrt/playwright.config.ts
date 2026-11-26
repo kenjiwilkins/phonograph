@@ -10,7 +10,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: [['list'], ['html', { outputFolder: '../.vrt/report', open: 'never' }]],
   expect: {
-    toHaveScreenshot: { animations: 'disabled', maxDiffPixels: 0 }
+    // Exact: base and head are captured on the same machine, and on this dark UI the default
+    // colour threshold (0.2) lets changes such as one surface shade pass
+    toHaveScreenshot: {
+      animations: 'disabled',
+      maxDiffPixels: 0,
+      threshold: 0,
+      stylePath: './screenshot.css'
+    }
   },
   use: {
     // Components stop their looping animations under reduced motion

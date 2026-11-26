@@ -23,6 +23,8 @@ The visual regression tests screenshot every story at a phone (375px) and a desk
 
 Stories without a baseline (newly added) are skipped when comparing.
 
+The comparison is exact (a one-shade colour change fails). Images are scaled with `image-rendering: pixelated` while capturing (`vrt/screenshot.css`), so they look blockier than in the app.
+
 ## Versioning and Releases
 
 Releases are automated with [release-please](https://github.com/googleapis/release-please) and follow [SemVer](https://semver.org/).

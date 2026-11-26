@@ -1,0 +1,7 @@
+/*
+ * Added while taking screenshots. Chromium's smooth downscaling of a raster image (the 640px
+ * logo mark shown at 112px) differs by a few shades between runs; nearest-neighbour doesn't.
+ */
+img {
+  image-rendering: pixelated !important;
+}
