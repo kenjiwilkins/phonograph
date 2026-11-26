@@ -284,4 +284,69 @@ describe('auth', () => {
       expect(getRefreshToken()).toBe('cookie-rt');
     });
   });
+
+  // Keep last: after logout() the module ignores getAuth() until the page is reloaded
+  describe('logout (#197)', () => {
+    const cacheLibrary = () =>
+      writeAlbumsCache('user-1', {
+        albums: [],
+        total: 0,
+        nextUrl: '',
+        fingerprint: { total: 0, firstId: null, firstAddedAt: null }
+      });
+    const authorizeParams = async (call = 0) => {
+      await auth.redirectToAuthCodeFlow('test-client-id');
+      return new URL(locationMock.assign.mock.calls[call][0]).searchParams;
+    };
+
+    test('removes the tokens, the verifier and the cached library, then reloads', () => {
+      saveTokens({ accessToken: 'at', expiresAt: Date.now() + 3_600_000, refreshToken: 'rt' });
+      saveVerifier('v');
+      cacheLibrary();
+
+      auth.logout();
+
+      expect(getStoredAccessToken()).toBeNull();
+      expect(getExpiresAt()).toBeNull();
+      expect(getRefreshToken()).toBeNull();
+      expect(takeVerifier()).toBeNull();
+      expect(readAlbumsCache('user-1')).toBeNull();
+      expect(locationMock.replace).toHaveBeenCalledWith('/');
+    });
+
+    test('removes data stored again before the page is gone', () => {
+      auth.logout();
+      saveTokens({ accessToken: 'late', expiresAt: 1, refreshToken: 'late-rt' });
+      cacheLibrary();
+
+      window.dispatchEvent(new Event('pagehide'));
+
+      expect(getStoredAccessToken()).toBeNull();
+      expect(getRefreshToken()).toBeNull();
+      expect(readAlbumsCache('user-1')).toBeNull();
+    });
+
+    test('does not start a login while logging out', async () => {
+      auth.logout();
+      auth.getAuth();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(locationMock.assign).not.toHaveBeenCalled();
+    });
+
+    test('does not ask for the account on a normal login', async () => {
+      expect((await authorizeParams()).has('show_dialog')).toBe(false);
+    });
+
+    test('asks for the account until the next login succeeds', async () => {
+      auth.logout();
+      expect((await authorizeParams(0)).get('show_dialog')).toBe('true');
+      // The user came back without logging in
+      expect((await authorizeParams(1)).get('show_dialog')).toBe('true');
+
+      mockTokenEndpoint({ access_token: 'at', refresh_token: 'rt', expires_in: 3600 });
+      await auth.getAccessToken('test-client-id', 'code');
+
+      expect((await authorizeParams(2)).has('show_dialog')).toBe(false);
+    });
+  });
 });
