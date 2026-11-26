@@ -4,7 +4,7 @@
     class="sticky top-0 z-10 flex h-14 w-full items-center justify-between gap-3 border-b border-line bg-surface-100 px-4"
   >
     <PhonographLogo size="md" data-testid="logo" />
-    <div class="flex min-w-0 items-center gap-3">
+    <div class="flex min-w-0 items-center gap-1">
       <span
         v-if="status"
         role="status"
@@ -13,25 +13,15 @@
       >
         {{ status.label }}
       </span>
-      <!-- Shows who is signed in; it has no action, so it isn't a button (no dead tab stop) -->
-      <div
-        v-if="loggedIn"
-        class="flex min-w-0 items-center gap-2 font-content text-sm font-bold text-ink"
-        data-testid="user-button"
-      >
-        <!-- The name is shown next to it, so the avatar is decorative -->
-        <img v-if="avatarUrl" :src="avatarUrl" alt="" class="app-bar__avatar" />
-        <span v-else class="app-bar__avatar" aria-hidden="true"></span>
-        <span class="max-w-32 truncate">{{ user?.display_name }}</span>
-      </div>
-      <PgButton v-else-if="!syncing" variant="ghost" data-testid="login-button">Login</PgButton>
+      <AccountMenu v-if="loggedIn || syncing" :loading="!loggedIn" />
+      <PgButton v-else variant="ghost" data-testid="login-button">Login</PgButton>
     </div>
   </header>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useUserStore, useUserSavedAlbumsStore } from '../data';
-import { getImageUrl } from '@/utils';
+import AccountMenu from './AccountMenu.vue';
 import PhonographLogo from './PhonographLogo.vue';
 import PgButton from './PgButton.vue';
 
@@ -45,9 +35,7 @@ const userStore = useUserStore();
 const userSavedAlbums = useUserSavedAlbumsStore();
 
 // computed
-const user = computed(() => userStore.user);
 const loggedIn = computed(() => userStore.loggedInState);
-const avatarUrl = computed(() => getImageUrl(user.value?.images, 28));
 
 /**
  * Link status derived from the existing stores: LINK OK once the user is loaded, SYNC while the
@@ -94,15 +82,5 @@ const status = computed(() => {
 
 .app-bar__status--sync::before {
   box-shadow: var(--glow-cyan);
-}
-
-.app-bar__avatar {
-  display: block;
-  flex: none;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  border-radius: var(--radius-art);
-  background: var(--surface-300);
 }
 </style>

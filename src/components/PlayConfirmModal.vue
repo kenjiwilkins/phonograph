@@ -16,7 +16,7 @@
         class="popup sheet"
         data-testid="play-confirm-modal"
         @keydown.esc.prevent="close"
-        @keydown.tab="trapFocus"
+        @keydown.tab="trapTab($event, sheet, 'button:not([disabled])')"
       >
         <div class="sheet__body">
           <div class="mb-4 flex items-center justify-between gap-4">
@@ -106,6 +106,7 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import { useUserSavedAlbumsStore, useTracksStore } from '@/data';
 import { getImageUrl } from '@/utils';
+import { trapTab } from '@/composables/trapTab';
 import ContentImage from './ContentImage.vue';
 import PgButton from './PgButton.vue';
 import SpotifyAttribution from './SpotifyAttribution.vue';
@@ -203,22 +204,6 @@ watch(
 // methods
 function focusSheet() {
   sheet.value?.focus();
-}
-
-/** Keep Tab inside the sheet while it is open */
-function trapFocus(event: KeyboardEvent) {
-  const focusable = sheet.value?.querySelectorAll<HTMLElement>('button:not([disabled])');
-  if (!focusable?.length) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  const active = document.activeElement;
-  if (event.shiftKey && (active === first || active === sheet.value)) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && active === last) {
-    event.preventDefault();
-    first.focus();
-  }
 }
 
 function play() {
