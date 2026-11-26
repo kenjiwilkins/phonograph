@@ -1,10 +1,13 @@
 import { isDev } from '../utils';
 import {
+  clearAccountChoiceRequest,
   clearTokens,
   getAccessToken as getStoredAccessToken,
   getExpiresAt,
   getRefreshToken,
+  isAccountChoiceRequested,
   migrateLegacyCookies,
+  requestAccountChoice,
   saveTokens,
   saveVerifier,
   takeVerifier
@@ -15,6 +18,23 @@ import { clearLibraryCache } from '../cache/libraryCache';
 function endSession() {
   clearTokens();
   clearLibraryCache();
+}
+
+// True from logout() until the page it reloads replaces this one
+let isLoggingOut = false;
+
+/**
+ * Logs out of this browser: removes the tokens and the cached library, then reloads the app so
+ * nothing stays in memory and the landing page is shown. Spotify has no endpoint to revoke
+ * tokens, so the account and the app's access to it are left as they are.
+ */
+export function logout() {
+  isLoggingOut = true;
+  endSession();
+  requestAccountChoice();
+  // Requests still in flight can store data again before the page is gone: remove it once more
+  window.addEventListener('pagehide', endSession, { once: true });
+  window.location.replace('/');
 }
 
 const deployURL = import.meta.env.VITE_APP_DEPLOY_URL || '';
@@ -76,6 +96,7 @@ export async function redirectToAuthCodeFlow(clientId: string) {
   );
   params.append('code_challenge_method', 'S256');
   params.append('code_challenge', challenge);
+  if (isAccountChoiceRequested()) params.append('show_dialog', 'true');
 
   window.location.assign(`https://accounts.spotify.com/authorize?${params.toString()}`);
 }
@@ -93,6 +114,8 @@ export async function getAccessToken(clientId: string, code: string): Promise<st
   try {
     const token = await requestToken(params);
     storeTokens(token);
+    // Kept until now so that backing out of Spotify's dialog doesn't skip it the next time
+    clearAccountChoiceRequest();
     return token.access_token;
   } finally {
     // The authorization code is single-use: remove it from the URL whether or not the exchange succeeded
@@ -163,6 +186,8 @@ export async function getCode() {
 }
 
 export function getAuth() {
+  // A request that fails while logging out must not send the user back to Spotify
+  if (isLoggingOut) return;
   redirectToAuthCodeFlow(getClientId());
 }
 

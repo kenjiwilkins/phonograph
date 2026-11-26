@@ -5,6 +5,7 @@
  *   unlike a cookie, is never sent along with requests to the app's own origin.
  * - Refresh token: localStorage, so a new tab or a restart doesn't require a new login.
  * - PKCE verifier: sessionStorage, only for the redirect to Spotify and back.
+ * - Account choice flag: localStorage, set on logout until the next login succeeds.
  *
  * JavaScript can still read these, so the Content-Security-Policy in vercel.json is the main
  * protection against XSS. A backend that keeps the refresh token in an HttpOnly cookie was
@@ -15,7 +16,8 @@ const keys = {
   accessToken: 'phonograph.accessToken',
   expiresAt: 'phonograph.expiresAt',
   refreshToken: 'phonograph.refreshToken',
-  verifier: 'phonograph.pkceVerifier'
+  verifier: 'phonograph.pkceVerifier',
+  chooseAccount: 'phonograph.chooseAccount'
 };
 
 // Cookies written by versions before #130
@@ -74,6 +76,19 @@ export function takeVerifier(): string | null {
   const verifier = read(sessionStorage, keys.verifier);
   sessionStorage.removeItem(keys.verifier);
   return verifier;
+}
+
+/** Makes Spotify ask which account to use at the next login, instead of approving it silently. */
+export function requestAccountChoice() {
+  localStorage.setItem(keys.chooseAccount, 'true');
+}
+
+export function isAccountChoiceRequested(): boolean {
+  return read(localStorage, keys.chooseAccount) !== null;
+}
+
+export function clearAccountChoiceRequest() {
+  localStorage.removeItem(keys.chooseAccount);
 }
 
 function readCookie(name: string): string | null {
