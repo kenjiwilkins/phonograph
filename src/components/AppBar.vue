@@ -11,7 +11,7 @@
         :class="['pg-hud app-bar__status', `app-bar__status--${status.tone}`]"
         data-testid="link-status"
       >
-        {{ status.label }}
+        <span class="app-bar__status-label">{{ status.label }}</span>
       </span>
       <AccountMenu v-if="loggedIn || syncing" :loading="!loggedIn" />
       <PgButton v-else variant="ghost" data-testid="login-button">Login</PgButton>
@@ -82,5 +82,20 @@ const status = computed(() => {
 
 .app-bar__status--sync::before {
   box-shadow: var(--glow-cyan);
+}
+
+/*
+ * Below 440px the logo, the status text and a full account chip don't fit side by side: only the
+ * dot stays visible. The text is hidden visually, so the live region still announces it.
+ */
+@media (max-width: 439px) {
+  .app-bar__status-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 </style>
